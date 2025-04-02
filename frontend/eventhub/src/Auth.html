@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авторизация | Сервис</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth-forms.css">
+</head>
+<body>
+<div class="center-container">
+  <div class="logo-container">
+    <img src="/src/img/EventHubLogo.png" alt="Логотип компании" class="logo">
+  </div>
+  <div class="auth-header">
+    <h1>Место, где встречаются люди и идеи!</h1>
+  </div>
+  <div class="auth-container">
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-tab="login">Вход</div>
+      <div class="auth-tab" data-tab="register">Регистрация</div>
+    </div>
+
+    <form id="login-form" class="auth-form active">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Пароль</label>
+        <input type="password" id="login-password" required>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </div>
+    </form>
+
+    <form id="register-form" class="auth-form">
+      <div class="form-group">
+        <label for="register-name">Имя</label>
+        <input type="text" id="register-name" placeholder="Введите ваше имя" required>
+      </div>
+
+      <div class="form-group">
+        <label for="register-email">Email</label>
+        <input type="email" id="register-email" placeholder="Введите ваш email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="register-password">Пароль</label>
+        <input type="password" id="register-password" placeholder="Придумайте пароль" required>
+      </div>
+
+      <div class="form-group">
+        <label for="register-confirm">Подтвердите пароль</label>
+        <input type="password" id="register-confirm" placeholder="Повторите пароль" required>
+      </div>
+
+      <div class="form-group">
+        <label>Роль</label>
+        <div class="role-toggle">
+          <button type="button" class="toggle-option active" data-role="participant">Участник</button>
+          <button type="button" class="toggle-option" data-role="organizer">Организатор</button>
+          <input type="hidden" id="user-role" name="role" value="participant">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script src="js/auth-scripts.js"></script>
+</body>
+</html>
