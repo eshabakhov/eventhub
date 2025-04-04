@@ -1,4 +1,4 @@
-﻿package org.kmb.eventhub.dto;
+package org.kmb.eventhub.dto;
 
 
 import lombok.Data;

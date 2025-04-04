@@ -1,4 +1,4 @@
-﻿package org.kmb.eventhub.enums;
+package org.kmb.eventhub.enums;
 
 public enum RoleEnum {
     MEMBER,
