@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<project.package.name>${project.groupId}</project.package.name>
+		<db.name>postgres</db.name>
 		<db.username>postgres</db.username>
 		<db.password>postgres</db.password>
 	</properties>
@@ -41,6 +42,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jooq</artifactId>
 		</dependency>
 
 		<dependency>
@@ -70,6 +76,13 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -79,48 +92,104 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.jooq</groupId>
-				<artifactId>jooq-codegen-maven</artifactId>
-				<version>3.19.3</version>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.1.1</version>
 				<executions>
 					<execution>
-						<id>jooq-codegen</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>import org.testcontainers.containers.PostgreSQLContainer
+
+							db = new PostgreSQLContainer(
+									"postgres:14")
+									.withDatabaseName("${db.name}")
+									.withUsername("${db.username}")
+									.withPassword("${db.password}")
+							db.start()
+							project.properties.setProperty('db.url', db.getJdbcUrl())
+							</source>
+						</configuration>
+					</execution>
+				</executions>
+
+				<dependencies>
+					<dependency>
+						<groupId>org.testcontainers</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>1.16.2</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<configuration>
+					<!--suppress UnresolvedMavenProperty -->
+					<url>${db.url}</url>
+					<username>${db.username}</username>
+					<password>${db.password}</password>
+					<changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>update</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+
+				<executions>
+					<execution>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
+
+						<configuration>
+							<jdbc>
+								<!--suppress UnresolvedMavenProperty -->
+								<url>${db.url}</url>
+								<user>${db.username}</user>
+								<password>${db.password}</password>
+							</jdbc>
+							<generator>
+								<name>org.jooq.codegen.JavaGenerator</name>
+								<database>
+									<name>org.jooq.meta.postgres.PostgresDatabase</name>
+									<includes>.*</includes>
+									<schemata>
+										<schema>
+											<inputSchema>public</inputSchema>
+										</schema>
+									</schemata>
+								</database>
+								<target>
+									<packageName>org.kmb.eventhub</packageName>
+									<directory>target/generated-sources/jooq</directory>
+								</target>
+								<generate>
+									<pojos>true</pojos>
+									<daos>true</daos>
+									<sequences>true</sequences>
+									<validationAnnotations>true</validationAnnotations>
+									<springAnnotations>true</springAnnotations>
+									<globalObjectReferences>true</globalObjectReferences>
+									<pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
+									<fluentSetters>true</fluentSetters>
+								</generate>
+							</generator>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<jdbc>
-						<driver>org.postgresql.Driver</driver>
-						<url>jdbc:postgresql://localhost:5432/postgres</url>
-						<user>postgres</user>
-						<password>postgres</password>
-					</jdbc>
-					<generator>
-						<name>org.jooq.codegen.JavaGenerator</name>
-						<database>
-							<name>org.jooq.meta.postgres.PostgresDatabase</name>
-							<includes>.*</includes>
-							<inputSchema>public</inputSchema>
-						</database>
-						<target>
-							<packageName>org.kmb.eventhub</packageName>
-							<directory>target/generated-sources/jooq</directory>
-						</target>
-						<generate>
-							<pojos>true</pojos>
-							<daos>true</daos>
-							<sequences>true</sequences>
-							<validationAnnotations>true</validationAnnotations>
-							<springAnnotations>true</springAnnotations>
-							<globalObjectReferences>true</globalObjectReferences>
-							<pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
-							<fluentSetters>true</fluentSetters>
-						</generate>
-					</generator>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

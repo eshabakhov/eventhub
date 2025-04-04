@@ -7,10 +7,22 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
 
-    <changeSet id="study/1.0/03-04-2025/1" author="shabakhov_eset" logicalFilePath="set-1.xml">
+    <changeSet id="eventhub/1.0/03-04-2025/1" author="Shabakhov_Eset" logicalFilePath="set-1.xml">
+        <sql>CREATE TYPE role_type AS ENUM ('ORGANIZER','MEMBER','MODERATOR')</sql>
+    </changeSet>
+
+    <changeSet id="study/1.0/03-04-2025/2" author="Shabakhov_Eset" logicalFilePath="set-1.xml">
         <sql>
             <![CDATA[
-            CREATE SCHEMA IF NOT EXISTS phone_calls;
+            CREATE TABLE public.user(
+                id bigserial primary key,
+                role role_type NOT NULL,
+                email varchar NOT NULL,
+                username varchar NOT NULL UNIQUE,
+                display_name integer NOT NULL,
+                password varchar NOT NULL,
+                is_active boolean NOT NULL
+            );
             ]]>
         </sql>
     </changeSet>
