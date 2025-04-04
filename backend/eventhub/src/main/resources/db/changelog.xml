@@ -8,7 +8,7 @@
 
 
     <changeSet id="eventhub/1.0/03-04-2025/1" author="Shabakhov_Eset" logicalFilePath="set-1.xml">
-        <sql>CREATE TYPE role_type AS ENUM ('ORGANIZER','MEMBER','MODERATOR')</sql>
+        <sql>CREATE TYPE role_type AS ENUM ('ORGANIZER','MEMBER','MODERATOR', 'ADMIN')</sql>
     </changeSet>
 
     <changeSet id="study/1.0/03-04-2025/2" author="Shabakhov_Eset" logicalFilePath="set-1.xml">
