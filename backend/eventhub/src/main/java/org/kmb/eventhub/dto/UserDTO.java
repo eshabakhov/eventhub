@@ -8,11 +8,11 @@ import org.kmb.eventhub.enums.RoleEnum;
 public class UserDTO {
     private Long id;
     private String username;
-    @JsonProperty(value = "display_name")
+    @JsonProperty(value = "displayName")
     private String displayName;
     private String password;
     private String email;
-    @JsonProperty(value = "is_active")
+    @JsonProperty(value = "isActive")
     private boolean isActive;
     private RoleEnum role;
 }
