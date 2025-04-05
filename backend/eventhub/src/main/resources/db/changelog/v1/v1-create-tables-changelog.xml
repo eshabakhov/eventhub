@@ -74,4 +74,35 @@
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="eventhub-tables/v1/05-04-2025/1" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.tag(
+                id bigserial primary key,
+                name varchar NOT NULL
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/05-04-2025/2" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.event(
+                                       id bigserial primary key,
+                                       title varchar NOT NULL,
+                                       description varchar NOT NULL,
+                                       format format_type NOT NULL,
+                                       start_date_time timestamp NOT NULL,
+                                       end_date_time timestamp NOT NULL,
+                                       location varchar NOT NULL,
+                                       organizer_id bigserial NOT NULL,
+                                       CONSTRAINT fk_event_organizer
+                                           FOREIGN KEY (organizer_id)
+                                           REFERENCES public.organizer(id)
+                                           ON DELETE RESTRICT
+                                           ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

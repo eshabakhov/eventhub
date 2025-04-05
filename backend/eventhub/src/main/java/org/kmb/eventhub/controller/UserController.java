@@ -30,7 +30,7 @@ public class UserController {
     @Operation(summary = "Добавление нового пользователя.",
                 description = "Добавляет нового пользователя в систему.")
     @ApiResponse(responseCode = "201",
-                    description = "Клиент успешно добавлен",
+                    description = "Пользователь успешно добавлен",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = User.class)))
     @ApiResponse(responseCode = "400",
