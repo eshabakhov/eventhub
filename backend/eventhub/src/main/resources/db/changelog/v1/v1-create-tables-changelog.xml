@@ -14,7 +14,7 @@
                 role role_type NOT NULL,
                 email varchar NOT NULL,
                 username varchar NOT NULL UNIQUE,
-                display_name integer NOT NULL,
+                display_name varchar NOT NULL,
                 password varchar NOT NULL,
                 is_active boolean NOT NULL
             );

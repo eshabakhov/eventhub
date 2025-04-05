@@ -34,6 +34,7 @@ public class UserService {
     }
 
     public User create(User user) {
+        user.setIsActive(true);
         userDao.insert(user);
         return user;
     }

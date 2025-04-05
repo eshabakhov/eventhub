@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.ResponseError;
 import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.dto.UserDTO;
+import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ public class UserController {
 
     private final UserService userService;
 
+    private final UserMapper userMapper;
+
     @Operation(summary = "Добавление нового пользователя.",
                 description = "Добавляет нового пользователя в систему.")
     @ApiResponse(responseCode = "201",
@@ -34,10 +38,10 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseError.class)))
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody @Valid User user) {
+    public ResponseEntity<User> create(@RequestBody @Valid UserDTO userDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userService.create(user));
+                .body(userService.create(userMapper.toEntity(userDTO)));
     }
 
     @Operation(summary = "Получить список всех пользователей",
