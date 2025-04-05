@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="eventhub-tables/v1/03-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.user(
+                id bigserial primary key,
+                role role_type NOT NULL,
+                email varchar NOT NULL,
+                username varchar NOT NULL UNIQUE,
+                display_name integer NOT NULL,
+                password varchar NOT NULL,
+                is_active boolean NOT NULL
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/2" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.organizer(
+                id bigserial primary key,
+                name varchar NOT NULL,
+                description varchar,
+                industry varchar NOT NULL,
+                address integer NOT NULL,
+                is_accredited boolean NOT NULL,
+                CONSTRAINT fk_organizer_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/3" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.member(
+                id bigserial primary key,
+                last_name varchar NOT NULL,
+                first_name varchar,
+                birth_date varchar NOT NULL,
+                birth_city varchar NOT NULL,
+                privacy boolean NOT NULL,
+                CONSTRAINT fk_member_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/4" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.moderator(
+                id bigserial primary key,
+                is_admin boolean NOT NULL,
+                CONSTRAINT fk_moderator_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>

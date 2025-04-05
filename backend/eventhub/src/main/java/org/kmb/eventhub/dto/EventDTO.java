@@ -5,7 +5,7 @@ import org.kmb.eventhub.enums.EventFormat;
 import java.time.LocalDate;
 
 @Data
-public class Event {
+public class EventDTO {
     private Long id;
     private String title;
     private String description;

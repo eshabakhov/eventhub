@@ -57,8 +57,8 @@
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.4</version>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 
 		<dependency>
@@ -104,7 +104,7 @@
 							<source>import org.testcontainers.containers.PostgreSQLContainer
 
 							db = new PostgreSQLContainer(
-									"postgres:14")
+									"postgres:15")
 									.withDatabaseName("${db.name}")
 									.withUsername("${db.username}")
 									.withPassword("${db.password}")
@@ -131,7 +131,7 @@
 					<url>${db.url}</url>
 					<username>${db.username}</username>
 					<password>${db.password}</password>
-					<changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
+					<changeLogFile>src/main/resources/db/changelog/changelog.xml</changeLogFile>
 				</configuration>
 				<executions>
 					<execution>

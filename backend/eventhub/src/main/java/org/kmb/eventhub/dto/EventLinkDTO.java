@@ -3,8 +3,8 @@ package org.kmb.eventhub.dto;
 import lombok.Data;
 
 @Data
-public class EventFile {
-    private Long fileId;
+public class EventLinkDTO {
+    private Long linkId;
     private Long eventId;
-    private String fileContent;
+    private String link;
 }

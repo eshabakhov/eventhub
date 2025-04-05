@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import org.kmb.eventhub.enums.FriendRequestStatusEnum;
 
 @Data
-public class FriendRequest {
+public class FriendRequestDTO {
     private Long requesterId;
     private Long addresseeId;
     private FriendRequestStatusEnum status;
