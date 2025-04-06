@@ -27,7 +27,7 @@ public class EventController {
     private final EventMapper eventMapper;
 
     @Operation(summary = "Добавление нового мероприятия.",
-                description = "Добавляет новое мероприятие в систему.")
+                    description = "Добавляет новое мероприятие в систему.")
     @ApiResponse(responseCode = "201",
                     description = "Мероприятие успешно добавлено",
                     content = @Content(mediaType = "application/json",
