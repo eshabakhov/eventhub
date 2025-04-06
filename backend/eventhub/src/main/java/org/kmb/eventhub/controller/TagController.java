@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.ResponseError;
+import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.mapper.TagMapper;
@@ -35,7 +35,7 @@ public class TagController {
     @ApiResponse(responseCode = "400",
                     description = "Ошибка валидации",
                     content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseError.class)))
+                    schema = @Schema(implementation = ResponseDTO.class)))
     @PostMapping
     public ResponseEntity<Tag> create(@RequestBody @Valid TagDTO tagDTO) {
         return ResponseEntity

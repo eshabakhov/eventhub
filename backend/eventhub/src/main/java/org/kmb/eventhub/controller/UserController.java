@@ -7,14 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.ResponseError;
+import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.UserDTO;
 import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,32 +29,62 @@ public class UserController {
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
     @ApiResponse(responseCode = "201",
-                    description = "Пользователь успешно добавлен",
+                    description = "Пользователь успешно добавлен.",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = User.class)))
     @ApiResponse(responseCode = "400",
-                    description = "Ошибка валидации",
+                    description = "Ошибка валидации.",
                     content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseError.class)))
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody @Valid UserDTO userDTO) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userService.create(userMapper.toEntity(userDTO)));
+    public User create(@RequestBody @Valid UserDTO userDTO) {
+        return userService.create(userMapper.toEntity(userDTO));
     }
 
-    @Operation(summary = "Получить список всех пользователей",
+    @Operation(summary = "Получить список всех пользователей.",
                     description = "Возвращает всех пользователей.")
     @ApiResponse(responseCode = "200",
-                    description = "Список всех пользователей",
+                    description = "Список всех пользователей.",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = User.class)))
+    @ResponseStatus(value = HttpStatus.OK)
     @GetMapping
-    public ResponseEntity<ResponseList<User>> getList(
+    public ResponseList<User> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getList(page, pageSize));
+        return userService.getList(page, pageSize);
+    }
+
+    @Operation(summary = "Получить информацию о пользователе.",
+                    description = "Возвращает информацию о пользователе по ID.")
+    @ApiResponse(responseCode = "200",
+                    description = "Информация о пользовалете.",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}")
+    public User get(@PathVariable Long id) {
+        return userService.get(id);
+    }
+
+    @Operation(summary = "Удалить пользователя.",
+                    description = "Удаляет пользователя по ID.")
+    @ApiResponse(responseCode = "200",
+                    description = "Пользователь удален.",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{id}")
+    public Long delete(@PathVariable Long id) {
+        return userService.delete(id);
     }
 }

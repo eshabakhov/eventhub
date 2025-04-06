@@ -7,10 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.ResponseError;
+import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.service.EventService;
+import org.kmb.eventhub.tables.pojos.Event;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +36,9 @@ public class EventController {
     @ApiResponse(responseCode = "400",
                     description = "Ошибка валидации",
                     content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseError.class)))
+                    schema = @Schema(implementation = ResponseDTO.class)))
     @PostMapping
-    public ResponseEntity<org.kmb.eventhub.tables.pojos.Event> create(@RequestBody @Valid EventDTO eventDTO) {
+    public ResponseEntity<Event> create(@RequestBody @Valid EventDTO eventDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(eventService.create(eventMapper.toEntity(eventDTO)));
@@ -50,7 +51,7 @@ public class EventController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = org.kmb.eventhub.tables.pojos.Event.class)))
     @GetMapping
-    public ResponseEntity<ResponseList<org.kmb.eventhub.tables.pojos.Event>> getList(
+    public ResponseEntity<ResponseList<Event>> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
         return ResponseEntity

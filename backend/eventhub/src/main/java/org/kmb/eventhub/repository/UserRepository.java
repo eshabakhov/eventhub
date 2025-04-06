@@ -25,11 +25,29 @@ public class UserRepository {
                 .fetchInto(User.class);
     }
 
+    public User fetchActive(Long id) {
+        return dslContext
+                .selectFrom(USER)
+                .where(USER.ID.eq(id))
+                .and(USER.IS_ACTIVE.eq(true))
+                .fetchOneInto(User.class);
+    }
+
     public Long count(Condition condition) {
         return dslContext
                 .selectCount()
                 .from(USER)
                 .where(condition)
                 .fetchOneInto(Long.class);
+    }
+
+    public Long setInactive(Long id) {
+        int affectedRows = dslContext
+                .update(USER)
+                .set(USER.IS_ACTIVE, false)
+                .where(USER.ID.eq(id))
+                .execute();
+
+        return affectedRows == 1 ? id : null;
     }
 }

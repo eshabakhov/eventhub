@@ -3,12 +3,15 @@ package org.kmb.eventhub.service;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.exception.UnexpectedException;
+import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.repository.UserRepository;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.tables.daos.UserDao;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -48,8 +51,14 @@ public class UserService {
         return user;
     }
 
-    public boolean delete(Long id) {
-        userDao.deleteById(id);
-        return true;
+    public Long delete(Long id) {
+        if (Objects.isNull(userRepository.fetchActive(id))) {
+            throw new UserNotFoundException(id);
+        }
+        Long userDeletedId = userRepository.setInactive(id);
+        if (Objects.isNull(userDeletedId)) {
+            throw new UnexpectedException("Пользователь не был удален из-за непредвиденной ошибки");
+        }
+        return id;
     }
 }
