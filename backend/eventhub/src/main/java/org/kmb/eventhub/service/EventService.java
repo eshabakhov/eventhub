@@ -14,9 +14,11 @@ import static org.jooq.impl.DSL.trueCondition;
 @Service
 @AllArgsConstructor
 public class EventService {
+
     private final EventRepository eventRepository;
 
     private final EventDao eventDao;
+
     public ResponseList<Event> getList(Integer page, Integer pageSize) {
         ResponseList<Event> responseList = new ResponseList<>();
         Condition condition = trueCondition();

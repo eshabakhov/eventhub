@@ -12,7 +12,6 @@ import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Tag;
-import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,18 +21,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/v1/tags")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Теги", description = "Управление тегами")
 public class TagController {
+
     private final TagService tagService;
 
     private final TagMapper tagMapper;
+
     @Operation(summary = "Добавление нового тега.",
-            description = "Добавляет нового тега в систему.")
+                    description = "Добавляет нового тега в систему.")
     @ApiResponse(responseCode = "201",
-            description = "Тег успешно добавлен",
-            content = @Content(mediaType = "application/json",
+                    description = "Тег успешно добавлен",
+                    content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Tag.class)))
     @ApiResponse(responseCode = "400",
-            description = "Ошибка валидации",
-            content = @Content(mediaType = "application/json",
+                    description = "Ошибка валидации",
+                    content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseError.class)))
     @PostMapping
     public ResponseEntity<Tag> create(@RequestBody @Valid TagDTO tagDTO) {
@@ -43,10 +44,10 @@ public class TagController {
     }
 
     @Operation(summary = "Получить список всех тегов",
-            description = "Возвращает все теги.")
+                    description = "Возвращает все теги.")
     @ApiResponse(responseCode = "200",
-            description = "Список всех тегов",
-            content = @Content(mediaType = "application/json",
+                    description = "Список всех тегов",
+                    content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Tag.class)))
     @GetMapping
     public ResponseEntity<ResponseList<Tag>> getList(

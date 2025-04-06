@@ -15,9 +15,11 @@ import static org.jooq.impl.DSL.trueCondition;
 @Service
 @AllArgsConstructor
 public class TagService {
+
     private final TagRepository tagRepository;
 
     private final TagDao tagDao;
+
     public ResponseList<Tag> getList(Integer page, Integer pageSize) {
         ResponseList<Tag> responseList = new ResponseList<>();
         Condition condition = trueCondition();

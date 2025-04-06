@@ -13,6 +13,7 @@ import static org.kmb.eventhub.Tables.USER;
 @Repository
 @AllArgsConstructor
 public class UserRepository {
+
     private final DSLContext dslContext;
 
     public List<User> fetch(Condition condition, Integer page, Integer pageSize) {

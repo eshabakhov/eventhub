@@ -12,6 +12,7 @@ import static org.kmb.eventhub.Tables.TAG;
 @Repository
 @AllArgsConstructor
 public class TagRepository {
+
     private final DSLContext dslContext;
 
     public List<Tag> fetch(Condition condition, Integer page, Integer pageSize) {

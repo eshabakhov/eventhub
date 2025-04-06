@@ -28,7 +28,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @Operation(summary = "Добавление нового пользователя.",
-                description = "Добавляет нового пользователя в систему.")
+                    description = "Добавляет нового пользователя в систему.")
     @ApiResponse(responseCode = "201",
                     description = "Пользователь успешно добавлен",
                     content = @Content(mediaType = "application/json",

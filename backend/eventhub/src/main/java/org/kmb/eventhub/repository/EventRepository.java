@@ -12,6 +12,7 @@ import static org.kmb.eventhub.Tables.EVENT;
 @Repository
 @AllArgsConstructor
 public class EventRepository {
+
     private final DSLContext dslContext;
 
     public List<Event> fetch(Condition condition, Integer page, Integer pageSize) {
