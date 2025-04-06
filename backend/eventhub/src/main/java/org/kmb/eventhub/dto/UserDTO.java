@@ -10,6 +10,6 @@ public class UserDTO {
     private String displayName;
     private String password;
     private String email;
-    private boolean isActive;
+    private Boolean isActive;
     private RoleEnum role;
 }

@@ -49,7 +49,7 @@
                 first_name varchar,
                 birth_date varchar,
                 birth_city varchar,
-                privacy boolean,
+                privacy privacy_type,
                 CONSTRAINT fk_member_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)

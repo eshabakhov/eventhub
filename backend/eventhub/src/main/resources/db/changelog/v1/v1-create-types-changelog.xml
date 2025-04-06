@@ -9,8 +9,13 @@
     <changeSet id="eventhub-types/v1/03-04-2025/1" author="Shabakhov_Eset">
         <sql>CREATE TYPE role_type AS ENUM ('ORGANIZER','MEMBER','MODERATOR')</sql>
     </changeSet>
-    <changeSet id="eventhub-types/v1/05-04-2025/1" author="Timokhov_Evgeniy">
+
+    <changeSet id="eventhub-types/v1/05-04-2025/2" author="Timokhov_Evgeniy">
         <sql>CREATE TYPE format_type AS ENUM ('ONLINE','OFFLINE')</sql>
+    </changeSet>
+
+    <changeSet id="eventhub-types/v1/05-04-2025/3" author="Shabakhov_Eset">
+        <sql>CREATE TYPE privacy_type AS ENUM ('PUBLIC','PRIVATE','ONLY_FRIENDS')</sql>
     </changeSet>
 
 </databaseChangeLog>
