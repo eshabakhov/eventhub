@@ -9,8 +9,10 @@ import org.kmb.eventhub.tables.pojos.Event;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.jooq.impl.DSL.trueCondition;
+
 @Service
 @AllArgsConstructor
 public class EventService {
@@ -18,6 +20,8 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final EventDao eventDao;
+
+    private final MapService mapService;
 
     public ResponseList<Event> getList(Integer page, Integer pageSize) {
         ResponseList<Event> responseList = new ResponseList<>();
@@ -33,6 +37,14 @@ public class EventService {
     }
 
     public Event create(Event event) {
+        if (Objects.isNull(event.getLocation()) && Objects.nonNull(event.getLatitude()) && Objects.nonNull(event.getLongitude()))
+            event.setLocation(mapService.getAddress(event.getLatitude(), event.getLongitude()));
+
+        if (Objects.nonNull(event.getLocation()) && Objects.isNull(event.getLatitude()) && Objects.isNull(event.getLongitude())) {
+            var coordinates = mapService.getCoordinates(event.getLocation());
+            event.setLatitude(coordinates.getLatitude());
+            event.setLongitude(coordinates.getLatitude());
+        }
         eventDao.insert(event);
         return event;
     }
