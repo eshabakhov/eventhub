@@ -1,6 +1,5 @@
 package org.kmb.eventhub.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.kmb.eventhub.enums.RoleEnum;
 
@@ -8,11 +7,9 @@ import org.kmb.eventhub.enums.RoleEnum;
 public class UserDTO {
     private Long id;
     private String username;
-    @JsonProperty(value = "display_name")
     private String displayName;
     private String password;
     private String email;
-    @JsonProperty(value = "is_active")
     private boolean isActive;
     private RoleEnum role;
 }
