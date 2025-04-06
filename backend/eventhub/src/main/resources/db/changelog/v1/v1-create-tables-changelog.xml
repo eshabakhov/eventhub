@@ -26,11 +26,11 @@
             <![CDATA[
             CREATE TABLE public.organizer(
                 id bigserial primary key,
-                name varchar NOT NULL,
+                name varchar,
                 description varchar,
-                industry varchar NOT NULL,
-                address integer NOT NULL,
-                is_accredited boolean NOT NULL,
+                industry varchar,
+                address varchar,
+                is_accredited boolean,
                 CONSTRAINT fk_organizer_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
@@ -45,11 +45,11 @@
             <![CDATA[
             CREATE TABLE public.member(
                 id bigserial primary key,
-                last_name varchar NOT NULL,
+                last_name varchar,
                 first_name varchar,
-                birth_date varchar NOT NULL,
-                birth_city varchar NOT NULL,
-                privacy boolean NOT NULL,
+                birth_date varchar,
+                birth_city varchar,
+                privacy boolean,
                 CONSTRAINT fk_member_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
@@ -64,7 +64,7 @@
             <![CDATA[
             CREATE TABLE public.moderator(
                 id bigserial primary key,
-                is_admin boolean NOT NULL,
+                is_admin boolean,
                 CONSTRAINT fk_moderator_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
