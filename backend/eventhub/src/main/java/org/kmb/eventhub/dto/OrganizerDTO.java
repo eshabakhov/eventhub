@@ -9,5 +9,5 @@ public class OrganizerDTO {
     private String description;
     private String industry;
     private String address;
-    private boolean isAccredited;
+    private Boolean isAccredited;
 }

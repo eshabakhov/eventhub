@@ -7,11 +7,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.dto.OrganizerDTO;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.UserDTO;
-import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.service.UserService;
+import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-
-    private final UserMapper userMapper;
 
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
@@ -39,7 +38,7 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping
     public User create(@RequestBody @Valid UserDTO userDTO) {
-        return userService.create(userMapper.toEntity(userDTO));
+        return userService.create(userDTO);
     }
 
     @Operation(summary = "Получить список всех пользователей.",
@@ -70,6 +69,24 @@ public class UserController {
     @GetMapping(value = "/{id}")
     public User get(@PathVariable Long id) {
         return userService.get(id);
+    }
+
+    @Operation(summary = "Обновить информацию организатора.",
+                    description = "Обновить информацию организатора по ID.")
+    @ApiResponse(responseCode = "200",
+                    description = "Информация об обрганизаторе обновлена.",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Organizer.class)))
+    @ApiResponse(responseCode = "404",
+                    description = "Организатор не найден",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/organizer/{id}")
+    public Organizer updateOrganizer(
+            @PathVariable Long id,
+            @RequestBody @Valid OrganizerDTO organizerDTO) {
+        return userService.updateOgranizer(id, organizerDTO);
     }
 
     @Operation(summary = "Удалить пользователя.",
