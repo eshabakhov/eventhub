@@ -6,6 +6,7 @@ import org.kmb.eventhub.dto.UserDTO;
 import org.kmb.eventhub.exception.EmailFormatException;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class ContactValidator implements ConstraintValidator<ValidUserContact, UserDTO> {
 
@@ -20,8 +21,7 @@ public class ContactValidator implements ConstraintValidator<ValidUserContact, U
         if (Objects.isNull(email) || Objects.isNull(password)) {
             return false;
         }
-
-        if (!EMAIL_REGEX.matches(email)) {
+        if (!Pattern.matches(EMAIL_REGEX, email)) {
             throw new EmailFormatException(email);
         }
         return true;
