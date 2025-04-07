@@ -1,11 +1,14 @@
 package org.kmb.eventhub.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -32,11 +35,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    @ExceptionHandler(value = { IllegalArgumentException.class })
-    protected ResponseEntity<Object> handleIllegalArgumentException(RuntimeException ex,
-                                                               WebRequest request) {
-        log.warn(ex.getMessage(), ex);
-        return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
+    @NonNull
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  @NonNull HttpHeaders headers,
+                                                                  @NonNull HttpStatusCode statusCode,
+                                                                  @NonNull WebRequest request) {
+        String errorMessage = ex.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
+        log.warn(errorMessage, ex);
+        return handleExceptionInternal(ex, ResponseDTO.getResponse(errorMessage),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
