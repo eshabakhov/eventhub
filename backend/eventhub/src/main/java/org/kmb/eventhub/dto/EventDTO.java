@@ -1,10 +1,12 @@
 package org.kmb.eventhub.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.kmb.eventhub.enums.EventFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class EventDTO {
@@ -15,7 +17,9 @@ public class EventDTO {
     private String location;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private LocalDate startDateTime;
-    private LocalDate endDateTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    private LocalDateTime startDateTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    private LocalDateTime endDateTime;
     private Long organizerId;
 }

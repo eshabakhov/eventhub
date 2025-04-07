@@ -9,6 +9,6 @@ public interface EventMapper {
 
     EventDTO toDto(Event event);
 
-    Event toEntity(EventDTO eventDTO);
+    Event dtoToEvent(EventDTO eventDTO);
 
 }

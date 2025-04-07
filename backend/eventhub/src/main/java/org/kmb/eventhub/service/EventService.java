@@ -2,11 +2,17 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.exception.UserNotFoundException;
+import org.kmb.eventhub.mapper.EventMapper;
+import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.repository.EventRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.pojos.Event;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +26,8 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final EventDao eventDao;
+
+    private final EventMapper eventMapper;
 
     private final MapService mapService;
 
@@ -43,7 +51,7 @@ public class EventService {
         if (Objects.nonNull(event.getLocation()) && Objects.isNull(event.getLatitude()) && Objects.isNull(event.getLongitude())) {
             var coordinates = mapService.getCoordinates(event.getLocation());
             event.setLatitude(coordinates.getLatitude());
-            event.setLongitude(coordinates.getLatitude());
+            event.setLongitude(coordinates.getLongitude());
         }
         eventDao.insert(event);
         return event;
@@ -53,7 +61,11 @@ public class EventService {
         return eventDao.findById(id);
     }
 
-    public Event update(Event event) {
+    @Transactional
+    public Event update(Long id, EventDTO eventDTO) {
+        Event event = eventDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        //Event event = eventMapper.dtoToEvent(eventDTO);
+        event.setId(id);
         eventDao.update(event);
         return event;
     }
