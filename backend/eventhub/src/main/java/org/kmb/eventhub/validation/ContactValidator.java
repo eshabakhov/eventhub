@@ -3,6 +3,7 @@ package org.kmb.eventhub.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.kmb.eventhub.dto.UserDTO;
+import org.kmb.eventhub.exception.EmailFormatException;
 
 import java.util.Objects;
 
@@ -12,10 +13,17 @@ public class ContactValidator implements ConstraintValidator<ValidUserContact, U
 
     @Override
     public boolean isValid(UserDTO userDTO, ConstraintValidatorContext context) {
-        if (Objects.isNull(userDTO.getEmail()) || Objects.isNull(userDTO.getPassword())) {
+
+        String email = userDTO.getEmail();
+        String password = userDTO.getPassword();
+
+        if (Objects.isNull(email) || Objects.isNull(password)) {
             return false;
         }
 
-        return userDTO.getEmail().matches(EMAIL_REGEX);
+        if (!EMAIL_REGEX.matches(email)) {
+            throw new EmailFormatException(email);
+        }
+        return true;
     }
 }
