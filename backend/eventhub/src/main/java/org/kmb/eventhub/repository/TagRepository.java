@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static org.kmb.eventhub.Tables.TAG;
+import static org.kmb.eventhub.Tables.*;
+
 @Repository
 @AllArgsConstructor
 public class TagRepository {
@@ -31,4 +32,12 @@ public class TagRepository {
                 .where(condition)
                 .fetchOneInto(Long.class);
     }
+
+    public Tag fetchUnused(Long id) {
+        return dslContext
+                .selectFrom(EVENT_TAGS)
+                .where(EVENT_TAGS.TAG_ID.eq(id))
+                .fetchOneInto(Tag.class);
+    }
+
 }

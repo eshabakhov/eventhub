@@ -57,4 +57,12 @@ public class TagController {
                 .status(HttpStatus.OK)
                 .body(tagService.getList(page, pageSize));
     }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        tagService.delete(id);
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }
