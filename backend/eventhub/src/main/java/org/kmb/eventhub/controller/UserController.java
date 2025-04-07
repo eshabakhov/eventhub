@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.Member;
+import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
@@ -88,14 +89,14 @@ public class UserController {
     }
 
     @Operation(summary = "Обновить информацию участника.",
-            description = "Обновить информацию участника по ID.")
+                    description = "Обновить информацию участника по ID.")
     @ApiResponse(responseCode = "200",
-            description = "Информация об участнике обновлена.",
-            content = @Content(mediaType = "application/json",
+                    description = "Информация об участнике обновлена.",
+                    content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Member.class)))
     @ApiResponse(responseCode = "404",
-            description = "Участник не найден",
-            content = @Content(mediaType = "application/json",
+                    description = "Участник не найден",
+                    content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
     @PutMapping(value = "/member/{id}")
@@ -103,6 +104,24 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid MemberDTO memberDTO) {
         return userService.updateMember(id, memberDTO);
+    }
+
+    @Operation(summary = "Обновить информацию модератора.",
+                    description = "Обновить информацию модератора по ID.")
+    @ApiResponse(responseCode = "200",
+                    description = "Информация о модераторе обновлена.",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Moderator.class)))
+    @ApiResponse(responseCode = "404",
+                    description = "Участник не найден",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/moderator/{id}")
+    public Moderator updateModerator(
+            @PathVariable Long id,
+            @RequestBody @Valid ModeratorDTO moderatorDTO) {
+        return userService.updateModerator(id, moderatorDTO);
     }
 
     @Operation(summary = "Удалить пользователя.",

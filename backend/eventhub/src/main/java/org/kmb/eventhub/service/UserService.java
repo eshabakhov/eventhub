@@ -2,10 +2,7 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
-import org.kmb.eventhub.dto.MemberDTO;
-import org.kmb.eventhub.dto.OrganizerDTO;
-import org.kmb.eventhub.dto.ResponseList;
-import org.kmb.eventhub.dto.UserDTO;
+import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.enums.RoleEnum;
 import org.kmb.eventhub.exception.UnexpectedException;
 import org.kmb.eventhub.exception.UserNotFoundException;
@@ -15,6 +12,7 @@ import org.kmb.eventhub.tables.daos.MemberDao;
 import org.kmb.eventhub.tables.daos.ModeratorDao;
 import org.kmb.eventhub.tables.daos.OrganizerDao;
 import org.kmb.eventhub.tables.pojos.Member;
+import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.tables.daos.UserDao;
@@ -88,6 +86,15 @@ public class UserService {
         member.setId(id);
         memberDao.update(member);
         return member;
+    }
+
+    @Transactional
+    public Moderator updateModerator(Long id, ModeratorDTO moderatorDTO) {
+        moderatorDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        Moderator moderator = userMapper.dtoToModerator(moderatorDTO);
+        moderator.setId(id);
+        moderatorDao.update(moderator);
+        return moderator;
     }
 
     public User get(Long id) {

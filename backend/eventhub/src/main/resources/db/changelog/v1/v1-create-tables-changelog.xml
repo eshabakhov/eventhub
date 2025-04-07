@@ -48,7 +48,7 @@
                 last_name varchar,
                 first_name varchar,
                 patronymic varchar,
-                birth_date varchar,
+                birth_date date,
                 birth_city varchar,
                 privacy privacy_type default 'ONLY_FRIENDS',
                 CONSTRAINT fk_member_user
@@ -89,21 +89,21 @@
         <sql>
             <![CDATA[
             CREATE TABLE public.event(
-                                       id bigserial primary key,
-                                       title varchar NOT NULL,
-                                       description varchar NOT NULL,
-                                       format format_type NOT NULL,
-                                       start_date_time timestamp NOT NULL,
-                                       end_date_time timestamp NOT NULL,
-                                       location varchar NOT NULL,
-                                       latitude numeric,
-                                       longitude numeric,
-                                       organizer_id bigserial NOT NULL,
-                                       CONSTRAINT fk_event_organizer
-                                           FOREIGN KEY (organizer_id)
-                                           REFERENCES public.organizer(id)
-                                           ON DELETE RESTRICT
-                                           ON UPDATE CASCADE
+                   id bigserial primary key,
+                   title varchar NOT NULL,
+                   description varchar NOT NULL,
+                   format format_type NOT NULL,
+                   start_date_time timestamp NOT NULL,
+                   end_date_time timestamp NOT NULL,
+                   location varchar NOT NULL,
+                   latitude numeric,
+                   longitude numeric,
+                   organizer_id bigserial NOT NULL,
+                   CONSTRAINT fk_event_organizer
+                       FOREIGN KEY (organizer_id)
+                       REFERENCES public.organizer(id)
+                       ON DELETE RESTRICT
+                       ON UPDATE CASCADE
             );
             ]]>
         </sql>
