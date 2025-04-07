@@ -47,9 +47,10 @@
                 id bigserial primary key,
                 last_name varchar,
                 first_name varchar,
+                patronymic varchar,
                 birth_date varchar,
                 birth_city varchar,
-                privacy privacy_type,
+                privacy privacy_type default 'ONLY_FRIENDS',
                 CONSTRAINT fk_member_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
