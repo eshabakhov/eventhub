@@ -125,18 +125,6 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jooq</groupId>
-			<artifactId>jooq</artifactId>
-			<version>3.19.7</version>
-		</dependency>
-
-		<!-- JOOQ Codegen runtime -->
-		<dependency>
-			<groupId>org.jooq</groupId>
-			<artifactId>jooq-codegen</artifactId>
-			<version>3.19.7</version>
-		</dependency>
     </dependencies>
 
 	<build>
@@ -216,11 +204,6 @@
 							</jdbc>
 							<generator>
 								<name>org.jooq.codegen.JavaGenerator</name>
-
-								<strategy>
-									<name>org.kmb.eventhub.CustomStrategy</name>
-								</strategy>
-
 								<database>
 									<name>org.jooq.meta.postgres.PostgresDatabase</name>
 									<includes>.*</includes>
