@@ -7,11 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.OrganizerDTO;
-import org.kmb.eventhub.dto.ResponseDTO;
-import org.kmb.eventhub.dto.ResponseList;
-import org.kmb.eventhub.dto.UserDTO;
+import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.service.UserService;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
@@ -86,7 +84,25 @@ public class UserController {
     public Organizer updateOrganizer(
             @PathVariable Long id,
             @RequestBody @Valid OrganizerDTO organizerDTO) {
-        return userService.updateOgranizer(id, organizerDTO);
+        return userService.updateOrganizer(id, organizerDTO);
+    }
+
+    @Operation(summary = "Обновить информацию участника.",
+            description = "Обновить информацию участника по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация об участнике обновлена.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Member.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/member/{id}")
+    public Member updateMember(
+            @PathVariable Long id,
+            @RequestBody @Valid MemberDTO memberDTO) {
+        return userService.updateMember(id, memberDTO);
     }
 
     @Operation(summary = "Удалить пользователя.",

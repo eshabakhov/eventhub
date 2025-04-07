@@ -2,6 +2,7 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.dto.MemberDTO;
 import org.kmb.eventhub.dto.OrganizerDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.UserDTO;
@@ -13,6 +14,7 @@ import org.kmb.eventhub.repository.UserRepository;
 import org.kmb.eventhub.tables.daos.MemberDao;
 import org.kmb.eventhub.tables.daos.ModeratorDao;
 import org.kmb.eventhub.tables.daos.OrganizerDao;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.tables.daos.UserDao;
@@ -71,12 +73,21 @@ public class UserService {
     }
 
     @Transactional
-    public Organizer updateOgranizer(Long id, OrganizerDTO organizerDTO) {
+    public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
         organizerDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
         Organizer organizer = userMapper.dtoToOrganizer(organizerDTO);
         organizer.setId(id);
         organizerDao.update(organizer);
         return organizer;
+    }
+
+    @Transactional
+    public Member updateMember(Long id, MemberDTO memberDTO) {
+        memberDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        Member member = userMapper.dtoToMember(memberDTO);
+        member.setId(id);
+        memberDao.update(member);
+        return member;
     }
 
     public User get(Long id) {
