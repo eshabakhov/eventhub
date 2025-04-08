@@ -99,7 +99,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PatchMapping(value = "/member/{id}")
+    @PutMapping(value = "/member/{id}")
     public Member updateMember(
             @PathVariable Long id,
             @RequestBody @Valid MemberDTO memberDTO) {

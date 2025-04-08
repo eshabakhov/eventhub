@@ -4,10 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.kmb.eventhub.dto.ResponseDTO;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -47,4 +46,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @NonNull
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                  @NonNull HttpHeaders headers,
+                                                                  @NonNull HttpStatusCode statusCode,
+                                                                  @NonNull WebRequest request) {
+        log.warn(ex.getMessage(), ex);
+        return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 }
