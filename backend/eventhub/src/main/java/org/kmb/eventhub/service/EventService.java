@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.enums.FormatType;
 import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.mapper.EventMapper;
-import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.repository.EventRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +63,34 @@ public class EventService {
     @Transactional
     public Event update(Long id, EventDTO eventDTO) {
         Event event = eventDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
-        //Event event = eventMapper.dtoToEvent(eventDTO);
+
+        if (Objects.nonNull(eventDTO.getDescription()))
+            event.setDescription(eventDTO.getDescription());
+
+        if (Objects.nonNull(eventDTO.getTitle()))
+            event.setTitle(eventDTO.getTitle());
+
+        if (Objects.nonNull(eventDTO.getFormat()))
+            event.setFormat(FormatType.valueOf(String.valueOf(eventDTO.getFormat())));
+
+        if (Objects.nonNull(eventDTO.getStartDateTime()))
+            event.setStartDateTime(eventDTO.getStartDateTime());
+
+        if (Objects.nonNull(eventDTO.getEndDateTime()))
+            event.setEndDateTime(eventDTO.getEndDateTime());
+
+        // TODO
+        // Нужно подумать проверять ли соответствие адреса координатам и что первичнее - адрес или координаты,
+        // если на вход придет московский адрес и координаты Дагестана
+        if (Objects.nonNull(eventDTO.getLocation()))
+            event.setLocation(eventDTO.getLocation());
+
+        if (Objects.nonNull(eventDTO.getLatitude()))
+            event.setLatitude(eventDTO.getLatitude());
+
+        if (Objects.nonNull(eventDTO.getLongitude()))
+            event.setLongitude(eventDTO.getLongitude());
+
         event.setId(id);
         eventDao.update(event);
         return event;
