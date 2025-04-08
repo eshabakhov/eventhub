@@ -72,7 +72,9 @@ public class UserService {
 
     @Transactional
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
-        organizerDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        userDao.findOptionalById(id)
+                .filter(e -> e.getIsActive() && RoleEnum.ORGANIZER.name().equals(e.getRole().toString()))
+                .orElseThrow(() -> new UserNotFoundException(id));
         Organizer organizer = userMapper.dtoToOrganizer(organizerDTO);
         organizer.setId(id);
         organizerDao.update(organizer);
@@ -81,7 +83,9 @@ public class UserService {
 
     @Transactional
     public Member updateMember(Long id, MemberDTO memberDTO) {
-        memberDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        userDao.findOptionalById(id)
+                .filter(e -> e.getIsActive() && RoleEnum.MEMBER.name().equals(e.getRole().toString()))
+                .orElseThrow(() -> new UserNotFoundException(id));
         Member member = userMapper.dtoToMember(memberDTO);
         member.setId(id);
         memberDao.update(member);
@@ -90,7 +94,9 @@ public class UserService {
 
     @Transactional
     public Moderator updateModerator(Long id, ModeratorDTO moderatorDTO) {
-        moderatorDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        userDao.findOptionalById(id)
+                .filter(e -> e.getIsActive() && RoleEnum.MODERATOR.name().equals(e.getRole().toString()))
+                .orElseThrow(() -> new UserNotFoundException(id));
         Moderator moderator = userMapper.dtoToModerator(moderatorDTO);
         moderator.setId(id);
         moderatorDao.update(moderator);
