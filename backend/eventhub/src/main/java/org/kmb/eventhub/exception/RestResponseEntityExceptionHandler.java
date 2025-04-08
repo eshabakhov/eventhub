@@ -28,10 +28,18 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value = { UnexpectedException.class })
     protected ResponseEntity<Object> handleUnexpectedException(RuntimeException ex,
-                                                                WebRequest request) {
+                                                               WebRequest request) {
         log.warn(ex.getMessage(), ex);
         return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    @ExceptionHandler(value = { RuntimeException.class })
+    protected ResponseEntity<Object> handleRuntimeException(RuntimeException ex,
+                                                               WebRequest request) {
+        log.warn(ex.getMessage(), ex);
+        return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @NonNull

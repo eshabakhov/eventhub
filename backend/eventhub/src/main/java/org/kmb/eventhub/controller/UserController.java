@@ -70,6 +70,24 @@ public class UserController {
         return userService.get(id);
     }
 
+    @Operation(summary = "Обновить информацию пользователя.",
+            description = "Обновить информацию пользователя по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация о пользователе обновлена.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Organizer.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/{id}")
+    public User updateUser(
+            @PathVariable Long id,
+            @RequestBody @Valid User user) {
+        return userService.update(id, user);
+    }
+
     @Operation(summary = "Обновить информацию организатора.",
                     description = "Обновить информацию организатора по ID.")
     @ApiResponse(responseCode = "200",
