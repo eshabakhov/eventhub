@@ -66,8 +66,6 @@ public class UserService {
             throw new MissingFieldException("password");
         if (Objects.isNull(userDTO.getEmail()))
             throw new MissingFieldException("email");
-        if (Objects.isNull(userDTO.getIsActive()))
-            throw new MissingFieldException("isActive");
         if (Objects.isNull(userDTO.getRole()))
             throw new MissingFieldException("role");
 
@@ -154,6 +152,12 @@ public class UserService {
                 filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+    public User getByUsername(String username) {
+        return userDao.fetchOptionalByUsername(username).
+                filter(User::getIsActive)
+                .orElseThrow(() -> new UserNotFoundException(-1L));
+    }
+
 
     @Transactional
     public User update(Long id, User user) {
