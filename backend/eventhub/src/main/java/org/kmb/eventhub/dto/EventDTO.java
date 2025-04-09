@@ -5,7 +5,6 @@ import lombok.Data;
 import org.kmb.eventhub.enums.EventFormat;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data

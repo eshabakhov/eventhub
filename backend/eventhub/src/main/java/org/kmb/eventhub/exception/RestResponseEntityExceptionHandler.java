@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,6 @@ public class MapService {
         return (String) response.getOrDefault("display_name", "Адрес не найден");
     }
     public CoordinatesDTO getCoordinates(String address) {
-        //String encoded = URLEncoder.encode(address, StandardCharsets.UTF_8);
         String uri = "/search?q=" + address + "&format=json";
 
         var response = webClient.get()
