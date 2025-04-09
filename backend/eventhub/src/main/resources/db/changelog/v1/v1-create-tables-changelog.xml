@@ -123,8 +123,8 @@
                      FOREIGN KEY (tag_id)
                          REFERENCES public.tag(id)
                          ON DELETE RESTRICT
-                         ON UPDATE CASCADE
-
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (event_id, tag_id)
             );
             ]]>
         </sql>
@@ -145,7 +145,8 @@
                      FOREIGN KEY (recipient_id)
                          REFERENCES public.member(id)
                          ON DELETE RESTRICT
-                         ON UPDATE CASCADE
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (sender_id, recipient_id)
             );
             ]]>
         </sql>
