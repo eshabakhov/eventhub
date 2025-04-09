@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static org.kmb.eventhub.Tables.EVENT;
+
 @Repository
 @AllArgsConstructor
 public class EventRepository {
