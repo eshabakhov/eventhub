@@ -112,19 +112,40 @@
         <sql>
             <![CDATA[
             CREATE TABLE public.event_tags(
-                                         event_id bigint NOT NULL,
-                                         tag_id bigint NOT NULL,
-                                         CONSTRAINT fk_event_id
-                                             FOREIGN KEY (event_id)
-                                                 REFERENCES public.event(id)
-                                                 ON DELETE RESTRICT
-                                                 ON UPDATE CASCADE,
-                                         CONSTRAINT fk_tag_id
-                                             FOREIGN KEY (tag_id)
-                                                 REFERENCES public.tag(id)
-                                                 ON DELETE RESTRICT
-                                                 ON UPDATE CASCADE
+                 event_id bigint NOT NULL,
+                 tag_id bigint NOT NULL,
+                 CONSTRAINT fk_event_id
+                     FOREIGN KEY (event_id)
+                         REFERENCES public.event(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_tag_id
+                     FOREIGN KEY (tag_id)
+                         REFERENCES public.tag(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE
 
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/09-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.friend_request(
+                 sender_id bigint NOT NULL,
+                 recipient_id bigint NOT NULL,
+                 status friend_request_status_type NOT NULL,
+                 CONSTRAINT fk_sender_member_id
+                     FOREIGN KEY (sender_id)
+                         REFERENCES public.member(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_sender_recipient_id
+                     FOREIGN KEY (recipient_id)
+                         REFERENCES public.member(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE
             );
             ]]>
         </sql>
