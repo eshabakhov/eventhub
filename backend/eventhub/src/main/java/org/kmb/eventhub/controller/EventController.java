@@ -12,6 +12,7 @@ import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.tables.pojos.Event;
+import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,16 +34,15 @@ public class EventController {
     @ApiResponse(responseCode = "201",
                     description = "Мероприятие успешно добавлено",
                     content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = org.kmb.eventhub.tables.pojos.Event.class)))
+                    schema = @Schema(implementation = Event.class)))
     @ApiResponse(responseCode = "400",
                     description = "Ошибка валидации",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<Event> create(@RequestBody @Valid EventDTO eventDTO) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(eventService.create(eventMapper.dtoToEvent(eventDTO)));
+    public Event create(@RequestBody @Valid EventDTO eventDTO) {
+        return eventService.create(eventDTO);
     }
 
     @Operation(summary = "Получить список всех мероприятий",
@@ -58,6 +58,22 @@ public class EventController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(eventService.getList(page, pageSize));
+    }
+
+    @Operation(summary = "Получить информацию о мероприятии.",
+            description = "Возвращает информацию о мероприятии по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация о мероприятии.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}")
+    public EventDTO get(@PathVariable Long id) {
+        return eventService.get(id);
     }
 
     @Operation(summary = "Обновить информацию о мероприятии.",

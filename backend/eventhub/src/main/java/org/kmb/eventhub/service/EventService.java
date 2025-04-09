@@ -7,14 +7,18 @@ import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.enums.FormatType;
 import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.mapper.EventMapper;
+import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.repository.EventRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
+import org.kmb.eventhub.tables.daos.EventFileDao;
 import org.kmb.eventhub.tables.pojos.Event;
+import org.kmb.eventhub.tables.pojos.EventFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -30,6 +34,10 @@ public class EventService {
 
     private final MapService mapService;
 
+    private final EventFileDao eventFileDao;
+
+    private final EventFileMapper eventFileMapper;
+
     public ResponseList<Event> getList(Integer page, Integer pageSize) {
         ResponseList<Event> responseList = new ResponseList<>();
         Condition condition = trueCondition();
@@ -43,21 +51,34 @@ public class EventService {
         return responseList;
     }
 
-    public Event create(Event event) {
-        if (Objects.isNull(event.getLocation()) && Objects.nonNull(event.getLatitude()) && Objects.nonNull(event.getLongitude()))
-            event.setLocation(mapService.getAddress(event.getLatitude(), event.getLongitude()));
+    @Transactional
+    public Event create(EventDTO eventDTO) {
 
-        if (Objects.nonNull(event.getLocation()) && Objects.isNull(event.getLatitude()) && Objects.isNull(event.getLongitude())) {
-            var coordinates = mapService.getCoordinates(event.getLocation());
-            event.setLatitude(coordinates.getLatitude());
-            event.setLongitude(coordinates.getLongitude());
+        if (Objects.isNull(eventDTO.getLocation()) && Objects.nonNull(eventDTO.getLatitude()) && Objects.nonNull(eventDTO.getLongitude()))
+            eventDTO.setLocation(mapService.getAddress(eventDTO.getLatitude(), eventDTO.getLongitude()));
+
+        if (Objects.nonNull(eventDTO.getLocation()) && Objects.isNull(eventDTO.getLatitude()) && Objects.isNull(eventDTO.getLongitude())) {
+            var coordinates = mapService.getCoordinates(eventDTO.getLocation());
+            eventDTO.setLatitude(coordinates.getLatitude());
+            eventDTO.setLongitude(coordinates.getLongitude());
         }
+
+        Event event = eventMapper.dtoToEvent(eventDTO);
         eventDao.insert(event);
+
+        if (Objects.nonNull(eventDTO.getFiles())) {
+            eventDTO.getFiles().forEach(file -> {
+                file.setEventId(event.getId());
+            });
+        }
+        eventFileDao.insert(eventDTO.getFiles().stream().map(eventFileMapper::toEntity).toList());
         return event;
     }
 
-    public Event get(Long id) {
-        return eventDao.findById(id);
+    public EventDTO get(Long id) {
+        EventDTO eventDTO = eventMapper.toDto(eventDao.findById(id));
+        eventDTO.setFiles(eventFileDao.fetchByEventId(id).stream().map(eventFileMapper::toDto).collect(Collectors.toSet()));
+        return eventDTO;
     }
 
     @Transactional
@@ -95,7 +116,7 @@ public class EventService {
         eventDao.update(event);
         return event;
     }
-
+    @Transactional
     public boolean delete(Long id) {
         eventDao.deleteById(id);
         return true;

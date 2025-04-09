@@ -6,6 +6,7 @@ import org.kmb.eventhub.enums.EventFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 public class EventDTO {
@@ -21,4 +22,5 @@ public class EventDTO {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime endDateTime;
     private Long organizerId;
+    private Set<EventFileDTO> files;
 }

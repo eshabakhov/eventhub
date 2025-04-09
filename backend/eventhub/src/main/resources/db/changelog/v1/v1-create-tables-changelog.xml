@@ -151,4 +151,24 @@
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="eventhub-tables/v1/09-04-2025/1" author="Timokhov_Evgeniy">
+         <sql>
+             <![CDATA[
+                 CREATE TABLE public.event_file(
+                     file_id bigserial not null primary key,
+                     file_name varchar not null,
+                     file_type varchar not null,
+                     file_size bigint not null,
+                     file_content bytea,
+                     event_id bigint not null,
+                     CONSTRAINT fk_event_file
+                         FOREIGN KEY (event_id)
+                             REFERENCES public.event(id)
+                             ON DELETE RESTRICT
+                             ON UPDATE CASCADE
+
+                 );
+             ]]>
+         </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -6,5 +6,8 @@ import lombok.Data;
 public class EventFileDTO {
     private Long fileId;
     private Long eventId;
-    private String fileContent;
+    private byte[] fileContent;
+    private String fileName;
+    private String fileType;
+    private Long fileSize;
 }
