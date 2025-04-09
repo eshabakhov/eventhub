@@ -4,8 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.kmb.eventhub.dto.ResponseDTO;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,6 +63,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                                   @NonNull WebRequest request) {
         log.warn(ex.getMessage(), ex);
         return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @NonNull
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex,
+                                                        @NonNull HttpHeaders headers,
+                                                        @NonNull HttpStatusCode status,
+                                                        @NonNull WebRequest request) {
+        Object[] args = new Object[]{ex.getPropertyName(), ex.getValue()};
+        String var10000 = String.valueOf(args[0]);
+        String defaultDetail = String.format("Failed to convert '%s' with value: '%s'", var10000, args[1]);
+        log.warn(defaultDetail, ex);
+        return handleExceptionInternal(ex, ResponseDTO.getResponse(defaultDetail),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }

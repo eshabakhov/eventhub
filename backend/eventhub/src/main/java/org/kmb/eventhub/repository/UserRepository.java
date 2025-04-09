@@ -20,6 +20,7 @@ public class UserRepository {
         return dslContext
                 .selectFrom(USER)
                 .where(condition)
+                .and(USER.IS_ACTIVE.eq(true))
                 .limit(pageSize)
                 .offset((page - 1) * pageSize)
                 .fetchInto(User.class);

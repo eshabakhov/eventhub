@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.enums.RoleEnum;
+import org.kmb.eventhub.exception.MissingFieldException;
 import org.kmb.eventhub.exception.UnexpectedException;
 import org.kmb.eventhub.exception.ImmutableFieldException;
 import org.kmb.eventhub.exception.UserNotFoundException;
@@ -56,6 +57,20 @@ public class UserService {
 
     @Transactional
     public User create(UserDTO userDTO) {
+
+        if (Objects.isNull(userDTO.getUsername()))
+            throw new MissingFieldException("username");
+        if (Objects.isNull(userDTO.getDisplayName()))
+            throw new MissingFieldException("displayName");
+        if (Objects.isNull(userDTO.getPassword()))
+            throw new MissingFieldException("password");
+        if (Objects.isNull(userDTO.getEmail()))
+            throw new MissingFieldException("email");
+        if (Objects.isNull(userDTO.getIsActive()))
+            throw new MissingFieldException("isActive");
+        if (Objects.isNull(userDTO.getRole()))
+            throw new MissingFieldException("role");
+
         User user = userMapper.toEntity(userDTO);
         user.setIsActive(true);
         userDao.insert(user);
@@ -73,6 +88,18 @@ public class UserService {
 
     @Transactional
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
+
+        if (Objects.isNull(organizerDTO.getName()))
+            throw new MissingFieldException("name");
+        if (Objects.isNull(organizerDTO.getDescription()))
+            throw new MissingFieldException("description");
+        if (Objects.isNull(organizerDTO.getIndustry()))
+            throw new MissingFieldException("industry");
+        if (Objects.isNull(organizerDTO.getAddress()))
+            throw new MissingFieldException("address");
+        if (Objects.isNull(organizerDTO.getIsAccredited()))
+            throw new MissingFieldException("isAccredited");
+
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.ORGANIZER.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -84,6 +111,20 @@ public class UserService {
 
     @Transactional
     public Member updateMember(Long id, MemberDTO memberDTO) {
+
+        if (Objects.isNull(memberDTO.getFirstName()))
+            throw new MissingFieldException("firstName");
+        if (Objects.isNull(memberDTO.getLastName()))
+            throw new MissingFieldException("lastName");
+        if (Objects.isNull(memberDTO.getPatronymic()))
+            throw new MissingFieldException("patronymic");
+        if (Objects.isNull(memberDTO.getBirthDate()))
+            throw new MissingFieldException("birthDate");
+        if (Objects.isNull(memberDTO.getBirthCity()))
+            throw new MissingFieldException("birthCity");
+        if (Objects.isNull(memberDTO.getPrivacy()))
+            throw new MissingFieldException("privacy");
+
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.MEMBER.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -95,6 +136,10 @@ public class UserService {
 
     @Transactional
     public Moderator updateModerator(Long id, ModeratorDTO moderatorDTO) {
+
+        if (Objects.isNull(moderatorDTO.getIsAdmin()))
+            throw new MissingFieldException("isAdmin");
+
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.MODERATOR.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -105,21 +150,27 @@ public class UserService {
     }
 
     public User get(Long id) {
-        return userDao.fetchOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return userDao.fetchOptionalById(id).
+                filter(User::getIsActive)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Transactional
     public User update(Long id, User user) {
+
         if (Objects.isNull(user))
             throw new UserNotFoundException(id);
         if (!user.getIsActive())
             throw new ImmutableFieldException("isActive");
+
         user.setId(id);
         User userFromDb = userDao.findOptionalById(id)
                 .filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
+
         if (!Objects.equals(user.getEmail(), userFromDb.getEmail()))
             throw new ImmutableFieldException("Email");
+
         userDao.update(user);
         return user;
     }
