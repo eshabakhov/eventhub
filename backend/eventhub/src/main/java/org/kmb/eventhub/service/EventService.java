@@ -5,6 +5,7 @@ import org.jooq.Condition;
 import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.enums.FormatType;
+import org.kmb.eventhub.exception.EventNotFoundException;
 import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.mapper.EventFileMapper;
@@ -13,6 +14,7 @@ import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.EventFileDao;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.EventFile;
+import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +78,8 @@ public class EventService {
     }
 
     public EventDTO get(Long id) {
-        EventDTO eventDTO = eventMapper.toDto(eventDao.findById(id));
+        EventDTO eventDTO = eventMapper.toDto(eventDao.fetchOptionalById(id)
+                .orElseThrow(() -> new EventNotFoundException(id)));
         eventDTO.setFiles(eventFileDao.fetchByEventId(id).stream().map(eventFileMapper::toDto).collect(Collectors.toSet()));
         return eventDTO;
     }

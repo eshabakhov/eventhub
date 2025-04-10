@@ -11,6 +11,7 @@ import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.service.EventFileService;
 import org.kmb.eventhub.tables.pojos.EventFile;
+import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +37,24 @@ public class EventFileController {
     @PostMapping
     public Long create(@RequestBody @Valid EventFileDTO eventFileDTO) {
         return eventFileService.create(eventFileDTO);
+    }
+
+    @Operation(summary = "Удалить файл.",
+            description = "Удаляет файл по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Файл удален.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = EventFile.class)))
+    @ApiResponse(responseCode = "404",
+            description = "файл не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        eventFileService.delete(id);
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
