@@ -10,8 +10,10 @@ import org.kmb.eventhub.tables.daos.TagDao;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -58,5 +60,29 @@ public class TagService {
             throw new UnexpectedException("Существуют мероприятия с указанным тегом");
         }
         tagDao.deleteById(id);
+    }
+
+    public List<Tag> checkAllTags(List<Tag> tagList) {
+        List<Tag> result = new ArrayList<>();
+        tagList.forEach(tag-> {
+            Tag existingTag = tagRepository.findTagByName(tag.getName());
+            if (existingTag == null) {
+                result.add(tagRepository.createTag(tag.getName()));
+            }
+            else {
+                result.add(existingTag);
+            }
+        });
+        return result;
+    }
+
+
+    public Set<Long> getUsedTagIdsForEvent(Long eventId) {
+        return tagRepository.getUsedTagIdsForEvent(eventId);
+    }
+
+
+    public void assignTagsToEvent(Long eventId, List<Long> tagIds) {
+         tagRepository.assignNewEventTag(eventId,tagIds);
     }
 }
