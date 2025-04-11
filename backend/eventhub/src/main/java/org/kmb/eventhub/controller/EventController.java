@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:63343")
@@ -96,15 +95,6 @@ public class EventController {
             @RequestBody @Valid EventDTO eventDTO) {
         return eventService.update(id, eventDTO);
     }
-
-    /*@PostMapping("/add-tags")
-    public ResponseEntity<List<Long>> addTagsToEvent(@RequestBody AddTagsToEventDTO request) {
-        System.out.printf("Formatted value: %d", request.getEventId());
-        return ResponseEntity
-                .noContent()
-                .build();
-        //return ResponseEntity.ok(eventService.addTagsToEvent(request.getEventId(), request.getTagDTOs()));
-    }*/
 
     @PostMapping("/add-tags")
     public ResponseEntity<String> addTagsToEvent(@RequestBody AddTagsToEventDTO request) {

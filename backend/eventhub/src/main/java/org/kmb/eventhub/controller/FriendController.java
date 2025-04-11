@@ -1,11 +1,9 @@
 package org.kmb.eventhub.controller;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.service.FriendService;
 import org.kmb.eventhub.tables.pojos.FriendRequest;
-import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,24 +27,24 @@ public class FriendController {
     @PostMapping(value = "/send/request")
     public void sendFriendRequest(
             @PathVariable Long id,
-            @RequestParam String usernameTo) {
-        friendService.sendFriendRequest(id, usernameTo);
+            @RequestParam Long idTo) {
+        friendService.sendFriendRequest(id, idTo);
     }
 
     @ResponseStatus(value = HttpStatus.OK)
     @PostMapping(value = "/accept/request")
     public void acceptFriendRequest(
             @PathVariable Long id,
-            @RequestBody @Valid User userTo) {
-        friendService.acceptFriendRequest(id, userTo);
+            @RequestParam Long idFrom) {
+        friendService.acceptFriendRequest(idFrom, id);
     }
 
     @ResponseStatus(value = HttpStatus.OK)
     @PostMapping(value = "/reject/request")
     public void rejectFriendRequest(
             @PathVariable Long id,
-            @RequestBody @Valid User userTo) {
-        friendService.rejectFriendRequest(id, userTo);
+            @RequestParam Long idFrom) {
+        friendService.rejectFriendRequest(idFrom, id);
     }
 
 }

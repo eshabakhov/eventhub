@@ -6,6 +6,7 @@ import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.enums.FormatType;
+import org.kmb.eventhub.exception.AlreadyExistsException;
 import org.kmb.eventhub.exception.EventNotFoundException;
 import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.mapper.EventMapper;
@@ -74,14 +75,17 @@ public class EventService {
         }
 
         Event event = eventMapper.dtoToEvent(eventDTO);
+        if (!eventDao.fetchByTitle(eventDTO.getTitle()).isEmpty()) {
+            throw new AlreadyExistsException(String.format("Event with title %s", eventDTO.getTitle()));
+        }
         eventDao.insert(event);
 
         if (Objects.nonNull(eventDTO.getFiles())) {
             eventDTO.getFiles().forEach(file -> {
                 file.setEventId(event.getId());
             });
+            eventFileDao.insert(eventDTO.getFiles().stream().map(eventFileMapper::toEntity).toList());
         }
-        eventFileDao.insert(eventDTO.getFiles().stream().map(eventFileMapper::toEntity).toList());
         return event;
     }
 
