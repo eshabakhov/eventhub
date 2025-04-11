@@ -2,10 +2,12 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.exception.TagNotFoundException;
 import org.kmb.eventhub.exception.UnexpectedException;
 import org.kmb.eventhub.repository.TagRepository;
+import org.kmb.eventhub.tables.daos.EventTagsDao;
 import org.kmb.eventhub.tables.daos.TagDao;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class TagService {
     private final TagRepository tagRepository;
 
     private final TagDao tagDao;
+    private final EventTagsDao eventTagsDao;
 
     public ResponseList<Tag> getList(Integer page, Integer pageSize) {
         ResponseList<Tag> responseList = new ResponseList<>();
@@ -52,14 +55,14 @@ public class TagService {
         return tag;
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, EventFileDTO eventFileDTO) {
         if (tagDao.fetchOptionalById(id).isEmpty()) {
             throw new TagNotFoundException(id);
         }
-        if (!Objects.isNull(tagRepository.fetchUnused(id))) {
-            throw new UnexpectedException("Существуют мероприятия с указанным тегом");
+        tagRepository.delete(id, eventFileDTO);
+        if (Objects.isNull(tagRepository.fetchUnused(id))) {
+            tagDao.deleteById(id);
         }
-        tagDao.deleteById(id);
     }
 
     public List<Tag> checkAllTags(List<Tag> tagList) {

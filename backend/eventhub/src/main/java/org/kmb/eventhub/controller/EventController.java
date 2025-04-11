@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.AddTagsToEventDTO;
+import org.kmb.eventhub.dto.EventTagsDTO;
 import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
@@ -98,7 +98,7 @@ public class EventController {
     @Operation(summary = "Добавление новых тегов к мероприятию.",
             description = "Добавляет новые теги к мероприятию.")
     @ApiResponse(responseCode = "201",
-            description = "Теги успешно добавлено",
+            description = "Теги успешно добавлены",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Tag.class)))
     @ApiResponse(responseCode = "400",
@@ -107,7 +107,7 @@ public class EventController {
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/add-tags")
-    public List<Tag> addTagsToEvent(@RequestBody AddTagsToEventDTO addTagsToEventDTO) {
-        return eventService.addTagsToEvent(addTagsToEventDTO.getEventId(), addTagsToEventDTO.getTags());
+    public List<Tag> addTagsToEvent(@RequestBody EventTagsDTO eventTagsDTO) {
+        return eventService.addTagsToEvent(eventTagsDTO.getEventId(), eventTagsDTO.getTags());
     }
 }

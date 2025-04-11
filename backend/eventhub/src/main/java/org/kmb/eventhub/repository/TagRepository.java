@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
+import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Repository;
 
@@ -81,5 +82,14 @@ public class TagRepository {
         );
         batch.execute();
     }
+
+    public void delete(Long id, EventFileDTO eventFileDTO) {
+        dslContext.deleteFrom(EVENT_TAGS)
+                .where(EVENT_TAGS.EVENT_ID.eq(eventFileDTO.getEventId()))
+                .and(EVENT_TAGS.TAG_ID.eq(id))
+                .execute();
+    }
+
+
 
 }

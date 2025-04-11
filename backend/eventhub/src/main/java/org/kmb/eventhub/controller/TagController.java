@@ -6,9 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.ResponseDTO;
-import org.kmb.eventhub.dto.ResponseList;
-import org.kmb.eventhub.dto.TagDTO;
+import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Tag;
@@ -61,11 +59,8 @@ public class TagController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        tagService.delete(id);
-        return ResponseEntity
-                .noContent()
-                .build();
+    public void delete(@PathVariable Long id, @RequestBody @Valid EventFileDTO eventFileDTO) {
+        tagService.delete(id, eventFileDTO);
     }
 
 }
