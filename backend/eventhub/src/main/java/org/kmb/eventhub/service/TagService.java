@@ -82,7 +82,7 @@ public class TagService {
     }
 
 
-    public void assignTagsToEvent(Long eventId, List<Long> tagIds) {
-         tagRepository.assignNewEventTag(eventId,tagIds);
+    public void assignTagsToEvent(Long eventId, List<Tag> tags) {
+         tagRepository.assignNewEventTag(eventId,tags);
     }
 }

@@ -13,8 +13,11 @@ import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.EventRepository;
+import org.kmb.eventhub.repository.TagRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.EventFileDao;
+import org.kmb.eventhub.tables.daos.EventTagsDao;
+import org.kmb.eventhub.tables.daos.TagDao;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.EventFile;
 import org.kmb.eventhub.tables.pojos.Tag;
@@ -35,6 +38,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
+    private final TagRepository tagRepository;
+
     private final TagService tagService;
 
     private final EventDao eventDao;
@@ -48,6 +53,8 @@ public class EventService {
     private final EventFileDao eventFileDao;
 
     private final EventFileMapper eventFileMapper;
+    private final TagDao tagDao;
+    private final EventTagsDao eventTagsDao;
 
     public ResponseList<Event> getList(Integer page, Integer pageSize) {
         ResponseList<Event> responseList = new ResponseList<>();
@@ -93,6 +100,7 @@ public class EventService {
         EventDTO eventDTO = eventMapper.toDto(eventDao.fetchOptionalById(id)
                 .orElseThrow(() -> new EventNotFoundException(id)));
         eventDTO.setFiles(eventFileDao.fetchByEventId(id).stream().map(eventFileMapper::toDto).collect(Collectors.toSet()));
+        eventDTO.setTags(tagRepository.fetch(id).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
         return eventDTO;
     }
 
@@ -137,30 +145,27 @@ public class EventService {
         return true;
     }
 
-    public List<Long> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
-
-        System.out.printf("Formatted value: %d", eventId);
-        List <Tag> tagNames=tagNamesDTO.stream().map(tagMapper::toEntity).toList();
+    public List<Tag> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
+        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
         Event event = eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
         //1. Добавление новых тегов, получение id всех тегов из запроса
         List<Tag> tagWithId = tagService.checkAllTags(tagNames);
 
         //2. Получение списка использованных тегов для мероприятия
-        Set<Long> usedTagIds =tagService.getUsedTagIdsForEvent(eventId);
+        Set<Long> usedTagIds = tagService.getUsedTagIdsForEvent(eventId);
 
         //3. Получение id неиспользованных тегов
-        List<Long> newTagIds = tagWithId.stream()
-                .map(Tag::getId)
-                .filter(tagId -> !usedTagIds.contains((tagId)))
+        List<Tag> newTags = tagWithId.stream()
+                .filter(tag -> !usedTagIds.contains(tag.getId()))
                 .toList();
 
         //4. Добавление связи для новых тегов и мероприятия
-        if (!newTagIds.isEmpty()) {
-            tagService.assignTagsToEvent(eventId, newTagIds);
+        if (!newTags.isEmpty()) {
+            tagService.assignTagsToEvent(eventId, newTags);
         }
 
-        return newTagIds;
+        return newTags;
     }
 
 

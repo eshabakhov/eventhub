@@ -23,4 +23,5 @@ public class EventDTO {
     private LocalDateTime endDateTime;
     private Long organizerId;
     private Set<EventFileDTO> files;
+    private Set<TagDTO> tags;
 }

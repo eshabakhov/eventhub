@@ -13,18 +13,17 @@ import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:63343")
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/events")
-@Tag(name = "Мероприятия", description = "Управление мероприятиями")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Мероприятия", description = "Управление мероприятиями")
 public class EventController {
 
     private final EventService eventService;
@@ -96,9 +95,19 @@ public class EventController {
         return eventService.update(id, eventDTO);
     }
 
+    @Operation(summary = "Добавление новых тегов к мероприятию.",
+            description = "Добавляет новые теги к мероприятию.")
+    @ApiResponse(responseCode = "201",
+            description = "Теги успешно добавлено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/add-tags")
-    public ResponseEntity<String> addTagsToEvent(@RequestBody AddTagsToEventDTO request) {
-        System.out.printf("Formatted value: %d", request.getEventId());
-        return ResponseEntity.ok(eventService.addTagsToEvent(request.getEventId(), request.getTagDTOs()).toString());
+    public List<Tag> addTagsToEvent(@RequestBody AddTagsToEventDTO addTagsToEventDTO) {
+        return eventService.addTagsToEvent(addTagsToEventDTO.getEventId(), addTagsToEventDTO.getTags());
     }
 }

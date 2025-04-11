@@ -27,6 +27,15 @@ public class TagRepository {
                 .fetchInto(Tag.class);
     }
 
+    public List<Tag> fetch(Long eventId) {
+        return dslContext
+                .select(TAG.fields())
+                .from(TAG)
+                .innerJoin(EVENT_TAGS).on(EVENT_TAGS.TAG_ID.eq(TAG.ID))
+                .where(EVENT_TAGS.EVENT_ID.eq(eventId))
+                .fetchInto(Tag.class);
+    }
+
     public Long count(Condition condition) {
         return dslContext
                 .selectCount()
@@ -62,12 +71,12 @@ public class TagRepository {
                 .fetchSet(EVENT_TAGS.TAG_ID);
     }
 
-    public void assignNewEventTag(Long eventId, List<Long> tagIds) {
-        var batch =dslContext.batch(
-                tagIds.stream()
-                        .map(tagId ->dslContext.insertInto(EVENT_TAGS)
+    public void assignNewEventTag(Long eventId, List<Tag> tags) {
+        var batch = dslContext.batch(
+                tags.stream()
+                        .map(tag -> dslContext.insertInto(EVENT_TAGS)
                                 .set(EVENT_TAGS.EVENT_ID, eventId)
-                                .set(EVENT_TAGS.TAG_ID, tagId))
+                                .set(EVENT_TAGS.TAG_ID, tag.getId()))
                         .toArray(Insert[]::new)
         );
         batch.execute();

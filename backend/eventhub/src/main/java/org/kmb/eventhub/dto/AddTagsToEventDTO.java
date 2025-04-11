@@ -5,6 +5,5 @@ import lombok.Data;
 @Data
 public class AddTagsToEventDTO {
     private Long eventId;
-    private List<TagDTO> tagDTOs; //todo поменять
-
+    private List<TagDTO> tags;
 }
