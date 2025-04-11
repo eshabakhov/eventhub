@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.dto.AddTagsToEventDTO;
 import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:63343")
 @RestController
@@ -92,5 +94,11 @@ public class EventController {
             @PathVariable Long id,
             @RequestBody @Valid EventDTO eventDTO) {
         return eventService.update(id, eventDTO);
+    }
+
+    @PostMapping("/add-tags")
+    public ResponseEntity<String> addTagsToEvent(@RequestBody AddTagsToEventDTO request) {
+        System.out.printf("Formatted value: %d", request.getEventId());
+        return ResponseEntity.ok(eventService.addTagsToEvent(request.getEventId(), request.getTagDTOs()).toString());
     }
 }
