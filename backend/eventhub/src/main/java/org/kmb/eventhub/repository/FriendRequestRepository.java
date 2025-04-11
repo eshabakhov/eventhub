@@ -36,6 +36,14 @@ public class FriendRequestRepository {
                 .fetchInto(FriendRequest.class);
     }
 
+    public void deleteFriendRequestByIds(Long idFrom, Long idTo) {
+        dslContext
+            .deleteFrom(FRIEND_REQUEST)
+            .where(FRIEND_REQUEST.SENDER_ID.eq(idFrom))
+            .and(FRIEND_REQUEST.RECIPIENT_ID.eq(idTo))
+            .execute();
+    }
+
     public Long count(Condition condition) {
         return dslContext
                 .selectCount()
