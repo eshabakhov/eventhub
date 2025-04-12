@@ -171,4 +171,25 @@
              ]]>
          </sql>
     </changeSet>
+    <changeSet id="eventhub-tables/v1/12-04-2025/1" author="Timokhov_Evgeniy">
+        <sql>
+             <![CDATA[
+            CREATE TABLE public.event_members(
+                    event_id bigint NOT NULL,
+                    member_id bigint NOT NULL,
+                CONSTRAINT fk_subscriber_member_id
+                    FOREIGN KEY (member_id)
+                    REFERENCES public.member(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE,
+                CONSTRAINT fk_subscriber_event_id
+                    FOREIGN KEY (event_id)
+                    REFERENCES public.event(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE,
+                PRIMARY KEY (event_id, member_id)
+            );
+            ]]>
+         </sql>
+    </changeSet>
 </databaseChangeLog>

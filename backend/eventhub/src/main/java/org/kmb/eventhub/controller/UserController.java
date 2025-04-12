@@ -8,11 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.UserService;
-import org.kmb.eventhub.tables.pojos.Member;
-import org.kmb.eventhub.tables.pojos.Moderator;
-import org.kmb.eventhub.tables.pojos.Organizer;
-import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.tables.pojos.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final SubscribeService subscribeService;
 
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
@@ -138,6 +137,22 @@ public class UserController {
     @GetMapping(value = "/member/{id}")
     public Member getMember(@PathVariable Long id) {
         return userService.getMember(id);
+    }
+
+
+    @Operation(summary = "Получить список мероприятий пользователя.",
+            description = "Возвращает все мероприятия, в которых участвует пользователь.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/member/{id}/events")
+
+    public ResponseList<Event> getMemberEvents(@PathVariable Long id,
+                                               @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        return subscribeService.getEventsByMemberId(id, page, pageSize);
     }
 
     @Operation(summary = "Получить информацию об организаторе.",

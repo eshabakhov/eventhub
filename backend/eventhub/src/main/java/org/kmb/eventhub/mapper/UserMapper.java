@@ -27,6 +27,8 @@ public interface UserMapper {
 
     Member dtoToMember(MemberDTO memberDTO);
 
+    MemberDTO toMemberDto(Member member);
+
     Moderator dtoToModerator(ModeratorDTO moderatorDTO);
 
 }

@@ -3,7 +3,6 @@ package org.kmb.eventhub.service;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.exception.EventNotFoundException;

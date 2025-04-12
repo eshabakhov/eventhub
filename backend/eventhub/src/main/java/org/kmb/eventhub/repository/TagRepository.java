@@ -5,7 +5,6 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
 import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Repository;
 

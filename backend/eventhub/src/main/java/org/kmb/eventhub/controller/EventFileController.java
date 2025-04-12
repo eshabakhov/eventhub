@@ -12,7 +12,6 @@ import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.service.EventFileService;
 import org.kmb.eventhub.tables.pojos.EventFile;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -11,9 +11,11 @@ import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.service.EventService;
+import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.Tag;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+
+    private final SubscribeService subscribeService;
 
     private final TagService tagService;
 
@@ -74,6 +78,25 @@ public class EventController {
         return eventService.get(id);
     }
 
+    @Operation(summary = "Получить участников мероприятия.",
+            description = "Возвращает участников мероприятия по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Участники мероприятия.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members")
+    public ResponseList<Member> get(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @PathVariable Long id) {
+        return subscribeService.getMembersByEventId(id, page, pageSize);
+    }
+
     @Operation(summary = "Обновить информацию о мероприятии.",
             description = "Обновить информацию мероприятия по ID.")
     @ApiResponse(responseCode = "200",
@@ -85,7 +108,7 @@ public class EventController {
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PatchMapping(value = "/event/{id}")
+    @PatchMapping(value = "/{id}")
     public Event updateEvent(
             @PathVariable Long id,
             @RequestBody @Valid EventDTO eventDTO) {
