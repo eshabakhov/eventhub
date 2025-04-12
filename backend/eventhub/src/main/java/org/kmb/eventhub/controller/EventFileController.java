@@ -11,7 +11,6 @@ import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.service.EventFileService;
 import org.kmb.eventhub.tables.pojos.EventFile;
-import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,7 @@ public class EventFileController {
     private final EventFileService eventFileService;
 
     @Operation(summary = "Добавление нового файла.",
-            description = "Добавляет нового файл к событию.")
+            description = "Добавляет новый файл к событию.")
     @ApiResponse(responseCode = "201",
             description = "Файл успешно добавлен.",
             content = @Content(mediaType = "application/json",
@@ -44,17 +43,12 @@ public class EventFileController {
     @ApiResponse(responseCode = "200",
             description = "Файл удален.",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = EventFile.class)))
+            schema = @Schema(implementation = EventFile.class)))
     @ApiResponse(responseCode = "404",
             description = "файл не найден",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
+            schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        eventFileService.delete(id);
-        return ResponseEntity
-                .noContent()
-                .build();
-    }
+    public Long delete(@PathVariable Long id) { return eventFileService.delete(id); }
 }

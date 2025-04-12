@@ -7,7 +7,6 @@ import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.repository.EventFileRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.EventFileDao;
-import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.EventFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ public class EventFileService {
         if (Objects.isNull(eventFileDTO.getFileType())) {
             throw new MissingFieldException("fileType");
         }
-        Event event = eventDao.findOptionalById(eventFileDTO.getEventId()).orElseThrow(() -> new EventNotFoundException(eventFileDTO.getEventId()));
+        eventDao.findOptionalById(eventFileDTO.getEventId()).orElseThrow(() -> new EventNotFoundException(eventFileDTO.getEventId()));
         EventFile eventFile = eventFileMapper.toEntity(eventFileDTO);
 
         if (eventFileRepository.isExist(eventFileDTO.getFileName(), eventFileDTO.getFileType(), eventFileDTO.getEventId())) {
@@ -50,11 +49,13 @@ public class EventFileService {
         eventFileDao.insert(eventFile);
         return eventFile.getFileId();
     }
+
     @Transactional
-    public void delete(Long id) {
+    public Long delete(Long id) {
         if (eventFileDao.fetchByFileId(id).isEmpty()) {
             throw new EventFileNotFoundException(id);
         }
         eventFileDao.deleteById(id);
+        return id;
     }
 }

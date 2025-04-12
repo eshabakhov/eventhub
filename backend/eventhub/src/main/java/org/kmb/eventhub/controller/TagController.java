@@ -7,14 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
-import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -24,10 +20,8 @@ public class TagController {
 
     private final TagService tagService;
 
-    private final TagMapper tagMapper;
-
     @Operation(summary = "Добавление нового тега.",
-                    description = "Добавляет нового тега в систему.")
+                    description = "Добавляет новый тег в систему.")
     @ApiResponse(responseCode = "201",
                     description = "Тег успешно добавлен",
                     content = @Content(mediaType = "application/json",
@@ -36,11 +30,10 @@ public class TagController {
                     description = "Ошибка валидации",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<Tag> create(@RequestBody @Valid TagDTO tagDTO) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(tagService.create(tagMapper.toEntity(tagDTO)));
+    public Tag create(@RequestBody @Valid TagDTO tagDTO) {
+        return tagService.create(tagDTO);
     }
 
     @Operation(summary = "Получить список всех тегов",
@@ -50,17 +43,27 @@ public class TagController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Tag.class)))
     @GetMapping
-    public ResponseEntity<ResponseList<Tag>> getList(
+    public ResponseList<Tag> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(tagService.getList(page, pageSize));
+        return tagService.getList(page, pageSize);
     }
 
+    @Operation(summary = "Удалить тег.",
+            description = "Удаляет тег по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Тег удален.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Тег не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping(value = "/{id}")
-    public void delete(@PathVariable Long id, @RequestBody @Valid EventFileDTO eventFileDTO) {
-        tagService.delete(id, eventFileDTO);
+    public Long delete(
+            @PathVariable Long id,
+            @RequestBody @Valid EventFileDTO eventFileDTO) {
+        return tagService.delete(id, eventFileDTO);
     }
-
 }

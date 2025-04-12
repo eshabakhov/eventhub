@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.enums.RoleEnum;
-import org.kmb.eventhub.exception.MissingFieldException;
-import org.kmb.eventhub.exception.UnexpectedException;
-import org.kmb.eventhub.exception.ImmutableFieldException;
-import org.kmb.eventhub.exception.UserNotFoundException;
+import org.kmb.eventhub.exception.*;
 import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.repository.UserRepository;
 import org.kmb.eventhub.tables.daos.MemberDao;
@@ -68,6 +65,12 @@ public class UserService {
             throw new MissingFieldException("email");
         if (Objects.isNull(userDTO.getRole()))
             throw new MissingFieldException("role");
+
+        if (!userDao.fetchByUsername(userDTO.getUsername()).isEmpty())
+            throw new AlreadyExistsException("user with username " + userDTO.getUsername());
+
+        if (!userDao.fetchByEmail(userDTO.getEmail()).isEmpty())
+            throw new AlreadyExistsException("user with email " + userDTO.getEmail());
 
         User user = userMapper.toEntity(userDTO);
         user.setIsActive(true);
@@ -152,12 +155,22 @@ public class UserService {
                 filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
     public User getByUsername(String username) {
         return userDao.fetchOptionalByUsername(username).
                 filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(-1L));
     }
 
+    public Member getMember(Long id) {
+        return memberDao.fetchOptionalById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    public Organizer getOrganizer(Long id) {
+        return organizerDao.fetchOptionalById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
 
     @Transactional
     public User update(Long id, User user) {

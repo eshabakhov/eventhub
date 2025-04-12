@@ -2,11 +2,11 @@ package org.kmb.eventhub.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import org.kmb.eventhub.enums.EventFormat;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import org.kmb.eventhub.enums.EventFormat;
 
 @Data
 public class EventDTO {

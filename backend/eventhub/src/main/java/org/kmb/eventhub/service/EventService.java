@@ -5,23 +5,20 @@ import org.jooq.Condition;
 import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
+import org.kmb.eventhub.enums.EventFormat;
 import org.kmb.eventhub.enums.FormatType;
 import org.kmb.eventhub.exception.AlreadyExistsException;
 import org.kmb.eventhub.exception.EventNotFoundException;
+import org.kmb.eventhub.exception.MissingFieldException;
 import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.EventRepository;
 import org.kmb.eventhub.repository.TagRepository;
-import org.kmb.eventhub.tables.daos.EventDao;
-import org.kmb.eventhub.tables.daos.EventFileDao;
-import org.kmb.eventhub.tables.daos.EventTagsDao;
-import org.kmb.eventhub.tables.daos.TagDao;
+import org.kmb.eventhub.tables.daos.*;
 import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.EventFile;
 import org.kmb.eventhub.tables.pojos.Tag;
-import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,8 +50,8 @@ public class EventService {
     private final EventFileDao eventFileDao;
 
     private final EventFileMapper eventFileMapper;
-    private final TagDao tagDao;
-    private final EventTagsDao eventTagsDao;
+
+    private final OrganizerDao organizerDao;
 
     public ResponseList<Event> getList(Integer page, Integer pageSize) {
         ResponseList<Event> responseList = new ResponseList<>();
@@ -71,11 +68,30 @@ public class EventService {
 
     @Transactional
     public Event create(EventDTO eventDTO) {
+        if (Objects.isNull(eventDTO.getTitle()) || eventDTO.getTitle().isEmpty())
+            throw new MissingFieldException("title");
 
-        if (Objects.isNull(eventDTO.getLocation()) && Objects.nonNull(eventDTO.getLatitude()) && Objects.nonNull(eventDTO.getLongitude()))
-            eventDTO.setLocation(mapService.getAddress(eventDTO.getLatitude(), eventDTO.getLongitude()));
+        if (Objects.isNull(eventDTO.getFormat()))
+            throw new MissingFieldException("format");
 
-        if (Objects.nonNull(eventDTO.getLocation()) && Objects.isNull(eventDTO.getLatitude()) && Objects.isNull(eventDTO.getLongitude())) {
+        if (Objects.isNull(eventDTO.getStartDateTime()))
+            throw new MissingFieldException("startDateTime");
+
+        if (Objects.isNull(eventDTO.getEndDateTime()))
+            throw new MissingFieldException("endDateTime");
+
+        if (Objects.isNull(eventDTO.getOrganizerId()))
+            throw new MissingFieldException("organizerId");
+        if (eventDTO.getStartDateTime().isAfter(eventDTO.getEndDateTime()))
+            throw new IllegalArgumentException("startDateTime > endDateTime");
+        organizerDao.findOptionalById(eventDTO.getOrganizerId()).orElseThrow(() -> new UserNotFoundException(eventDTO.getOrganizerId()));
+
+        if ((Objects.isNull(eventDTO.getLocation()) || eventDTO.getLocation().isEmpty())
+                && Objects.nonNull(eventDTO.getLatitude()) && Objects.nonNull(eventDTO.getLongitude()))
+            eventDTO.setLocation(mapService.getAddress(eventDTO.getLatitude(), eventDTO.getLongitude(), Objects.equals(eventDTO.getFormat(), EventFormat.ONLINE)));
+
+        if (Objects.nonNull(eventDTO.getLocation()) && !eventDTO.getLocation().isEmpty()
+                && Objects.isNull(eventDTO.getLatitude()) && Objects.isNull(eventDTO.getLongitude())) {
             var coordinates = mapService.getCoordinates(eventDTO.getLocation());
             eventDTO.setLatitude(coordinates.getLatitude());
             eventDTO.setLongitude(coordinates.getLongitude());
@@ -106,7 +122,7 @@ public class EventService {
 
     @Transactional
     public Event update(Long id, EventDTO eventDTO) {
-        Event event = eventDao.findOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+        Event event = eventDao.findOptionalById(id).orElseThrow(() -> new EventNotFoundException(id));
 
         if (Objects.nonNull(eventDTO.getDescription()))
             event.setDescription(eventDTO.getDescription());
@@ -140,14 +156,16 @@ public class EventService {
         return event;
     }
     @Transactional
-    public boolean delete(Long id) {
+    public Long delete(Long id) {
+        eventDao.findOptionalById(id).orElseThrow(() -> new EventNotFoundException(id));
         eventDao.deleteById(id);
-        return true;
+        return id;
     }
 
+    @Transactional
     public List<Tag> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
         List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
-        Event event = eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
         //1. Добавление новых тегов, получение id всех тегов из запроса
         List<Tag> tagWithId = tagService.checkAllTags(tagNames);
@@ -167,6 +185,4 @@ public class EventService {
 
         return newTags;
     }
-
-
 }

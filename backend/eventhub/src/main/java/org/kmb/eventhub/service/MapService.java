@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -16,11 +17,11 @@ public class MapService {
 
     private final WebClient webClient = WebClient.builder()
             .baseUrl("https://nominatim.openstreetmap.org")
-            .defaultHeader("User-Agent", "YourAppName/1.0")
+            .defaultHeader("User-Agent", "EventHub/1.0")
             .build();
 
 
-    public String getAddress(BigDecimal latitude, BigDecimal longitude) {
+    public String getAddress(BigDecimal latitude, BigDecimal longitude, boolean isOnline) {
         String uri = "/reverse?format=json&lat=" + latitude + "&lon=" + longitude;
 
         Map<String, Object> response = webClient.get()
@@ -29,7 +30,29 @@ public class MapService {
                 .bodyToMono(Map.class)
                 .block();
 
-        return (String) response.getOrDefault("display_name", "Адрес не найден");
+        // Здесь превращаем адрес в строку Страна, Край, город, улица, номер дома
+        Map<String, Object> addr = (Map<String, Object>) response.getOrDefault("address", Map.of());
+        String country = (String) addr.getOrDefault("country", "");
+        country = Objects.equals(country, "Россия") ? "" : country;
+        String city = (String) addr.getOrDefault("city", "");
+        String road = (String) addr.getOrDefault("road", "");
+        String houseNumber = (String) addr.getOrDefault("house_number", "");
+        String state = (String) addr.getOrDefault("state", "");
+
+        StringBuilder sb = new StringBuilder();
+        List<String> parts;
+        // Если онлайн мероприятие, нужна только страна и город
+        if (isOnline)
+             parts = List.of(country, city);
+        else
+             parts= List.of(country, city, state, road, houseNumber);
+
+        parts.stream()
+                .filter(s -> !s.isEmpty())
+                .reduce((s1, s2) -> s1 + ", " + s2)
+                .ifPresent(sb::append);
+
+        return sb.toString().trim();
     }
     public CoordinatesDTO getCoordinates(String address) {
         String uri = "/search?q=" + address + "&format=json";

@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.exception.TagNotFoundException;
-import org.kmb.eventhub.exception.UnexpectedException;
+import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.TagRepository;
-import org.kmb.eventhub.tables.daos.EventTagsDao;
 import org.kmb.eventhub.tables.daos.TagDao;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,8 @@ public class TagService {
     private final TagRepository tagRepository;
 
     private final TagDao tagDao;
-    private final EventTagsDao eventTagsDao;
+
+    private final TagMapper tagMapper;
 
     public ResponseList<Tag> getList(Integer page, Integer pageSize) {
         ResponseList<Tag> responseList = new ResponseList<>();
@@ -41,7 +43,9 @@ public class TagService {
         return responseList;
     }
 
-    public Tag create(Tag tag) {
+    @Transactional
+    public Tag create(TagDTO tagDTO) {
+        Tag tag = tagMapper.toEntity(tagDTO);
         tagDao.insert(tag);
         return tag;
     }
@@ -50,12 +54,8 @@ public class TagService {
         return tagDao.fetchOptionalById(id).orElseThrow(() -> new TagNotFoundException(id));
     }
 
-    public Tag update(Tag tag) {
-        tagDao.update(tag);
-        return tag;
-    }
-
-    public void delete(Long id, EventFileDTO eventFileDTO) {
+    @Transactional
+    public Long delete(Long id, EventFileDTO eventFileDTO) {
         if (tagDao.fetchOptionalById(id).isEmpty()) {
             throw new TagNotFoundException(id);
         }
@@ -63,13 +63,14 @@ public class TagService {
         if (Objects.isNull(tagRepository.fetchUnused(id))) {
             tagDao.deleteById(id);
         }
+        return id;
     }
 
     public List<Tag> checkAllTags(List<Tag> tagList) {
         List<Tag> result = new ArrayList<>();
         tagList.forEach(tag-> {
             Tag existingTag = tagRepository.findTagByName(tag.getName());
-            if (existingTag == null) {
+            if (Objects.isNull(existingTag)) {
                 result.add(tagRepository.createTag(tag.getName()));
             }
             else {
@@ -79,11 +80,9 @@ public class TagService {
         return result;
     }
 
-
     public Set<Long> getUsedTagIdsForEvent(Long eventId) {
         return tagRepository.getUsedTagIdsForEvent(eventId);
     }
-
 
     public void assignTagsToEvent(Long eventId, List<Tag> tags) {
          tagRepository.assignNewEventTag(eventId,tags);

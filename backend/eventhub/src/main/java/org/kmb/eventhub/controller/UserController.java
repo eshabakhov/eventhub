@@ -57,7 +57,7 @@ public class UserController {
     @Operation(summary = "Получить информацию о пользователе.",
                     description = "Возвращает информацию о пользователе по ID.")
     @ApiResponse(responseCode = "200",
-                    description = "Информация о пользовалете.",
+                    description = "Информация о пользователе.",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = User.class)))
     @ApiResponse(responseCode = "404",
@@ -75,11 +75,11 @@ public class UserController {
     @ApiResponse(responseCode = "200",
             description = "Информация о пользователе обновлена.",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Organizer.class)))
+            schema = @Schema(implementation = Organizer.class)))
     @ApiResponse(responseCode = "404",
             description = "Пользователь не найден",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
+            schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
     @PutMapping(value = "/{id}")
     public User updateUser(
@@ -122,6 +122,38 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid MemberDTO memberDTO) {
         return userService.updateMember(id, memberDTO);
+    }
+
+    @Operation(summary = "Получить информацию об участнике.",
+                    description = "Возвращает информацию об участнике по ID.")
+    @ApiResponse(responseCode = "200",
+                    description = "Информация об участнике.",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Member.class)))
+    @ApiResponse(responseCode = "404",
+                    description = "Участник не найден",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/member/{id}")
+    public Member getMember(@PathVariable Long id) {
+        return userService.getMember(id);
+    }
+
+    @Operation(summary = "Получить информацию об организаторе.",
+            description = "Возвращает информацию об организаторе по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация об организаторе.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Organizer.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Организатор не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizer/{id}")
+    public Organizer getOrganizer(@PathVariable Long id) {
+        return userService.getOrganizer(id);
     }
 
     @Operation(summary = "Обновить информацию модератора.",
