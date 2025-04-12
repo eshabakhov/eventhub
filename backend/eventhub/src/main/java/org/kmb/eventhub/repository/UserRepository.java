@@ -26,6 +26,14 @@ public class UserRepository {
                 .fetchInto(User.class);
     }
 
+    public User fetchByUsername(String username) {
+        return dslContext
+                .selectFrom(USER)
+                .where(USER.USERNAME.eq(username))
+                .and(USER.IS_ACTIVE.eq(true))
+                .fetchOneInto(User.class);
+    }
+
     public User fetchActive(Long id) {
         return dslContext
                 .selectFrom(USER)
