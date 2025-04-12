@@ -15,6 +15,7 @@ import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.tables.daos.UserDao;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +75,7 @@ public class UserService {
 
         User user = userMapper.toEntity(userDTO);
         user.setIsActive(true);
+//        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userDao.insert(user);
         if (RoleEnum.ORGANIZER.equals(userDTO.getRole())) {
             organizerDao.insert(userMapper.toOrganizer(user));

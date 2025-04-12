@@ -6,7 +6,6 @@
 //import org.kmb.eventhub.tables.pojos.User;
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
-//import org.springframework.http.HttpMethod;
 //import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 //import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 //import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +13,8 @@
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.security.web.SecurityFilterChain;
+//
+//import java.util.Objects;
 //
 //@Configuration
 //@EnableWebSecurity
@@ -25,10 +26,10 @@
 //        http
 //                .csrf(AbstractHttpConfigurer::disable)
 //                .cors(AbstractHttpConfigurer::disable)
-//
 //                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(HttpMethod.GET, "/api/*/users").permitAll()
-//                        .requestMatchers("/api/*/users").hasRole(RoleEnum.MODERATOR.name())
+//                        .requestMatchers("/api/*/users/moderator").hasRole(RoleEnum.MODERATOR.name())
+//                        .requestMatchers("/api/*/users/organizer").hasRole(RoleEnum.ORGANIZER.name())
+//                        .requestMatchers("/api/*/users/member").hasRole(RoleEnum.MEMBER.name())
 //                        .anyRequest().authenticated()
 //                )
 //                .httpBasic(httpBasic -> {});
@@ -40,7 +41,7 @@
 //        return username -> {
 //
 //            User user = userRepository.fetchByUsername(username);
-//            if (user == null) {
+//            if (Objects.isNull(user)) {
 //                throw new UserNotFoundException(-1L);
 //            }
 //

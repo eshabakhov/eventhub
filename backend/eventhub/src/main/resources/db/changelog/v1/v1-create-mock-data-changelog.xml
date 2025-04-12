@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="eventhub-data/v1/12-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.user VALUES
+            (1, 'ORGANIZER', 'ogranizer@test.ru', 'organizer-test-1', 'Тестовый организатор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (2, 'MODERATOR', 'moderator@test.ru', 'moderator-test-1', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (3, 'MODERATOR', 'moderator@test.ru', 'moderator-test-2', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (4, 'MEMBER', 'member@test.ru', 'member-test-1', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (5, 'MEMBER', 'member@test.ru', 'member-test-2', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (6, 'MEMBER', 'member@test.ru', 'member-test-3', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true');
+            ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>
