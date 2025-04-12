@@ -11,6 +11,7 @@ import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.service.EventService;
+import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+
+    private final TagService tagService;
 
     @Operation(summary = "Добавление нового мероприятия.",
                     description = "Добавляет новое мероприятие в систему.")
@@ -100,7 +103,7 @@ public class EventController {
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/add-tags")
+    @PostMapping("/tag")
     public List<Tag> addTagsToEvent(@RequestBody EventTagsDTO eventTagsDTO) {
         return eventService.addTagsToEvent(eventTagsDTO.getEventId(), eventTagsDTO.getTags());
     }
@@ -119,5 +122,23 @@ public class EventController {
     @DeleteMapping(value = "/{id}")
     public Long delete(@PathVariable Long id) {
         return eventService.delete(id);
+    }
+
+    @Operation(summary = "Удалить тег у мероприятия.",
+            description = "Удаляет тег по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Тег удален.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Тег не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/tag/{id}")
+    public Long deleteTagFromEvent(
+            @PathVariable Long id,
+            @RequestBody @Valid EventDTO eventDTO) {
+        return tagService.delete(id, eventDTO);
     }
 }

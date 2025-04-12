@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
+import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Repository;
@@ -45,16 +46,17 @@ public class TagRepository {
                 .fetchOneInto(Long.class);
     }
 
-    public Tag fetchUnused(Long id) {
+    public boolean tagIsUsed(Long id) {
         return dslContext
-                .selectFrom(EVENT_TAGS)
+                .selectCount()
+                .from(EVENT_TAGS)
                 .where(EVENT_TAGS.TAG_ID.eq(id))
-                .fetchOneInto(Tag.class);
+                .fetchOneInto(Long.class) > 0;
     }
 
     public Tag findTagByName(String name) {
         return dslContext.selectFrom(TAG)
-                .where(TAG.NAME.eq(name.toLowerCase()))
+                .where(TAG.NAME.equalIgnoreCase(name))
                 .fetchOneInto(Tag.class);
     }
 
@@ -83,9 +85,9 @@ public class TagRepository {
         batch.execute();
     }
 
-    public void delete(Long id, EventFileDTO eventFileDTO) {
+    public void delete(Long id, EventDTO eventDTO) {
         dslContext.deleteFrom(EVENT_TAGS)
-                .where(EVENT_TAGS.EVENT_ID.eq(eventFileDTO.getEventId()))
+                .where(EVENT_TAGS.EVENT_ID.eq(eventDTO.getId()))
                 .and(EVENT_TAGS.TAG_ID.eq(id))
                 .execute();
     }

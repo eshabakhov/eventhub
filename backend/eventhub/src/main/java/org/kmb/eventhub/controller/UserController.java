@@ -84,14 +84,14 @@ public class UserController {
     @PutMapping(value = "/{id}")
     public User updateUser(
             @PathVariable Long id,
-            @RequestBody @Valid User user) {
-        return userService.update(id, user);
+            @RequestBody @Valid UserDTO userDTO) {
+        return userService.update(id, userDTO);
     }
 
     @Operation(summary = "Обновить информацию организатора.",
                     description = "Обновить информацию организатора по ID.")
     @ApiResponse(responseCode = "200",
-                    description = "Информация об обрганизаторе обновлена.",
+                    description = "Информация об организаторе обновлена.",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Organizer.class)))
     @ApiResponse(responseCode = "404",

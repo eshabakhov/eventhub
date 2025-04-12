@@ -48,22 +48,4 @@ public class TagController {
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
         return tagService.getList(page, pageSize);
     }
-
-    @Operation(summary = "Удалить тег.",
-            description = "Удаляет тег по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Тег удален.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Tag.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Тег не найден",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}")
-    public Long delete(
-            @PathVariable Long id,
-            @RequestBody @Valid EventFileDTO eventFileDTO) {
-        return tagService.delete(id, eventFileDTO);
-    }
 }

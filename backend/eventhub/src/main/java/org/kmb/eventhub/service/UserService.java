@@ -175,11 +175,12 @@ public class UserService {
     }
 
     @Transactional
-    public User update(Long id, User user) {
+    public User update(Long id, UserDTO userDTO) {
 
+        User user = userMapper.toEntity(userDTO);
         if (Objects.isNull(user))
             throw new UserNotFoundException(id);
-        if (!user.getIsActive())
+        if (Objects.nonNull(user.getIsActive()))
             throw new ImmutableFieldException("isActive");
 
         user.setId(id);

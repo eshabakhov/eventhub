@@ -2,12 +2,15 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.EventFileDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
+import org.kmb.eventhub.exception.EventNotFoundException;
 import org.kmb.eventhub.exception.TagNotFoundException;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.TagRepository;
+import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.TagDao;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ public class TagService {
     private final TagRepository tagRepository;
 
     private final TagDao tagDao;
+
+    private final EventDao eventDao;
 
     private final TagMapper tagMapper;
 
@@ -55,12 +60,14 @@ public class TagService {
     }
 
     @Transactional
-    public Long delete(Long id, EventFileDTO eventFileDTO) {
+    public Long delete(Long id, EventDTO eventDTO) {
         if (tagDao.fetchOptionalById(id).isEmpty()) {
             throw new TagNotFoundException(id);
         }
-        tagRepository.delete(id, eventFileDTO);
-        if (Objects.isNull(tagRepository.fetchUnused(id))) {
+        eventDao.fetchOptionalById(eventDTO.getId()).orElseThrow(() -> new EventNotFoundException(eventDTO.getId()));
+
+        tagRepository.delete(id, eventDTO);
+        if (tagRepository.tagIsUsed(id)) {
             tagDao.deleteById(id);
         }
         return id;
