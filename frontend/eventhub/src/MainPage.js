@@ -3,18 +3,22 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import onlineIconImg from "./img/online-marker.png";
 import offlineIconImg from "./img/offline-marker.png";
 
 const onlineIcon = new L.Icon({
-    iconUrl: onlineIconImg
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
 });
 
 const offlineIcon = new L.Icon({
-    iconUrl: offlineIconImg
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
 });
 
 function FitToAllMarkers({ events }) {
