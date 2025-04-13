@@ -6,14 +6,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.EventTagsDTO;
-import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.ResponseDTO;
-import org.kmb.eventhub.dto.ResponseList;
+import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.service.EventFileService;
 import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.tables.pojos.Event;
+import org.kmb.eventhub.tables.pojos.EventFile;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.kmb.eventhub.tables.pojos.Member;
 import org.springframework.http.HttpStatus;
@@ -28,6 +27,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+
+    private final EventFileService eventFileService;
 
     private final SubscribeService subscribeService;
 
@@ -126,9 +127,11 @@ public class EventController {
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/tag")
-    public List<Tag> addTagsToEvent(@RequestBody EventTagsDTO eventTagsDTO) {
-        return eventService.addTagsToEvent(eventTagsDTO.getEventId(), eventTagsDTO.getTags());
+    @PostMapping("/{id}/tag")
+    public List<Tag> addTagsToEvent(
+            @PathVariable Long id,
+            @RequestBody EventTagsDTO eventTagsDTO) {
+        return eventService.addTagsToEvent(id, eventTagsDTO.getTags());
     }
 
     @Operation(summary = "Удалить мероприятие.",
@@ -136,11 +139,11 @@ public class EventController {
     @ApiResponse(responseCode = "200",
             description = "Мероприятие удалено.",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Event.class)))
+            schema = @Schema(implementation = Event.class)))
     @ApiResponse(responseCode = "404",
             description = "Мероприятие не найдено",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
+            schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping(value = "/{id}")
     public Long delete(@PathVariable Long id) {
@@ -158,10 +161,45 @@ public class EventController {
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/tag/{id}")
+    @DeleteMapping(value = "/{id}/tag")
     public Long deleteTagFromEvent(
             @PathVariable Long id,
-            @RequestBody @Valid EventDTO eventDTO) {
-        return tagService.delete(id, eventDTO);
+            @RequestBody @Valid TagDTO tagDTO) {
+        return tagService.delete(id, tagDTO);
+    }
+
+    @Operation(summary = "Добавление нового файла.",
+            description = "Добавляет новый файл к событию.")
+    @ApiResponse(responseCode = "201",
+            description = "Файл успешно добавлен.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = EventFile.class)))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping(value = "/{id}/eventFiles")
+    public Long addFile(
+            @PathVariable Long id,
+            @RequestBody @Valid EventFileDTO eventFileDTO) {
+        return eventFileService.create(id, eventFileDTO);
+    }
+
+    @Operation(summary = "Удалить файл.",
+            description = "Удаляет файл у мероприятия.")
+    @ApiResponse(responseCode = "200",
+            description = "Файл удален.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = EventFile.class)))
+    @ApiResponse(responseCode = "404",
+            description = "файл не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{id}/eventFiles")
+    public Long deleteFile(@PathVariable Long id,
+                       @RequestBody @Valid EventFileDTO eventFileDTO) {
+        return eventFileService.delete(id, eventFileDTO);
     }
 }

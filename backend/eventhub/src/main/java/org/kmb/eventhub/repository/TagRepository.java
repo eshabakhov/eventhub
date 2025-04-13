@@ -91,10 +91,10 @@ public class TagRepository {
         batch.execute();
     }
 
-    public void delete(Long id, EventDTO eventDTO) {
+    public void delete(Long tagId, Long eventId) {
         dslContext.deleteFrom(EVENT_TAGS)
-                .where(EVENT_TAGS.EVENT_ID.eq(eventDTO.getId()))
-                .and(EVENT_TAGS.TAG_ID.eq(id))
+                .where(EVENT_TAGS.EVENT_ID.eq(eventId))
+                .and(EVENT_TAGS.TAG_ID.eq(tagId))
                 .execute();
     }
 }
