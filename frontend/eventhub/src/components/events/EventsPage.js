@@ -4,7 +4,7 @@ import L from "leaflet";
 import { motion } from "framer-motion";
 import onlineIconImg from "../../img/online-marker.png";
 import offlineIconImg from "../../img/offline-marker.png";
-
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
 

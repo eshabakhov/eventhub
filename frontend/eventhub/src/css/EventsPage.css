@@ -93,3 +93,6 @@
   .text-xs {
     font-size: 0.75rem;
   }
+  .leaflet-attribution-flag {
+    display: none !important;
+  }
