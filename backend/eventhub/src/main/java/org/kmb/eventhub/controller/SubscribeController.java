@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/v1/subscribe")
+@RequestMapping(value = "/v1/members/{id}/subscribe")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Участие в мероприятие", description = "Управление участием в мероприятии")
 public class SubscribeController {
 

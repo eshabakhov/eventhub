@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/users")
-@Tag(name = "Пользователи", description = "Управление пользователями")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Пользователи", description = "Управление пользователями")
 public class UserController {
 
     private final UserService userService;
@@ -99,7 +99,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PutMapping(value = "/organizer/{id}")
+    @PutMapping(value = "/organizers/{id}")
     public Organizer updateOrganizer(
             @PathVariable Long id,
             @RequestBody @Valid OrganizerDTO organizerDTO) {
@@ -117,7 +117,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PutMapping(value = "/member/{id}")
+    @PutMapping(value = "/members/{id}")
     public Member updateMember(
             @PathVariable Long id,
             @RequestBody @Valid MemberDTO memberDTO) {
@@ -135,7 +135,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/member/{id}")
+    @GetMapping(value = "/members/{id}")
     public Member getMember(@PathVariable Long id) {
         return userService.getMember(id);
     }
@@ -148,7 +148,7 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Event.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/member/{id}/events")
+    @GetMapping(value = "/members/{id}/events")
 
     public ResponseList<Event> getMemberEvents(@PathVariable Long id,
                                                @RequestParam(value = "page", defaultValue = "1") Integer page,
@@ -167,7 +167,7 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/organizer/{id}")
+    @GetMapping(value = "/organizers/{id}")
     public Organizer getOrganizer(@PathVariable Long id) {
         return userService.getOrganizer(id);
     }
@@ -183,7 +183,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PutMapping(value = "/moderator/{id}")
+    @PutMapping(value = "/moderators/{id}")
     public Moderator updateModerator(
             @PathVariable Long id,
             @RequestBody @Valid ModeratorDTO moderatorDTO) {
@@ -217,7 +217,7 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/add-tags")
+    @PostMapping("/tags")
     public List<Tag> addTagsToUser(@RequestBody UserTagsDTO userTagsDTO) {
         return userService.addTagsToUser(userTagsDTO.getUserId(), userTagsDTO.getTags());
     }

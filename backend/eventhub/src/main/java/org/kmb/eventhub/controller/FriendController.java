@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/v1/friends/{id}")
+@RequestMapping(value = "/v1/users/members/{id}/friends")
 public class FriendController {
 
     private final FriendService friendService;

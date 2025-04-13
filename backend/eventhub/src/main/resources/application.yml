@@ -20,3 +20,6 @@ server:
   port: 9500
   servlet:
     context-path: /api
+
+jwt:
+  secret: "MySuperLongSecretKeyThatIsAtLeast32CharsMySuperLongSecretKeyThatIsAtLeast32Chars"

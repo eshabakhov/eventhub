@@ -7,6 +7,7 @@ import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.kmb.eventhub.Tables.USER;
 
