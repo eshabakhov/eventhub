@@ -22,9 +22,7 @@ import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.trueCondition;
@@ -53,13 +51,20 @@ public class EventService {
 
     private final OrganizerDao organizerDao;
 
-    public ResponseList<Event> getList(Integer page, Integer pageSize) {
-        ResponseList<Event> responseList = new ResponseList<>();
+
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize) {
+        ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
 
-        List<Event> list =  eventRepository.fetch(condition, page, pageSize);
+        List<Event> eventList = eventRepository.fetch(condition, page, pageSize);
+        List<EventDTO> eventDTOList = new ArrayList<>();
+        eventList.forEach(event -> {
+            EventDTO eventDTO = eventMapper.toDto(event);
+            eventDTO.setTags(tagRepository.fetch(event.getId()).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
+            eventDTOList.add(eventDTO);
+        });
 
-        responseList.setList(list);
+        responseList.setList(eventDTOList);
         responseList.setTotal(eventRepository.count(condition));
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);

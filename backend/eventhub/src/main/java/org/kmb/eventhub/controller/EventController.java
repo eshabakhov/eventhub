@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:63343")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/events")
@@ -57,7 +57,7 @@ public class EventController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Event.class)))
     @GetMapping
-    public ResponseList<Event> getList(
+    public ResponseList<EventDTO> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
         return eventService.getList(page, pageSize);
