@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="eventhub-data/v1/12-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.user VALUES
+            (1, 'ORGANIZER', 'ogranizer@test.ru', 'organizer-test-1', 'Тестовый организатор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (2, 'MODERATOR', 'moderator@test.ru', 'moderator-test-1', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (3, 'MODERATOR', 'moderator@test.ru', 'moderator-test-2', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (4, 'MEMBER', 'member@test.ru', 'member-test-1', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (5, 'MEMBER', 'member@test.ru', 'member-test-2', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            (6, 'MEMBER', 'member@test.ru', 'member-test-3', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true');
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/12-04-2025/2" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.organizer VALUES
+            (1, 'ООО "Тестовый организатор"', 'Тестовый организатор, организует тестовые тесты', 'Организация тестовых тестов', 'Москва', 'true');
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/12-04-2025/3" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+                INSERT INTO public.moderator VALUES (2, 'true'), (3, 'false');
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/12-04-2025/4" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.member VALUES
+            (4, 'Иванов', 'Иван', 'Иванович', '1999-01-01', 'Москва', 'PRIVATE'),
+            (5, 'Петров', 'Петр', 'Петрович', '1999-01-01', 'Москва', 'PUBLIC'),
+            (6, 'Сидоров', 'Сидор', 'Сидорович', '1999-01-01', 'Москва', 'ONLY_FRIENDS');
+            ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>

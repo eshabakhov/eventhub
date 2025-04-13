@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="eventhub-types/v1/03-04-2025/1" author="Shabakhov_Eset">
+        <sql>CREATE TYPE role_type AS ENUM ('ORGANIZER','MEMBER','MODERATOR')</sql>
+    </changeSet>
+
+    <changeSet id="eventhub-types/v1/05-04-2025/2" author="Timokhov_Evgeniy">
+        <sql>CREATE TYPE format_type AS ENUM ('ONLINE','OFFLINE')</sql>
+    </changeSet>
+
+    <changeSet id="eventhub-types/v1/05-04-2025/3" author="Shabakhov_Eset">
+        <sql>CREATE TYPE privacy_type AS ENUM ('PUBLIC','PRIVATE','ONLY_FRIENDS')</sql>
+    </changeSet>
+
+    <changeSet id="eventhub-types/v1/05-04-2025/4" author="Shabakhov_Eset">
+        <sql>CREATE TYPE friend_request_status_type AS ENUM ('PENDING','ACCEPTED')</sql>
+    </changeSet>
+
+</databaseChangeLog>

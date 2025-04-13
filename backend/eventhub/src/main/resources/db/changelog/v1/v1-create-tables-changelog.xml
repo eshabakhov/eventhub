@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="eventhub-tables/v1/03-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.user(
+                id bigserial primary key,
+                role role_type NOT NULL,
+                email varchar NOT NULL,
+                username varchar NOT NULL UNIQUE,
+                display_name varchar NOT NULL,
+                password varchar NOT NULL,
+                is_active boolean NOT NULL
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/2" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.organizer(
+                id bigserial primary key,
+                name varchar,
+                description varchar,
+                industry varchar,
+                address varchar,
+                is_accredited boolean,
+                CONSTRAINT fk_organizer_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/3" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.member(
+                id bigserial primary key,
+                last_name varchar,
+                first_name varchar,
+                patronymic varchar,
+                birth_date date,
+                birth_city varchar,
+                privacy privacy_type default 'ONLY_FRIENDS',
+                CONSTRAINT fk_member_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/03-04-2025/4" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.moderator(
+                id bigserial primary key,
+                is_admin boolean,
+                CONSTRAINT fk_moderator_user
+                    FOREIGN KEY (id)
+                    REFERENCES public.user(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/05-04-2025/1" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.tag(
+                id bigserial primary key,
+                name varchar NOT NULL
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/05-04-2025/2" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.event(
+                   id bigserial primary key,
+                   title varchar NOT NULL,
+                   description varchar NOT NULL,
+                   format format_type NOT NULL,
+                   start_date_time timestamp NOT NULL,
+                   end_date_time timestamp NOT NULL,
+                   location varchar NOT NULL,
+                   latitude numeric,
+                   longitude numeric,
+                   organizer_id bigserial NOT NULL,
+                   CONSTRAINT fk_event_organizer
+                       FOREIGN KEY (organizer_id)
+                       REFERENCES public.organizer(id)
+                       ON DELETE RESTRICT
+                       ON UPDATE CASCADE
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/07-04-2025/1" author="Lebedev_Danil">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.event_tags(
+                 event_id bigint NOT NULL,
+                 tag_id bigint NOT NULL,
+                 CONSTRAINT fk_event_id
+                     FOREIGN KEY (event_id)
+                         REFERENCES public.event(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_tag_id
+                     FOREIGN KEY (tag_id)
+                         REFERENCES public.tag(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (event_id, tag_id)
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/09-04-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.friend_request(
+                 sender_id bigint NOT NULL,
+                 recipient_id bigint NOT NULL,
+                 status friend_request_status_type NOT NULL,
+                 CONSTRAINT fk_sender_member_id
+                     FOREIGN KEY (sender_id)
+                         REFERENCES public.member(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_sender_recipient_id
+                     FOREIGN KEY (recipient_id)
+                         REFERENCES public.member(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (sender_id, recipient_id)
+            );
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/09-04-2025/1" author="Timokhov_Evgeniy">
+         <sql>
+             <![CDATA[
+                 CREATE TABLE public.event_file(
+                     file_id bigserial not null primary key,
+                     file_name varchar not null,
+                     file_type varchar not null,
+                     file_size bigint not null,
+                     file_content bytea,
+                     event_id bigint not null,
+                     CONSTRAINT fk_event_file
+                         FOREIGN KEY (event_id)
+                             REFERENCES public.event(id)
+                             ON DELETE RESTRICT
+                             ON UPDATE CASCADE
+
+                 );
+             ]]>
+         </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/12-04-2025/1" author="Timokhov_Evgeniy">
+        <sql>
+             <![CDATA[
+            CREATE TABLE public.event_members(
+                    event_id bigint NOT NULL,
+                    member_id bigint NOT NULL,
+                CONSTRAINT fk_subscriber_member_id
+                    FOREIGN KEY (member_id)
+                    REFERENCES public.member(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE,
+                CONSTRAINT fk_subscriber_event_id
+                    FOREIGN KEY (event_id)
+                    REFERENCES public.event(id)
+                    ON DELETE RESTRICT
+                    ON UPDATE CASCADE,
+                PRIMARY KEY (event_id, member_id)
+            );
+            ]]>
+         </sql>
+    </changeSet>
+    <changeSet id="eventhub-tables/v1/12-04-2025/2" author="Lebedev_Danil">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.user_tags(
+                 user_id bigint NOT NULL,
+                 tag_id bigint NOT NULL,
+                 CONSTRAINT fk_user_id
+                     FOREIGN KEY (user_id)
+                         REFERENCES public.event(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_tag_id
+                     FOREIGN KEY (tag_id)
+                         REFERENCES public.tag(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (user_id, tag_id)
+            );
+            ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>
