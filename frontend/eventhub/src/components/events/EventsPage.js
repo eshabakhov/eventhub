@@ -9,11 +9,17 @@ import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
 
 const onlineIcon = new L.Icon({
-    iconUrl: onlineIconImg
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
 });
 
 const offlineIcon = new L.Icon({
-    iconUrl: offlineIconImg
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
 });
 
 function FitToAllMarkers({ events }) {
