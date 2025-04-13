@@ -192,4 +192,25 @@
             ]]>
          </sql>
     </changeSet>
+    <changeSet id="eventhub-tables/v1/12-04-2025/2" author="Lebedev_Danil">
+        <sql>
+            <![CDATA[
+            CREATE TABLE public.user_tags(
+                 user_id bigint NOT NULL,
+                 tag_id bigint NOT NULL,
+                 CONSTRAINT fk_user_id
+                     FOREIGN KEY (user_id)
+                         REFERENCES public.event(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 CONSTRAINT fk_tag_id
+                     FOREIGN KEY (tag_id)
+                         REFERENCES public.tag(id)
+                         ON DELETE RESTRICT
+                         ON UPDATE CASCADE,
+                 PRIMARY KEY (user_id, tag_id)
+            );
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

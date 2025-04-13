@@ -93,4 +93,8 @@ public class TagService {
     public void assignTagsToEvent(Long eventId, List<Tag> tags) {
          tagRepository.assignNewEventTag(eventId,tags);
     }
+
+    public Set<Long> getUsedTagIdsForUser(Long userId) {
+        return tagRepository.getUsedTagIdsForUser(userId);
+    }
 }

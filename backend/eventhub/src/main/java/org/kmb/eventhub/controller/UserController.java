@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
@@ -13,6 +12,8 @@ import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -204,4 +205,21 @@ public class UserController {
     public Long delete(@PathVariable Long id) {
         return userService.delete(id);
     }
+
+    @Operation(summary = "Добавление новых тегов в избранное пользователя.",
+            description = "Добавляет новые теги в избранное пользователя мероприятию.")
+    @ApiResponse(responseCode = "201",
+            description = "Теги успешно добавлены",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping("/add-tags")
+    public List<Tag> addTagsToUser(@RequestBody UserTagsDTO userTagsDTO) {
+        return userService.addTagsToUser(userTagsDTO.getUserId(), userTagsDTO.getTags());
+    }
+
 }

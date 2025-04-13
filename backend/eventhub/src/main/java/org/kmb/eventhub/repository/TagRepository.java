@@ -73,6 +73,13 @@ public class TagRepository {
                 .fetchSet(EVENT_TAGS.TAG_ID);
     }
 
+    public Set<Long> getUsedTagIdsForUser(Long userId) {
+        return dslContext.select(USER_TAGS.USER_ID)
+                .from(USER_TAGS)
+                .where(USER_TAGS.USER_ID.eq(userId))
+                .fetchSet(USER_TAGS.TAG_ID);
+    }
+
     public void assignNewEventTag(Long eventId, List<Tag> tags) {
         var batch = dslContext.batch(
                 tags.stream()
@@ -90,7 +97,4 @@ public class TagRepository {
                 .and(EVENT_TAGS.TAG_ID.eq(id))
                 .execute();
     }
-
-
-
 }
