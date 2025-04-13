@@ -42,8 +42,8 @@ function FlyToLocation({ position }) {
 
 const formatDateRange = (start, end) => {
     const options = { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
-    const startStr = new Date(start).toLocaleString('ru-RU', options).replace(',', '');
-    const endStr = new Date(end).toLocaleString('ru-RU', options).replace(',', '');
+    const startStr = start.toLocaleString('ru-RU', options).replace(',', '').replaceAll('/', '.');
+    const endStr = end.toLocaleString('ru-RU', options).replace(',', '').replaceAll('/', '.');
     return `${startStr} - ${endStr}`;
 };
 
@@ -174,11 +174,11 @@ class MainPage extends React.Component {
         );
     }
 
-    componentDidUpdate() {
-        if (!this.navigate) {
-            this.navigate = require("react-router-dom").useNavigate();
-        }
-    }
+    // componentDidUpdate() {
+    //     if (!this.navigate) {
+    //         this.navigate = require("react-router-dom").useNavigate();
+    //     }
+    // }
 }
 
 export default MainPage;

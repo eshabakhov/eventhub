@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router';
 import LoginForm from "./login/LoginForm"
 import { UserProvider } from "./UserContext";
 import './App.css';
+import MainPage from "./MainPage";
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -22,7 +23,8 @@ class App extends React.Component {
         <Router>
           <UserProvider value={{ user: user}}>
             <Routes>
-                <Route path='/login' exact={true} element={<LoginForm/>}/>
+              <Route path='/login' exact={true} element={<LoginForm/>}/>
+              <Route path='/main' exact={true} element={<MainPage/>}/>
             </Routes>
           </UserProvider>
         </Router>
