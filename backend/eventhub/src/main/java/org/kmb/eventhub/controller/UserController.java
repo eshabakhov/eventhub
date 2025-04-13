@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/users")
-@Tag(name = "Пользователи", description = "Управление пользователями")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Пользователи", description = "Управление пользователями")
 public class UserController {
 
     private final UserService userService;

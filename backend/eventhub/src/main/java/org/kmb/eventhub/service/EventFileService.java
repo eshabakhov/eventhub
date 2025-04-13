@@ -26,9 +26,16 @@ public class EventFileService {
     private final EventFileRepository eventFileRepository;
 
     @Transactional
-    public Long create(EventFileDTO eventFileDTO) {
-        if (Objects.isNull(eventFileDTO.getEventId())) {
-            throw new MissingFieldException("eventId");
+    public Long create(Long eventId, EventFileDTO eventFileDTO) {
+        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (Objects.nonNull(eventFileDTO.getEventId())) {
+            if (!eventFileDTO.getEventId().equals(eventId)) {
+                throw new UnexpectedException("Field eventId is wrong");
+            }
+        }
+        else {
+            eventFileDTO.setEventId(eventId);
         }
         if (Objects.isNull(eventFileDTO.getFileName())) {
             throw new MissingFieldException("fileName");
@@ -39,10 +46,9 @@ public class EventFileService {
         if (Objects.isNull(eventFileDTO.getFileType())) {
             throw new MissingFieldException("fileType");
         }
-        eventDao.findOptionalById(eventFileDTO.getEventId()).orElseThrow(() -> new EventNotFoundException(eventFileDTO.getEventId()));
         EventFile eventFile = eventFileMapper.toEntity(eventFileDTO);
 
-        if (eventFileRepository.isExist(eventFileDTO.getFileName(), eventFileDTO.getFileType(), eventFileDTO.getEventId())) {
+        if (eventFileRepository.isExist(eventFileDTO.getFileName(), eventFileDTO.getFileType(), eventId)) {
             throw new AlreadyExistsException(String.format("file with name %s and type %s", eventFileDTO.getFileName(), eventFileDTO.getFileType()));
         }
 
@@ -51,11 +57,13 @@ public class EventFileService {
     }
 
     @Transactional
-    public Long delete(Long id) {
-        if (eventFileDao.fetchByFileId(id).isEmpty()) {
-            throw new EventFileNotFoundException(id);
+    public Long delete(Long eventId, EventFileDTO eventFileDTO) {
+        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        Long fileId = eventFileDTO.getFileId();
+        if (eventFileDao.fetchByFileId(fileId).isEmpty()) {
+            throw new EventFileNotFoundException(fileId);
         }
-        eventFileDao.deleteById(id);
-        return id;
+        eventFileDao.deleteById(fileId);
+        return fileId;
     }
 }

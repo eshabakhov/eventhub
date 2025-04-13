@@ -51,6 +51,4 @@ public class SubscribeController {
             @RequestParam Long memberId) {
         subscribeService.unsubscribeFromEvent(eventId, memberId);
     }
-
-
 }

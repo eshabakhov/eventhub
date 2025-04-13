@@ -59,17 +59,18 @@ public class TagService {
     }
 
     @Transactional
-    public Long delete(Long id, EventDTO eventDTO) {
-        if (tagDao.fetchOptionalById(id).isEmpty()) {
-            throw new TagNotFoundException(id);
+    public Long delete(Long eventID, TagDTO tagDTO) {
+        Long tagId = tagDTO.getId();
+        if (tagDao.fetchOptionalById(tagId).isEmpty()) {
+            throw new TagNotFoundException(tagId);
         }
-        eventDao.fetchOptionalById(eventDTO.getId()).orElseThrow(() -> new EventNotFoundException(eventDTO.getId()));
+        eventDao.fetchOptionalById(eventID).orElseThrow(() -> new EventNotFoundException(eventID));
 
-        tagRepository.delete(id, eventDTO);
-        if (tagRepository.tagIsUsed(id)) {
-            tagDao.deleteById(id);
+        tagRepository.delete(tagId, eventID);
+        if (!tagRepository.tagIsUsed(tagId)) {
+            tagDao.deleteById(tagId);
         }
-        return id;
+        return tagId;
     }
 
     public List<Tag> checkAllTags(List<Tag> tagList) {
