@@ -1,5 +1,5 @@
 import React from "react"
-import '../css/AuthPage.css';
+import "../../css/AuthPage.css";
 
 class Login extends React.Component {
     constructor(props) {

@@ -1,13 +1,12 @@
 ﻿import React from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
-import onlineIconImg from "./img/online-marker.png";
-import offlineIconImg from "./img/offline-marker.png";
+import onlineIconImg from "../../img/online-marker.png";
+import offlineIconImg from "../../img/offline-marker.png";
+
+import "leaflet/dist/leaflet.css";
+import "../../css/EventsPage.css";
 
 const onlineIcon = new L.Icon({
     iconUrl: onlineIconImg
@@ -47,7 +46,7 @@ const formatDateRange = (start, end) => {
     return `${startStr} - ${endStr}`;
 };
 
-class MainPage extends React.Component {
+class EventsPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -114,8 +113,8 @@ class MainPage extends React.Component {
                                             key={idx}
                                             className="px-2 py-1 text-xs bg-gray-200 rounded"
                                         >
-                      {tag}
-                    </span>
+                                            {tag}
+                                        </span>
                                     ))}
                                 </div>
                                 <div className="flex justify-between items-center mt-2">
@@ -181,4 +180,4 @@ class MainPage extends React.Component {
     // }
 }
 
-export default MainPage;
+export default EventsPage;
