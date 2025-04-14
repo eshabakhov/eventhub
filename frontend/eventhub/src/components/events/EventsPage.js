@@ -25,6 +25,7 @@ const offlineIcon = new leaflet.Icon({
     iconAnchor: [12, 41],
 });
 
+
 // масштабирование и центрирование карты,
 // чтобы все метки мероприятий поместились в область видимости карты
 function FitToAllMarkers({ events }) {
@@ -39,15 +40,23 @@ function FitToAllMarkers({ events }) {
 }
 
 // перемещение карты к заданной точке
-function FlyToLocation({ position }) {
+function FlyToLocation({ position, markerId, markerRefs }) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
+            // переходим к заданному маркеру
             map.flyTo(position, 13, {
                 duration: 1.5
             });
+            // открываем окошко этого маркера
+            const marker = markerRefs.current[markerId];
+            if (marker) {
+                setTimeout(() => {
+                    marker.openPopup();
+                }, 1600);
+            }
         }
-    }, [position, map]);
+    }, [position, map, markerId, markerRefs]);
     return null;
 }
 
@@ -61,8 +70,11 @@ const formatDateRange = (start, end) => {
 
 class EventsPage extends React.Component {
     static contextType = UserContext;
+
     constructor(props) {
         super(props);
+        this.markerRefs = React.createRef();
+        this.markerRefs.current = {};
         this.state = {
             events: [],
             search: "",
@@ -93,6 +105,7 @@ class EventsPage extends React.Component {
     render() {
         // Задаем контекст пользователя
         const { user } = this.context;
+
         return (
             <div className="events-container">
                 <motion.div
@@ -108,6 +121,7 @@ class EventsPage extends React.Component {
                     value={this.state.search}
                     onChange={(e) => this.setState({ search: e.target.value })}
                     />
+
                     {this.state.events
                     .filter((event) =>
                         event.title.toLowerCase().includes(this.state.search.toLowerCase()) ||
@@ -166,12 +180,20 @@ class EventsPage extends React.Component {
                         maxZoom={18}
                     />
                     {this.state.events.length > 0 && <FitToAllMarkers events={this.state.events} />}
-                    {this.state.focusedEvent && <FlyToLocation position={this.state.focusedEvent.position} />}
+                    {this.state.focusedEvent &&
+                        <FlyToLocation
+                            position={this.state.focusedEvent.position}
+                            markerId={this.state.focusedEvent.id}
+                            markerRefs={this.markerRefs}
+                        />}
                     {this.state.events.map((event) => (
                         <Marker
                         key={event.id}
                         position={event.position}
                         icon={event.format === "ONLINE" ? onlineIcon : offlineIcon}
+                        ref={ref => {
+                            if (ref) this.markerRefs.current[event.id] = ref;
+                        }}
                         >
                         <Popup>
                             <strong>{event.title}</strong>

@@ -109,11 +109,13 @@
   }
   
   .search-input {
-    width: 100%;
-    padding: 0.5rem;
+    position: relative;
+    padding: 1rem;
     margin-bottom: 1rem;
     border: 1px solid #ccc;
     border-radius: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .event-card {
