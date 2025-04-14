@@ -40,12 +40,13 @@ function FitToAllMarkers({ events }) {
 }
 
 // перемещение карты к заданной точке
-function FlyToLocation({ position, markerId, markerRefs }) {
+function FlyToLocation({ position, markerId, markerRefs, format }) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
+            var zoom = format === "OFFLINE" ? 18 : 10;
             // переходим к заданному маркеру
-            map.flyTo(position, 13, {
+            map.flyTo(position, zoom, {
                 duration: 1.5
             });
             // открываем окошко этого маркера
@@ -185,6 +186,7 @@ class EventsPage extends React.Component {
                             position={this.state.focusedEvent.position}
                             markerId={this.state.focusedEvent.id}
                             markerRefs={this.markerRefs}
+                            format={this.state.focusedEvent.format}
                         />}
                     {this.state.events.map((event) => (
                         <Marker
