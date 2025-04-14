@@ -7,16 +7,14 @@ import offlineIconImg from "../../img/offline-marker.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
-import UserContext from "../../UserContext";
 
-// Иконка онлайн мероприятий
 const onlineIcon = new L.Icon({
     iconUrl: onlineIconImg,
     shadowUrl: iconShadow,
     iconSize: [41, 41],
     iconAnchor: [12, 41],
 });
-// Иконка оффлайн мероприятий
+
 const offlineIcon = new L.Icon({
     iconUrl: offlineIconImg,
     shadowUrl: iconShadow,
@@ -24,7 +22,6 @@ const offlineIcon = new L.Icon({
     iconAnchor: [12, 41],
 });
 
-// Подгонка карты, чтобы вмещались все маркеры
 function FitToAllMarkers({ events }) {
     const map = useMap();
     React.useEffect(() => {
@@ -36,7 +33,6 @@ function FitToAllMarkers({ events }) {
     return null;
 }
 
-// Переход к мероприятию на карте
 function FlyToLocation({ position }) {
     const map = useMap();
     React.useEffect(() => {
@@ -48,7 +44,7 @@ function FlyToLocation({ position }) {
     }, [position, map]);
     return null;
 }
-// Преобразование даты
+
 const formatDateRange = (start, end) => {
     const options = { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
     const startStr = start.toLocaleString('ru-RU', options).replace(',', '').replaceAll('/', '.');
@@ -57,8 +53,6 @@ const formatDateRange = (start, end) => {
 };
 
 class EventsPage extends React.Component {
-    static contextType = UserContext;
-
     constructor(props) {
         super(props);
         this.state = {
@@ -69,7 +63,6 @@ class EventsPage extends React.Component {
         this.navigate = null;
     }
 
-    // Обращаемся к бэку, берем список мероприятий, парсим ответ, сохраняем в список в state
     componentDidMount() {
         fetch("http://localhost:9500/api/v1/events")
             .then((res) => res.json())
@@ -90,8 +83,6 @@ class EventsPage extends React.Component {
     }
 
     render() {
-        // Задаем контекст пользователя
-        const { user } = this.context;
         return (
             <div className="flex h-screen">
                 <motion.div
@@ -107,9 +98,7 @@ class EventsPage extends React.Component {
                         value={this.state.search}
                         onChange={(e) => this.setState({ search: e.target.value })}
                     />
-
                     {this.state.events
-                        // Строим список событий слева
                         .filter((event) =>
                             event.title.toLowerCase().includes(this.state.search.toLowerCase()) ||
                             event.tags.some((tag) => tag.toLowerCase().includes(this.state.search.toLowerCase()))
@@ -163,7 +152,6 @@ class EventsPage extends React.Component {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-
                     <MapContainer center={[55.75, 37.61]} zoom={11} style={{ height: "100%" }}>
                         <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -173,7 +161,6 @@ class EventsPage extends React.Component {
                         {this.state.events.length > 0 && <FitToAllMarkers events={this.state.events} />}
                         {this.state.focusedEvent && <FlyToLocation position={this.state.focusedEvent.position} />}
                         {this.state.events.map((event) => (
-                            // Отображаем маркеры событий на карте и настраиваем маркеры
                             <Marker
                                 key={event.id}
                                 position={event.position}
