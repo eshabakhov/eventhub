@@ -7,6 +7,7 @@ import offlineIconImg from "../../img/offline-marker.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
+import UserContext from "../../UserContext";
 
 // метка для онлайн мероприятий
 const onlineIcon = new leaflet.Icon({
@@ -59,6 +60,7 @@ const formatDateRange = (start, end) => {
 };
 
 class EventsPage extends React.Component {
+    static contextType = UserContext;
     constructor(props) {
         super(props);
         this.state = {
@@ -89,6 +91,8 @@ class EventsPage extends React.Component {
     }
 
     render() {
+        // Задаем контекст пользователя
+        const { user } = this.context;
         return (
             <div className="events-container">
                 <motion.div
