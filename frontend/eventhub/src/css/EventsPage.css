@@ -96,3 +96,113 @@
   .leaflet-attribution-flag {
     display: none !important;
   }
+
+  .events-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .events-list {
+    width: 50%;
+    padding: 1rem;
+    overflow-y: scroll;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+  }
+  
+  .event-card {
+    position: relative;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+  }
+  
+  .event-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .event-date {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    color: #888;
+  }
+  
+  .event-title {
+    font-size: 1.125rem;
+    font-weight: bold;
+  }
+  
+  .event-description {
+    font-size: 0.875rem;
+    color: #555;
+  }
+  
+  .event-location {
+    font-size: 0.875rem;
+    color: #777;
+    font-style: italic;
+  }
+  
+  .event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .event-tag {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background-color: #eee;
+    border-radius: 0.25rem;
+  }
+  
+  .card-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  
+  .card-buttons .button-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .event-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+  
+  .event-button.details {
+    background-color: #3b82f6;
+  }
+  
+  .event-button.map {
+    background-color: #10b981;
+  }
+  
+  .event-format {
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+  }
+  
+  .map-container {
+    width: 50%;
+  }

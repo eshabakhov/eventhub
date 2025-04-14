@@ -24,7 +24,7 @@ class App extends React.Component {
           <UserProvider value={{ user: user}}>
             <Routes>
               <Route path='/login' exact={true} element={<LoginForm/>}/>
-              <Route path='/main' exact={true} element={<EventsPage/>}/>
+              <Route path='/events' exact={true} element={<EventsPage/>}/>
             </Routes>
           </UserProvider>
         </Router>
