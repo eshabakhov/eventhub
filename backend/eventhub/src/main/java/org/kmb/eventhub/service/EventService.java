@@ -97,7 +97,7 @@ public class EventService {
 
         if (Objects.nonNull(eventDTO.getLocation()) && !eventDTO.getLocation().isEmpty()
                 && Objects.isNull(eventDTO.getLatitude()) && Objects.isNull(eventDTO.getLongitude())) {
-            var coordinates = mapService.getCoordinates(eventDTO.getLocation());
+            var coordinates = mapService.getCoordinates(eventDTO.getLocation(), eventDTO.getFormat() == EventFormat.ONLINE);
             eventDTO.setLatitude(coordinates.getLatitude());
             eventDTO.setLongitude(coordinates.getLongitude());
         }
