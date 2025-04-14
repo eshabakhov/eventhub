@@ -44,16 +44,26 @@ function FitToAllMarkers({ events }) {
   return null;
 }
 
-
-// Перелет к точке
-function FlyToLocation({ position }) {
-  const map = useMap();
-  React.useEffect(() => {
-    if (position) {
-      map.flyTo(position, 13, { duration: 1.5 });
-    }
-  }, [position, map]);
-  return null;
+// перемещение карты к заданной точке
+function FlyToLocation({ position, markerId, markerRefs, format }) {
+    const map = useMap();
+    React.useEffect(() => {
+        if (position) {
+            var zoom = format === "OFFLINE" ? 18 : 10;
+            // переходим к заданному маркеру
+            map.flyTo(position, zoom, {
+                duration: 1.5
+            });
+            // открываем окошко этого маркера
+            const marker = markerRefs.current[markerId];
+            if (marker) {
+                setTimeout(() => {
+                    marker.openPopup();
+                }, 1600);
+            }
+        }
+    }, [position, map, markerId, markerRefs]);
+    return null;
 }
 
 // Формат даты
@@ -202,6 +212,7 @@ class EventsPage extends Component {
                             position={this.state.focusedEvent.position}
                             markerId={this.state.focusedEvent.id}
                             markerRefs={this.markerRefs}
+                            format={this.state.focusedEvent.format}
                         />}
               {this.state.events.map((event) => (
                 <Marker
