@@ -1,7 +1,9 @@
 import React from "react"
 import "../../css/AuthPage.css";
+import UserContext from "../../UserContext";
 
 class Login extends React.Component {
+    static contextType = UserContext;
     constructor(props) {
         super(props);
         this.state = {
@@ -52,8 +54,17 @@ class Login extends React.Component {
           })
           .then(data => {
             console.log('Успешно:', data);
+            const ctx = this.context;
             if (isLogin && data.token) {
               localStorage.setItem('token', data.token);
+              // Сохраняем контекст пользователя
+              if (ctx.setUser) {
+                ctx.setUser({
+                  name: data.username || this.state.username,
+                  loggedIn: true,
+                  token: data.token
+                });
+              }
               alert('Успешный вход');
             } else {
               alert('Успешная регистрация');
