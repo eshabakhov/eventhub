@@ -54,8 +54,12 @@ public class MapService {
 
         return sb.toString().trim();
     }
-    public CoordinatesDTO getCoordinates(String address) {
-        String uri = "/search?q=" + address + "&format=json";
+    public CoordinatesDTO getCoordinates(String address, boolean isOnline) {
+        String uri;
+        if (isOnline) {
+            uri = "/search?city=" + address + "&format=json";
+        }
+        else uri = "/search?q=" + address + "&format=json";
 
         var response = webClient.get()
                 .uri(uri)
