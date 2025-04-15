@@ -27,7 +27,7 @@ const onlineIcon = new leaflet.Icon({
 const offlineIcon = new leaflet.Icon({
   iconUrl: offlineIconImg,
   shadowUrl: iconShadow,
-  iconSize: [25, 41],
+  iconSize: [41, 41],
   iconAnchor: [12, 41],
 });
 
@@ -187,7 +187,7 @@ class EventsPage extends Component {
                         Показать на карте
                       </button>
                     </div>
-                    <div className="event-format">
+                    <div className={"event-format " + event.format.toLowerCase()}>
                       {event.format === "ONLINE" ? "Онлайн" : "Оффлайн"}
                     </div>
                   </div>
