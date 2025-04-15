@@ -96,6 +96,7 @@ class EventsPage extends Component {
         const loadedEvents = data.list.map((e) => ({
           id: e.id,
           title: e.title,
+          shortDescription: e.shortDescription,
           description: e.description,
           format: e.format,
           date: formatDateRange(e.startDateTime, e.endDateTime),
@@ -162,7 +163,7 @@ class EventsPage extends Component {
                 >
                   <div className="event-date">{event.date}</div>
                   <h3 className="event-title">{event.title}</h3>
-                  <p className="event-description">{event.description}</p>
+                  <p className="event-short-description">{event.shortDescription}</p>
                   <p className="event-location">{event.location}</p>
                   <div className="event-tags">
                     {event.tags.map((tag, idx) => (
@@ -225,7 +226,7 @@ class EventsPage extends Component {
                 >
                   <Popup>
                     <strong>{event.title}</strong>
-                    <p>{event.description}</p>
+                    <p>{event.shortDescription}</p>
                     <p>{event.date}</p>
                   </Popup>
                 </Marker>
