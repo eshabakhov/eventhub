@@ -11,25 +11,28 @@ import UserContext from "../../UserContext";
 import { useNavigate } from "react-router-dom";
 import EventHubLogo from "../../img/eventhub.png";
 
-// HOC для навигации в class component
+// HOC для добавления navigate в класс-компонент
 export const withNavigation = (WrappedComponent) => {
-    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+  return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
 };
 
+// Иконки
 const onlineIcon = new leaflet.Icon({
-    iconUrl: onlineIconImg,
-    shadowUrl: iconShadow,
-    iconSize: [41, 41],
-    iconAnchor: [12, 41],
+  iconUrl: onlineIconImg,
+  shadowUrl: iconShadow,
+  iconSize: [41, 41],
+  iconAnchor: [12, 41],
 });
 
 const offlineIcon = new leaflet.Icon({
-    iconUrl: offlineIconImg,
-    shadowUrl: iconShadow,
-    iconSize: [41, 41],
-    iconAnchor: [12, 41],
+  iconUrl: offlineIconImg,
+  shadowUrl: iconShadow,
+  iconSize: [41, 41],
+  iconAnchor: [12, 41],
 });
 
+
+// Центрирование карты по всем точкам
 function FitToAllMarkers({ events }) {
     const map = useMap();
     React.useEffect(() => {
@@ -41,12 +44,17 @@ function FitToAllMarkers({ events }) {
     return null;
 }
 
+// перемещение карты к заданной точке
 function FlyToLocation({ position, markerId, markerRefs, format }) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
-            const zoom = format === "OFFLINE" ? 18 : 10;
-            map.flyTo(position, zoom, { duration: 1.5 });
+            var zoom = format === "OFFLINE" ? 18 : 10;
+            // переходим к заданному маркеру
+            map.flyTo(position, zoom, {
+                duration: 1.5
+            });
+            // открываем окошко этого маркера
             const marker = markerRefs.current[markerId];
             if (marker) {
                 setTimeout(() => {
@@ -58,11 +66,12 @@ function FlyToLocation({ position, markerId, markerRefs, format }) {
     return null;
 }
 
+// Формат даты
 const formatDateRange = (start, end) => {
-    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
-    const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-    const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-    return `${startStr} - ${endStr}`;
+  const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+  const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+  const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+  return `${startStr} - ${endStr}`;
 };
 
 class EventsPage extends Component {
