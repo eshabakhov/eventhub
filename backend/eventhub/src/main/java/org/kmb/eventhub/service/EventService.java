@@ -79,6 +79,9 @@ public class EventService {
         if (Objects.isNull(eventDTO.getFormat()))
             throw new MissingFieldException("format");
 
+        if (Objects.isNull(eventDTO.getShortDescription()))
+            throw new MissingFieldException("shortDescription");
+
         if (Objects.isNull(eventDTO.getStartDateTime()))
             throw new MissingFieldException("startDateTime");
 
@@ -131,6 +134,9 @@ public class EventService {
 
         if (Objects.nonNull(eventDTO.getDescription()))
             event.setDescription(eventDTO.getDescription());
+
+        if (Objects.nonNull(eventDTO.getShortDescription()))
+            event.setDescription(eventDTO.getShortDescription());
 
         if (Objects.nonNull(eventDTO.getTitle()))
             event.setTitle(eventDTO.getTitle());

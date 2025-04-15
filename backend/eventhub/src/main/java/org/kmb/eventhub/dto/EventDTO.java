@@ -12,6 +12,7 @@ import org.kmb.eventhub.enums.EventFormat;
 public class EventDTO {
     private Long id;
     private String title;
+    private String shortDescription;
     private String description;
     private EventFormat format;
     private String location;
