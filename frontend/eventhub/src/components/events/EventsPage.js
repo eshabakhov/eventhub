@@ -62,7 +62,7 @@ function FlyToLocation({ position, markerId, markerRefs, format }) {
                 }, 1600);
             }
         }
-    }, [position, map, markerId, markerRefs]);
+    }, [format, position, map, markerId, markerRefs]);
     return null;
 }
 
@@ -110,7 +110,6 @@ class EventsPage extends Component {
   }
 
   render() {
-    const { user } = this.context;
     const { navigate } = this.props;
 
 

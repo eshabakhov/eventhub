@@ -153,7 +153,6 @@ public class UserController {
                     schema = @Schema(implementation = Event.class)))
     @ResponseStatus(value = HttpStatus.OK)
     @GetMapping(value = "/members/{id}/events")
-
     public ResponseList<Event> getMemberEvents(@PathVariable Long id,
                                                @RequestParam(value = "page", defaultValue = "1") Integer page,
                                                @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
