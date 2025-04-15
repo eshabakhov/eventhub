@@ -90,8 +90,9 @@
             <![CDATA[
             CREATE TABLE public.event(
                    id bigserial primary key,
-                   title varchar NOT NULL,
-                   description varchar NOT NULL,
+                   title varchar(50) NOT NULL,
+                   short_description varchar(100) NOT NULL,
+                   description text,
                    format format_type NOT NULL,
                    start_date_time timestamp NOT NULL,
                    end_date_time timestamp NOT NULL,
