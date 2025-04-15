@@ -24,8 +24,6 @@ public class AuthController {
 
     private CustomUserDetailsService userDetailsService;
 
-    private JwtUtil jwtUtil;
-
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest request) {
         try {
@@ -36,11 +34,6 @@ public class AuthController {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        final String token = jwtUtil.generateToken(userDetails);
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setToken(token);
-
-        return authResponse;
+        return userDetailsService.createAuthResponse(userDetailsService.loadUserByUsername(request.getUsername()));
     }
 }
