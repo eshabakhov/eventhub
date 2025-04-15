@@ -2,6 +2,7 @@ package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.CoordinatesDTO;
+import org.kmb.eventhub.exception.AddressNotFound;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -67,6 +68,9 @@ public class MapService {
                 .bodyToMono(List.class)
                 .block();
 
+        if (Objects.isNull(response) || response.isEmpty()) {
+            throw new AddressNotFound(isOnline? String.format("City %s", address) : String.format("Address %s", address));
+        }
         if (response != null && !response.isEmpty()) {
             LinkedHashMap<String, Object> result;
             result = (LinkedHashMap<String, Object>) response.get(0);
