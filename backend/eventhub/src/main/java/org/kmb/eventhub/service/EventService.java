@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.trueCondition;
 
 @Service
@@ -51,10 +52,31 @@ public class EventService {
 
     private final OrganizerDao organizerDao;
 
-
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize) {
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search) {
         ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
+
+        if (search != null && !search.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.TITLE.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.SHORT_DESCRIPTION.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.LOCATION.containsIgnoreCase(search));
+
+
+            Map<String, String> formatRuMap = Map.of(
+                    "ONLINE", "Онлайн",
+                    "OFFLINE", "Оффлайн"
+            );
+
+            List<EventFormat> matchingFormats = formatRuMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().toLowerCase().contains(search.toLowerCase()))
+                    .map(entry -> EventFormat.valueOf(entry.getKey()))
+                    .collect(Collectors.toList());
+
+            if (!matchingFormats.isEmpty()) {
+                condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.FORMAT.in(matchingFormats));
+            }
+
+        }
 
         List<Event> eventList = eventRepository.fetch(condition, page, pageSize);
         List<EventDTO> eventDTOList = new ArrayList<>();

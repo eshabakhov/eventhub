@@ -59,8 +59,9 @@ public class EventController {
     @GetMapping
     public ResponseList<EventDTO> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return eventService.getList(page, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search) {
+        return eventService.getList(page, pageSize, search);
     }
 
     @Operation(summary = "Получить информацию о мероприятии.",
