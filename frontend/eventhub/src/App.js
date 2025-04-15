@@ -1,5 +1,5 @@
 import React from "react"
-import {BrowserRouter as Router, Route, Routes} from 'react-router';
+import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router';
 import LoginForm from "./components/login/LoginForm"
 import { UserProvider } from "./UserContext";
 import './App.css';
@@ -23,6 +23,7 @@ class App extends React.Component {
         <Router>
           <UserProvider value={{ user: user}}>
             <Routes>
+              <Route path="/" element={<Navigate to="/events" />} />
               <Route path='/login' exact={true} element={<LoginForm/>}/>
               <Route path='/events' exact={true} element={<EventsPage/>}/>
             </Routes>
