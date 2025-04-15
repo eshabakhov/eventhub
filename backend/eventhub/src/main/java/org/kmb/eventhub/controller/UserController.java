@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.service.SubscribeService;
+import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,10 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
     private final SubscribeService subscribeService;
+
+    private final TagService tagService;
 
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
@@ -217,9 +221,29 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/tags")
-    public List<Tag> addTagsToUser(@RequestBody UserTagsDTO userTagsDTO) {
-        return userService.addTagsToUser(userTagsDTO.getUserId(), userTagsDTO.getTags());
+    @PostMapping("/{id}/tag")
+    public List<Tag> addTagsToUser(
+            @PathVariable Long id,
+            @RequestBody UserTagsDTO userTagsDTO) {
+        return userService.addTagsToUser(id, userTagsDTO.getTags());
+    }
+
+    @Operation(summary = "Удалить тег из избранного пользователя.",
+            description = "Удаляет тег по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Тег удален.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Тег не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{id}/tag")
+    public Long deleteTagFromUser(
+            @PathVariable Long id,
+            @RequestBody @Valid TagDTO tagDTO) {
+        return tagService.deleteTagFromUser(id, tagDTO);
     }
 
 }

@@ -229,7 +229,7 @@ public class UserService {
 
         //4. Добавление связи для новых тегов и мероприятия
         if (!newTags.isEmpty()) {
-            tagService.assignTagsToEvent(userId, newTags);
+            tagService.assignTagsToUser(userId, newTags);
         }
 
         return newTags;

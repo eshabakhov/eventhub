@@ -6,6 +6,7 @@ import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.dto.TagDTO;
 import org.kmb.eventhub.exception.EventNotFoundException;
+import org.kmb.eventhub.exception.UserNotFoundException;
 import org.kmb.eventhub.exception.TagNotFoundException;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.TagRepository;
@@ -59,15 +60,30 @@ public class TagService {
     }
 
     @Transactional
-    public Long delete(Long eventID, TagDTO tagDTO) {
+    public Long deleteTagFromEvent(Long eventId, TagDTO tagDTO) {
         Long tagId = tagDTO.getId();
         if (tagDao.fetchOptionalById(tagId).isEmpty()) {
             throw new TagNotFoundException(tagId);
         }
-        eventDao.fetchOptionalById(eventID).orElseThrow(() -> new EventNotFoundException(eventID));
+        eventDao.fetchOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        tagRepository.delete(tagId, eventID);
+        tagRepository.deleteTagFromEvent(tagId, eventId);
         if (!tagRepository.tagIsUsed(tagId)) {
+            tagDao.deleteById(tagId);
+        }
+        return tagId;
+    }
+
+    @Transactional
+    public Long deleteTagFromUser(Long userId, TagDTO tagDTO) {
+        Long tagId = tagDTO.getId();
+        if (tagDao.fetchOptionalById(tagId).isEmpty()) {
+            throw new TagNotFoundException(tagId);
+        }
+        eventDao.fetchOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
+        tagRepository.deleteTagFromUser(tagId, userId);
+        if (tagRepository.tagIsUsed(tagId)) {
             tagDao.deleteById(tagId);
         }
         return tagId;
@@ -97,5 +113,9 @@ public class TagService {
 
     public Set<Long> getUsedTagIdsForUser(Long userId) {
         return tagRepository.getUsedTagIdsForUser(userId);
+    }
+
+    public void assignTagsToUser(Long userId, List<Tag> tags) {
+        tagRepository.assignNewUserTag(userId,tags);
     }
 }

@@ -165,7 +165,7 @@ public class EventController {
     public Long deleteTagFromEvent(
             @PathVariable Long id,
             @RequestBody @Valid TagDTO tagDTO) {
-        return tagService.delete(id, tagDTO);
+        return tagService.deleteTagFromEvent(id, tagDTO);
     }
 
     @Operation(summary = "Добавление нового файла.",
