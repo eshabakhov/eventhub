@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.kmb.eventhub.service.CustomUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -41,6 +40,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (Objects.nonNull(authHeader) && authHeader.startsWith(BEARER)) {
             jwt = authHeader.substring(7);
+        }
+        // если токен не передан в заголовке, то ищем его в куках
+        if (Objects.isNull(jwt) && request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if (cookie.getName().equals("token")) {
+                    jwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (jwt != null) {
             username = jwtUtil.extractUsername(jwt);
         }
 
