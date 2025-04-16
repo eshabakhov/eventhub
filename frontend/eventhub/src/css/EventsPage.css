@@ -298,10 +298,11 @@
   }
 .pagination-controls {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   gap: 12px;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .pagination-controls button {
@@ -364,4 +365,7 @@
   background-color: #2563eb;
   color: white;
   border-color: #2563eb;
+}
+.hidden {
+  display: none;
 }

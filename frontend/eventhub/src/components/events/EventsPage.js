@@ -145,6 +145,8 @@ class EventsPage extends Component {
     // Переключаем страницу
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search);
+        const el = document.getElementsByClassName('left-panel')[0];
+        el.scrollTo(0,0);
     };
     toggleTag = (tagName) => {
         this.setState((prevState) => {
@@ -226,7 +228,18 @@ class EventsPage extends Component {
                                 );
                             })}
                         </div>
-
+                        {/* Пагинация */}
+                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <button
+                                    key={i}
+                                    className='pagination-button'
+                                    disabled={currentPage === i + 1}
+                                    onClick={() => this.handlePageClick(i + 1)}
+                                >{i + 1}
+                                </button>
+                            ))}
+                        </div>
 
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
@@ -256,18 +269,18 @@ class EventsPage extends Component {
                         ))}
 
                         {/* Пагинация */}
-                        <div className="pagination-controls">
+                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <button
                                     key={i}
                                     className='pagination-button'
                                     disabled={currentPage === i + 1}
                                     onClick={() => this.handlePageClick(i + 1)}
-                                >
-                                    {i + 1}
+                                >{i + 1}
                                 </button>
                             ))}
                         </div>
+
                     </motion.div>
 
                     {/* Карта */}
