@@ -222,15 +222,18 @@
   }
 
   .event-format {
-    font-size: 0.75rem;
-    font-style: italic;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    color: white;
   }
+
   .online {
-    color: green;
+    background-color: #2e7d32;
   }
 
   .offline {
-    color: red;
+    background-color: #c62828;
   }
 
   .map-container {
@@ -319,4 +322,46 @@
 
 .pagination-controls span {
   font-weight: bold;
+}
+
+.tags-filter-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 10px 50px 0;
+}
+
+.tag-button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background-color: #f3f3f3;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.tag-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remove-icon {
+  font-weight: bold;
+  font-size: 16px;
+  margin-left: 4px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tag-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tag-button.selected {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
 }
