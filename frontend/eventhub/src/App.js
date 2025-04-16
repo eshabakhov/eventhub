@@ -1,9 +1,11 @@
 import React from "react"
 import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router';
-import LoginForm from "./components/login/LoginForm"
 import { UserProvider } from "./UserContext";
 import './App.css';
+import LoginForm from "./components/login/LoginForm"
 import EventsPage from "./components/events/EventsPage";
+import ProfilePage from "./components/profile/ProfilePage"
+import LogoutPage from "./components/logout/LogoutPage"
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -26,6 +28,8 @@ class App extends React.Component {
               <Route path="/" element={<Navigate to="/events" />} />
               <Route path='/login' exact={true} element={<LoginForm/>}/>
               <Route path='/events' exact={true} element={<EventsPage/>}/>
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/logout" element={<LogoutPage />} />
             </Routes>
           </UserProvider>
         </Router>

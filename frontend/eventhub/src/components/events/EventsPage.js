@@ -81,6 +81,7 @@ class EventsPage extends Component {
         super(props);
         this.markerRefs = React.createRef();
         this.markerRefs.current = {};
+        this.dropdownRef = React.createRef();
         this.state = {
             events: [],
             search: "",
@@ -90,14 +91,24 @@ class EventsPage extends Component {
             totalEvents: 0,
             tags: [],
             selectedTags: [], // <--- добавлено
+            showDropdown: false,
         };
     }
 
     componentDidMount() {
         this.loadEvents(1, this.state.search);
-
         this.loadTags();
+        this.checkAuth();
+        document.addEventListener("click", this.handleOutsideClick);
     }
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleOutsideClick);
+    }
+
+    toggleDropdown = () => {
+        this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
+    };    
+
     loadTags = () => {
         fetch("http://localhost:9500/api/v1/tags", {
                 method: 'GET',
@@ -146,6 +157,18 @@ class EventsPage extends Component {
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search);
     };
+    
+    handleMenuClick = (path) => {
+        this.setState({ showDropdown: false });
+        this.props.navigate(path);
+    };
+
+    handleOutsideClick = (e) => {
+        if (this.dropdownRef && !this.dropdownRef.contains(e.target)) {
+            this.setState({ showDropdown: false });
+        }
+    };
+
     toggleTag = (tagName) => {
         this.setState((prevState) => {
             const isSelected = prevState.selectedTags.includes(tagName);
@@ -157,6 +180,28 @@ class EventsPage extends Component {
         });
     };
 
+    checkAuth = () => {
+        const { user, setUser } = this.context;
+    
+        // Если пользователь уже есть в контексте, пропускаем
+        if (user && user.id) return;
+    
+        fetch("http://localhost:9500/api/auth/me", {
+            method: 'GET',
+            credentials: 'include',
+        })
+        .then((res) => {
+            if (!res.ok) throw new Error("Не авторизован");
+            return res.json();
+        })
+        .then((userData) => {
+            setUser(userData); // сохраняем в context + localStorage
+        })
+        .catch((err) => {
+            console.log("Ошибка авторизации:", err.message);
+        });
+    };
+    
 
     render() {
         const { navigate } = this.props;
@@ -171,9 +216,26 @@ class EventsPage extends Component {
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="login-button-container">
-                        <button onClick={() => navigate("/login")} className="login-button">
-                            Войти
-                        </button>
+                        {this.context.user && this.context.user.id ? (
+                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                <button onClick={this.toggleDropdown} className="login-button">
+                                    Профиль
+                                </button>
+                                {this.state.showDropdown && (
+                                    <div className="dropdown-menu">
+                                        <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
+                                        <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
+                                        <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
+                                    </div>
+                                )}
+                             </div>
+                        ) : (
+                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                <button onClick={() => navigate("/login")} className="login-button">
+                                    Войти
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
