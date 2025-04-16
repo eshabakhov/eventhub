@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.trueCondition;
 
 @Service
@@ -64,7 +63,7 @@ public class EventService {
 
             Map<String, String> formatRuMap = Map.of(
                     "ONLINE", "Онлайн",
-                    "OFFLINE", "Оффлайн"
+                    "OFFLINE", "Офлайн"
             );
 
             List<EventFormat> matchingFormats = formatRuMap.entrySet().stream()
