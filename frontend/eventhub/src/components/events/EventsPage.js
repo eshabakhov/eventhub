@@ -88,18 +88,34 @@ class EventsPage extends Component {
             currentPage: 1,
             eventsPerPage: 10,
             totalEvents: 0,
+            tags: [],
+            selectedTags: [], // <--- добавлено
         };
     }
 
     componentDidMount() {
         this.loadEvents(1, this.state.search);
-    }
 
+        this.loadTags();
+    }
+    loadTags = () => {
+        fetch("http://localhost:9500/api/v1/tags", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                this.setState({ tags: data.list });
+            })
+            .catch((err) => console.error("Ошибка при загрузке тегов:", err));
+    }
     // Загрузка точек
-    loadEvents = (page, search = "") => {
+    loadEvents = (page, search = "", searchTags=[]) => {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-        fetch(`http://localhost:9500/api/v1/events?page=${page}&size=${eventsPerPage}${searchParam}`)
+        const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
+        fetch(`http://localhost:9500/api/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
             .then((res) => res.json())
             .then((data) => {
                 const loadedEvents = data.list.map((e) => ({
@@ -130,10 +146,21 @@ class EventsPage extends Component {
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search);
     };
+    toggleTag = (tagName) => {
+        this.setState((prevState) => {
+            const isSelected = prevState.selectedTags.includes(tagName);
+            const selectedTags = isSelected
+                ? prevState.selectedTags.filter((t) => t !== tagName)
+                : [...prevState.selectedTags, tagName];
+            this.loadEvents(1, this.state.search, selectedTags);
+            return { selectedTags };
+        });
+    };
+
 
     render() {
         const { navigate } = this.props;
-        const { events, search, currentPage, eventsPerPage, totalEvents } = this.state;
+        const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
 
         return (
@@ -184,6 +211,22 @@ class EventsPage extends Component {
                                 </svg>
                             </button>
                         </div>
+                        <div className="tags-filter-wrapper">
+                            {tags.map((tag) => {
+                                const isSelected = this.state.selectedTags.includes(tag.name);
+                                return (
+                                    <button
+                                        key={tag.name}
+                                        onClick={() => this.toggleTag(tag.name)}
+                                        className={`tag-button ${isSelected ? 'selected' : ''}`}
+                                    >
+                                        {tag.name}
+                                        {isSelected && <span className="remove-icon">×</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
 
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
@@ -206,7 +249,7 @@ class EventsPage extends Component {
                                         </button>
                                     </div>
                                     <div className={`event-format ${event.format.toLowerCase()}`}>
-                                        {event.format === "ONLINE" ? "Онлайн" : "Оффлайн"}
+                                        {event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
                                     </div>
                                 </div>
                             </motion.div>

@@ -84,15 +84,19 @@ class Login extends React.Component {
         })
         .then(data => {
           const ctx = this.context;
-          if (data.token && ctx.setUser) {
-            localStorage.setItem('token', data.token);
+          if (
+              //data.token &&
+              ctx.setUser) {
+            //document.cookie = `token=${data.token}; path=/; Secure; SameSite=Strict`;
+            //localStorage.setItem('token', data.token);
             console.log(data); 
             ctx.setUser({ 
               name: username, 
               role: data.role,
               email: data.email,
               loggedIn: true, 
-              token: data.token });
+              //token: data.token
+            });
             this.setState({ redirect: true }); // ← редирект после входа
           }
         })
@@ -162,15 +166,17 @@ class Login extends React.Component {
       .then(res => res.json())
       .then(data => {
         const ctx = this.context;
-        if (data.token && ctx.setUser) {
-          localStorage.setItem('token', data.token);
+        if (
+            //.token &&
+            ctx.setUser) {
+          //localStorage.setItem('token', data.token);
           console.log(data); 
           ctx.setUser({
             name: data.username || username,
             role: data.role,
             email: data.email,
             loggedIn: true,
-            token: data.token
+            //token: data.token
           });
           alert("Успешный вход");
         }
