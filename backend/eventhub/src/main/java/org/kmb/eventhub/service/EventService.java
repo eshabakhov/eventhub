@@ -51,7 +51,7 @@ public class EventService {
 
     private final OrganizerDao organizerDao;
 
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search) {
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags) {
         ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
 
@@ -75,6 +75,9 @@ public class EventService {
                 condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.FORMAT.in(matchingFormats));
             }
 
+        }
+        if (tags != null && !tags.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(eventRepository.fetchEventIdsBySelectedTags(tags)));
         }
 
         List<Event> eventList = eventRepository.fetch(condition, page, pageSize);

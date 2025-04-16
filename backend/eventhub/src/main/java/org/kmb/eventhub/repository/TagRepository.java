@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
-import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Repository;
 
@@ -63,6 +62,7 @@ public class TagRepository {
                         .limit(1)
         );
     }
+
 
     public Tag findTagByName(String name) {
         return dslContext.selectFrom(TAG)
