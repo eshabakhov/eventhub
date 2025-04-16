@@ -13,23 +13,24 @@ import EventHubLogo from "../../img/eventhub.png";
 
 // HOC для добавления navigate в класс-компонент
 export const withNavigation = (WrappedComponent) => {
-    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+  return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
 };
 
 // Иконки
 const onlineIcon = new leaflet.Icon({
-    iconUrl: onlineIconImg,
-    shadowUrl: iconShadow,
-    iconSize: [41, 41],
-    iconAnchor: [12, 41],
+  iconUrl: onlineIconImg,
+  shadowUrl: iconShadow,
+  iconSize: [41, 41],
+  iconAnchor: [12, 41],
 });
 
 const offlineIcon = new leaflet.Icon({
-    iconUrl: offlineIconImg,
-    shadowUrl: iconShadow,
-    iconSize: [41, 41],
-    iconAnchor: [12, 41],
+  iconUrl: offlineIconImg,
+  shadowUrl: iconShadow,
+  iconSize: [41, 41],
+  iconAnchor: [12, 41],
 });
+
 
 // Центрирование карты по всем точкам
 function FitToAllMarkers({ events }) {
@@ -70,10 +71,10 @@ function FlyToLocation({ position, markerId, markerRefs, format, groupedEvents }
 
 // Формат даты
 const formatDateRange = (start, end) => {
-    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
-    const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-    const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-    return `${startStr} - ${endStr}`;
+  const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+  const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+  const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+  return `${startStr} - ${endStr}`;
 };
 
 // Popup для нескольких мероприятий
@@ -113,6 +114,7 @@ class EventsPage extends Component {
         super(props);
         this.markerRefs = React.createRef();
         this.markerRefs.current = {};
+        this.dropdownRef = React.createRef();
         this.state = {
             events: [],
             search: "",
@@ -121,29 +123,39 @@ class EventsPage extends Component {
             eventsPerPage: 10,
             totalEvents: 0,
             tags: [],
-            selectedTags: [],
+            selectedTags: [], // <--- добавлено
+            showDropdown: false,
         };
     }
 
     componentDidMount() {
         this.loadEvents(1, this.state.search);
         this.loadTags();
+        this.checkAuth();
+        document.addEventListener("click", this.handleOutsideClick);
     }
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleOutsideClick);
+    }
+
+    toggleDropdown = () => {
+        this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
+    };
 
     loadTags = () => {
         fetch("http://localhost:9500/api/v1/tags", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        })
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
             .then((res) => res.json())
             .then((data) => {
                 this.setState({ tags: data.list });
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
-    };
-
-    loadEvents = (page, search = "", searchTags = []) => {
+    }
+    // Загрузка точек
+    loadEvents = (page, search = "", searchTags=[]) => {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
@@ -169,16 +181,27 @@ class EventsPage extends Component {
             })
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
-
+    // Обновляем значение поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
         this.setState({ search: newSearch });
     };
-
+    // Переключаем страницу
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search);
-        const el = document.getElementsByClassName("left-panel")[0];
-        el.scrollTo(0, 0);
+        const el = document.getElementsByClassName('left-panel')[0];
+        el.scrollTo(0,0);
+    };
+
+    handleMenuClick = (path) => {
+        this.setState({ showDropdown: false });
+        this.props.navigate(path);
+    };
+
+    handleOutsideClick = (e) => {
+        if (this.dropdownRef && !this.dropdownRef.contains(e.target)) {
+            this.setState({ showDropdown: false });
+        }
     };
 
     toggleTag = (tagName) => {
@@ -201,12 +224,33 @@ class EventsPage extends Component {
         });
         return grouped;
     }
+    checkAuth = () => {
+        const { user, setUser } = this.context;
+
+        // Если пользователь уже есть в контексте, пропускаем
+        if (user && user.id) return;
+
+        fetch("http://localhost:9500/api/auth/me", {
+            method: 'GET',
+            credentials: 'include',
+        })
+        .then((res) => {
+            if (!res.ok) throw new Error("Не авторизован");
+            return res.json();
+        })
+        .then((userData) => {
+            setUser(userData); // сохраняем в context + localStorage
+        })
+        .catch((err) => {
+            console.log("Ошибка авторизации:", err.message);
+        });
+    };
+
 
     render() {
         const { navigate } = this.props;
         const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
-        const groupedEvents = this.groupEventsByPosition(events);
 
         return (
             <div className="events-container">
@@ -216,9 +260,26 @@ class EventsPage extends Component {
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="login-button-container">
-                        <button onClick={() => navigate("/login")} className="login-button">
-                            Войти
-                        </button>
+                        {this.context.user && this.context.user.id ? (
+                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                <button onClick={this.toggleDropdown} className="login-button">
+                                    Профиль
+                                </button>
+                                {this.state.showDropdown && (
+                                    <div className="dropdown-menu">
+                                        <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
+                                        <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
+                                        <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
+                                    </div>
+                                )}
+                             </div>
+                        ) : (
+                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                <button onClick={() => navigate("/login")} className="login-button">
+                                    Войти
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -234,12 +295,25 @@ class EventsPage extends Component {
                                 value={search}
                                 onChange={this.handleSearchChange}
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter") this.loadEvents(1, this.state.search);
+                                    if (e.key === "Enter")
+                                        this.loadEvents(1, this.state.search);
                                 }}
                             />
-                            <button className="search-button-inside" onClick={() => this.loadEvents(1, this.state.search)} aria-label="Поиск">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                            <button
+                                className="search-button-inside"
+                                onClick={() => this.loadEvents(1, this.state.search)}
+                                aria-label="Поиск"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
                                 </svg>
                             </button>
                         </div>
@@ -252,7 +326,7 @@ class EventsPage extends Component {
                                     <button
                                         key={tag.name}
                                         onClick={() => this.toggleTag(tag.name)}
-                                        className={`tag-button ${isSelected ? "selected" : ""}`}
+                                        className={`tag-button ${isSelected ? 'selected' : ''}`}
                                     >
                                         {tag.name}
                                         {isSelected && <span className="remove-icon">×</span>}
@@ -261,15 +335,14 @@ class EventsPage extends Component {
                             })}
                         </div>
                         {/* Пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
+                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <button
                                     key={i}
-                                    className="pagination-button"
+                                    className='pagination-button'
                                     disabled={currentPage === i + 1}
                                     onClick={() => this.handlePageClick(i + 1)}
-                                >
-                                    {i + 1}
+                                >{i + 1}
                                 </button>
                             ))}
                         </div>
@@ -287,8 +360,12 @@ class EventsPage extends Component {
                                 </div>
                                 <div className="card-buttons">
                                     <div className="button-group">
-                                        <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">Подробнее</button>
-                                        <button onClick={() => this.setState({ focusedEvent: event })} className="event-button map">Показать на карте</button>
+                                        <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+                                            Подробнее
+                                        </button>
+                                        <button onClick={() => this.setState({ focusedEvent: event })} className="event-button map">
+                                            Показать на карте
+                                        </button>
                                     </div>
                                     <div className={`event-format ${event.format.toLowerCase()}`}>
                                         {event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
@@ -298,24 +375,28 @@ class EventsPage extends Component {
                         ))}
 
                         {/* Пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
+                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <button
                                     key={i}
-                                    className="pagination-button"
+                                    className='pagination-button'
                                     disabled={currentPage === i + 1}
                                     onClick={() => this.handlePageClick(i + 1)}
-                                >
-                                    {i + 1}
+                                >{i + 1}
                                 </button>
                             ))}
                         </div>
+
                     </motion.div>
 
                     {/* Карта */}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                         <MapContainer center={[55.75, 37.61]} zoom={11} style={{ height: "100%" }}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution="&copy; OpenStreetMap contributors"
+                                maxZoom={18}
+                            />
                             {events.length > 0 && <FitToAllMarkers events={events} />}
                             {this.state.focusedEvent && (
                                 <FlyToLocation
@@ -352,5 +433,6 @@ class EventsPage extends Component {
         );
     }
 }
+
 
 export default withNavigation(EventsPage);

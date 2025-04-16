@@ -91,9 +91,10 @@ class Login extends React.Component {
             //localStorage.setItem('token', data.token);
             console.log(data); 
             ctx.setUser({ 
+              id: data.user.id,
               name: username, 
-              role: data.role,
-              email: data.email,
+              role: data.user.role,
+              email: data.user.email,
               loggedIn: true, 
               //token: data.token
             });
