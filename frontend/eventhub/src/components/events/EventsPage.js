@@ -95,6 +95,7 @@ class EventsPage extends Component {
         this.loadEvents(1, this.state.search);
     }
 
+    // Загрузка точек
     loadEvents = (page, search = "") => {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
@@ -120,12 +121,12 @@ class EventsPage extends Component {
             })
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
-
+    // Обновляем значение поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
         this.setState({ search: newSearch });
     };
-
+    // Переключаем страницу
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search);
     };
@@ -152,17 +153,37 @@ class EventsPage extends Component {
                 {/* Контент */}
                 <div className="content-panels">
                     <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-                        <input
-                            type="text"
-                            placeholder="Поиск мероприятий"
-                            className="search-input"
-                            value={search}
-                            onChange={this.handleSearchChange}
-                            onKeyDown={ (e) => {
-                                if (e.key === "Enter")
-                                    this.loadEvents(1, this.state.search);
-                            }}
-                        />
+                        {/* Поиск */}
+                        <div className="search-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Поиск мероприятий"
+                                className="search-input"
+                                value={search}
+                                onChange={this.handleSearchChange}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter")
+                                        this.loadEvents(1, this.state.search);
+                                }}
+                            />
+                            <button
+                                className="search-button-inside"
+                                onClick={() => this.loadEvents(1, this.state.search)}
+                                aria-label="Поиск"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                                </svg>
+                            </button>
+                        </div>
 
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
@@ -192,11 +213,12 @@ class EventsPage extends Component {
                         ))}
 
                         {/* Пагинация */}
-                        <div className="pagination">
+                        <div className="pagination-controls">
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <button
                                     key={i}
-                                    className={`pagination-button ${currentPage === i + 1 ? "active" : ""}`}
+                                    className='pagination-button'
+                                    disabled={currentPage === i + 1}
                                     onClick={() => this.handlePageClick(i + 1)}
                                 >
                                     {i + 1}
