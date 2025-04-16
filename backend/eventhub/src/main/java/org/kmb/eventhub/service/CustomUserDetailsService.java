@@ -14,11 +14,13 @@ import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,10 +57,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         User user = userRepository.fetchByUsername(userDetails.getUsername());
 
-        final String token = jwtUtil.generateToken(userDetails);
-
         AuthResponse authResponse = new AuthResponse();
-        authResponse.setToken(token);
         authResponse.setUser(userMapper.toDto(user));
 
         if (user.getRole().equals(RoleType.ORGANIZER)) {
@@ -77,5 +76,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         return authResponse;
+    }
+    public ResponseCookie getCookieWithJwtToken(UserDetails userDetails) {
+
+        final String token = jwtUtil.generateToken(userDetails);
+
+        return ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofHours(12))
+                .build();
     }
 }
