@@ -1,4 +1,4 @@
-﻿import React, { Component, useState } from "react";
+﻿import React, { Component } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import leaflet from "leaflet";
 import { motion } from "framer-motion";
@@ -11,28 +11,25 @@ import UserContext from "../../UserContext";
 import { useNavigate } from "react-router-dom";
 import EventHubLogo from "../../img/eventhub.png";
 
-// HOC для добавления navigate в класс-компонент
 export const withNavigation = (WrappedComponent) => {
-  return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
 };
 
-// Иконки
 const onlineIcon = new leaflet.Icon({
-  iconUrl: onlineIconImg,
-  shadowUrl: iconShadow,
-  iconSize: [41, 41],
-  iconAnchor: [12, 41],
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
 });
 
 const offlineIcon = new leaflet.Icon({
-  iconUrl: offlineIconImg,
-  shadowUrl: iconShadow,
-  iconSize: [41, 41],
-  iconAnchor: [12, 41],
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
 });
 
-
-// Центрирование карты по всем точкам
+// Подгонка карты под маркеры
 function FitToAllMarkers({ events }) {
     const map = useMap();
     React.useEffect(() => {
@@ -44,68 +41,31 @@ function FitToAllMarkers({ events }) {
     return null;
 }
 
-// перемещение карты к заданной точке
-function FlyToLocation({ position, markerId, markerRefs, format, groupedEvents }) {
+// Перемещение карты к маркеру
+function FlyToLocation({ position, markerId, markerRefs, format }) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
             const zoom = format === "OFFLINE" ? 18 : 10;
-            map.flyTo(position, zoom, {
-                duration: 1.5,
-            });
-            let marker = markerRefs.current[markerId];
-
-            if (marker === undefined) {
-                //marker = groupedEvents[`${position[0]},${position[1]}`].find(x=>x.id = markerId);
-            }
-
+            map.flyTo(position, zoom, { duration: 1.5 });
+            const marker = markerRefs.current[markerId];
             if (marker) {
                 setTimeout(() => {
                     marker.openPopup();
                 }, 1600);
             }
         }
-    }, [position, markerId, markerRefs, format, map]);
+    }, [position, map, markerId, markerRefs]);
     return null;
 }
 
-// Формат даты
+// Форматирование даты
 const formatDateRange = (start, end) => {
-  const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
-  const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-  const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
-  return `${startStr} - ${endStr}`;
+    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+    const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+    const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
+    return `${startStr} - ${endStr}`;
 };
-
-// Popup для нескольких мероприятий
-function MultiEventPopup({ eventsAtLocation, navigate }) {
-    const [index, setIndex] = useState(0);
-    const event = eventsAtLocation[index];
-
-    const next = () => setIndex((index + 1) % eventsAtLocation.length);
-    const prev = () => setIndex((index - 1 + eventsAtLocation.length) % eventsAtLocation.length);
-
-    return (
-        <div className="multi-popup">
-            <strong>{event.title}</strong>
-            <p>{event.shortDescription}</p>
-            <p>{event.date}</p>
-            <button
-                onClick={() => navigate(`/event/${event.id}`)}
-                className="event-button details"
-            >
-                Подробнее
-            </button>
-            {eventsAtLocation.length > 1 && (
-                <div className="popup-navigation">
-                    <button onClick={prev}>←</button>
-                    <span>{index + 1} / {eventsAtLocation.length}</span>
-                    <button onClick={next}>→</button>
-                </div>
-            )}
-        </div>
-    );
-}
 
 class EventsPage extends Component {
     static contextType = UserContext;
@@ -114,7 +74,6 @@ class EventsPage extends Component {
         super(props);
         this.markerRefs = React.createRef();
         this.markerRefs.current = {};
-        this.dropdownRef = React.createRef();
         this.state = {
             events: [],
             search: "",
@@ -123,39 +82,30 @@ class EventsPage extends Component {
             eventsPerPage: 10,
             totalEvents: 0,
             tags: [],
-            selectedTags: [], // <--- добавлено
-            showDropdown: false,
+            selectedTags: [],
         };
     }
 
     componentDidMount() {
         this.loadEvents(1, this.state.search);
         this.loadTags();
-        this.checkAuth();
-        document.addEventListener("click", this.handleOutsideClick);
     }
-    componentWillUnmount() {
-        document.removeEventListener("click", this.handleOutsideClick);
-    }
-
-    toggleDropdown = () => {
-        this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
-    };
-
+    // Загрузка тегов
     loadTags = () => {
         fetch("http://localhost:9500/api/v1/tags", {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            })
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => {
                 this.setState({ tags: data.list });
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
-    }
-    // Загрузка точек
-    loadEvents = (page, search = "", searchTags=[]) => {
+    };
+
+    // Загрузка мероприятий
+    loadEvents = (page, search = "", searchTags = []) => {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
@@ -181,29 +131,19 @@ class EventsPage extends Component {
             })
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
-    // Обновляем значение поискового запроса
+    // Обработка изменения поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
         this.setState({ search: newSearch });
     };
-    // Переключаем страницу
+    // Обработка перехода на другую страницу
     handlePageClick = (pageNumber) => {
-        this.loadEvents(pageNumber, this.state.search);
-        const el = document.getElementsByClassName('left-panel')[0];
-        el.scrollTo(0,0);
+        this.loadEvents(pageNumber, this.state.search, this.state.selectedTags);
+        const el = document.getElementsByClassName("left-panel")[0];
+        el.scrollTo(0, 0);
     };
 
-    handleMenuClick = (path) => {
-        this.setState({ showDropdown: false });
-        this.props.navigate(path);
-    };
-
-    handleOutsideClick = (e) => {
-        if (this.dropdownRef && !this.dropdownRef.contains(e.target)) {
-            this.setState({ showDropdown: false });
-        }
-    };
-
+    // Поиск по тегу
     toggleTag = (tagName) => {
         this.setState((prevState) => {
             const isSelected = prevState.selectedTags.includes(tagName);
@@ -215,76 +155,44 @@ class EventsPage extends Component {
         });
     };
 
-    groupEventsByPosition(events) {
-        const grouped = {};
-        events.forEach((event) => {
+    // Группировка событий по одинаковым координатам
+    groupEventsByLocation(events) {
+        const groups = new Map();
+        for (const event of events) {
             const key = event.position.join(",");
-            if (!grouped[key]) grouped[key] = [];
-            grouped[key].push(event);
-        });
-        return grouped;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(event);
+        }
+        return groups;
     }
-    checkAuth = () => {
-        const { user, setUser } = this.context;
-
-        // Если пользователь уже есть в контексте, пропускаем
-        if (user && user.id) return;
-
-        fetch("http://localhost:9500/api/auth/me", {
-            method: 'GET',
-            credentials: 'include',
-        })
-        .then((res) => {
-            if (!res.ok) throw new Error("Не авторизован");
-            return res.json();
-        })
-        .then((userData) => {
-            setUser(userData); // сохраняем в context + localStorage
-        })
-        .catch((err) => {
-            console.log("Ошибка авторизации:", err.message);
-        });
-    };
-
+    // Получение маркера для события
+    getMarkerIdForEvent(event) {
+        const grouped = this.groupEventsByLocation(this.state.events);
+        for (const [key, group] of grouped.entries()) {
+            if (group.find((e) => e.id === event.id)) return key;
+        }
+        return null;
+    }
 
     render() {
         const { navigate } = this.props;
         const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
-        const groupedEvents = this.groupEventsByPosition(events);
+        const groupedEvents = this.groupEventsByLocation(events);
 
         return (
             <div className="events-container">
-                {/* Верхняя панель */}
                 <div className="header-bar">
                     <div className="top-logo">
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="login-button-container">
-                        {this.context.user && this.context.user.id ? (
-                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                <button onClick={this.toggleDropdown} className="login-button">
-                                    Профиль
-                                </button>
-                                {this.state.showDropdown && (
-                                    <div className="dropdown-menu">
-                                        <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
-                                        <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
-                                        <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
-                                    </div>
-                                )}
-                             </div>
-                        ) : (
-                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                <button onClick={() => navigate("/login")} className="login-button">
-                                    Войти
-                                </button>
-                            </div>
-                        )}
+                        <button onClick={() => navigate("/login")} className="login-button">
+                            Войти
+                        </button>
                     </div>
                 </div>
 
-                {/* Контент */}
                 <div className="content-panels">
                     <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                         {/* Поиск */}
@@ -296,29 +204,15 @@ class EventsPage extends Component {
                                 value={search}
                                 onChange={this.handleSearchChange}
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter")
-                                        this.loadEvents(1, this.state.search);
+                                    if (e.key === "Enter") this.loadEvents(1, this.state.search);
                                 }}
                             />
-                            <button
-                                className="search-button-inside"
-                                onClick={() => this.loadEvents(1, this.state.search)}
-                                aria-label="Поиск"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                            <button className="search-button-inside" onClick={() => this.loadEvents(1, this.state.search)} aria-label="Поиск">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
                                 </svg>
                             </button>
                         </div>
-
                         {/* Фильтр по тегам */}
                         <div className="tags-filter-wrapper">
                             {tags.map((tag) => {
@@ -327,7 +221,7 @@ class EventsPage extends Component {
                                     <button
                                         key={tag.name}
                                         onClick={() => this.toggleTag(tag.name)}
-                                        className={`tag-button ${isSelected ? 'selected' : ''}`}
+                                        className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
                                         {tag.name}
                                         {isSelected && <span className="remove-icon">×</span>}
@@ -335,19 +229,15 @@ class EventsPage extends Component {
                                 );
                             })}
                         </div>
-                        {/* Пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
+                        {/* Верхняя пагинация */}
+                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
                             {Array.from({ length: totalPages }, (_, i) => (
-                                <button
-                                    key={i}
-                                    className='pagination-button'
-                                    disabled={currentPage === i + 1}
-                                    onClick={() => this.handlePageClick(i + 1)}
-                                >{i + 1}
+                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
+                                    {i + 1}
                                 </button>
                             ))}
                         </div>
-                        {/* Список карточек */}
+                        {/* Карточки событий */}
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
                                 <div className="event-date">{event.date}</div>
@@ -364,65 +254,52 @@ class EventsPage extends Component {
                                         <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
                                             Подробнее
                                         </button>
-                                        <button onClick={() => this.setState({ focusedEvent: event })} className="event-button map">
+                                        <button
+                                            onClick={() =>
+                                                this.setState({
+                                                    focusedEvent: event,
+                                                    focusedMarkerId: this.getMarkerIdForEvent(event),
+                                                })
+                                            }
+                                            className="event-button map"
+                                        >
                                             Показать на карте
                                         </button>
                                     </div>
-                                    <div className={`event-format ${event.format.toLowerCase()}`}>
-                                        {event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
-                                    </div>
+                                    <div className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
                                 </div>
                             </motion.div>
                         ))}
-
-                        {/* Пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? 'hidden' : ''}`}>
+                        {/* Нижняя пагинация */}
+                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
                             {Array.from({ length: totalPages }, (_, i) => (
-                                <button
-                                    key={i}
-                                    className='pagination-button'
-                                    disabled={currentPage === i + 1}
-                                    onClick={() => this.handlePageClick(i + 1)}
-                                >{i + 1}
+                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
+                                    {i + 1}
                                 </button>
                             ))}
                         </div>
-
                     </motion.div>
-
                     {/* Карта */}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                         <MapContainer center={[55.75, 37.61]} zoom={11} style={{ height: "100%" }}>
-                            <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution="&copy; OpenStreetMap contributors"
-                                maxZoom={18}
-                            />
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
                             {events.length > 0 && <FitToAllMarkers events={events} />}
-                            {this.state.focusedEvent && (
+                            {this.state.focusedEvent && this.state.focusedMarkerId && (
                                 <FlyToLocation
                                     position={this.state.focusedEvent.position}
-                                    markerId={this.state.focusedEvent.id}
+                                    markerId={this.state.focusedMarkerId}
                                     markerRefs={this.markerRefs}
                                     format={this.state.focusedEvent.format}
-                                    groupedEvents={groupedEvents}
                                 />
                             )}
-                            {Object.entries(groupedEvents).map(([posKey, eventsAtPosition]) => {
-                                const position = eventsAtPosition[0].position;
-                                const mainEvent = eventsAtPosition[0];
-                                const icon = mainEvent.format === "ONLINE" ? onlineIcon : offlineIcon;
+                            {[...groupedEvents.entries()].map(([key, group]) => {
+                                const [lat, lng] = key.split(",").map(Number);
+                                const icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon
+                                const initialEventId = this.state.focusedEvent?.id;
                                 return (
-                                    <Marker
-                                        key={posKey}
-                                        position={position}
-                                        icon={icon}
-                                        ref={(ref) => {
-                                            if (ref) this.markerRefs.current[mainEvent.id] = ref;
-                                        }}
-                                    >
+                                    <Marker key={key} position={[lat, lng]} icon={icon} ref={(ref) => (this.markerRefs.current[key] = ref)}>
                                         <Popup>
-                                            <MultiEventPopup eventsAtLocation={eventsAtPosition} navigate={navigate} />
+                                            <MultiEventPopup events={group} navigate={navigate} initialEventId={initialEventId}/>
                                         </Popup>
                                     </Marker>
                                 );
@@ -434,6 +311,37 @@ class EventsPage extends Component {
         );
     }
 }
-
+{/* PopUp для сгрупированных событий */}
+function MultiEventPopup({ events, navigate, initialEventId }) {
+    const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
+    const [page, setPage] = React.useState(Math.max(0, initialIndex));
+    const total = events.length;
+    const event = events[page];
+    React.useEffect(() => {
+        if (initialEventId) {
+            const index = events.findIndex(e => e.id === initialEventId);
+            if (index >= 0) setPage(index);
+        }
+    }, [initialEventId, events]);
+    return (
+        <div>
+            <strong>{event.title}</strong>
+            <p>{event.shortDescription}</p>
+            <p>{event.date}</p>
+            <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+                Подробнее
+            </button>
+            {total > 1 && (
+                <div className="popup-pagination">
+                    <button className="popup-page-button" onClick={() => setPage((p) => (p === 0 ? total - 1 : p - 1))}>{"<"}</button>
+                        <span>
+                            {page + 1} / {total}
+                        </span>
+                    <button className="popup-page-button" onClick={() => setPage((p) => (p + 1) % total)}>{">"}</button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default withNavigation(EventsPage);
