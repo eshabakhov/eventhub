@@ -68,7 +68,7 @@
     <changeSet id="eventhub-data/v1/12-04-2025/3" author="Timokhov_Evgeniy">
         <sql>
             <![CDATA[
-                INSERT INTO public.moderator VALUES (2, 'true'), (3, 'false');
+                INSERT INTO public.moderator VALUES (21, 'true'), (22, 'false');
             ]]>
         </sql>
     </changeSet>
