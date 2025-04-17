@@ -3,6 +3,8 @@ package org.kmb.eventhub.service;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.enums.PrivacyEnum;
+import org.kmb.eventhub.enums.PrivacyType;
 import org.kmb.eventhub.enums.RoleEnum;
 import org.kmb.eventhub.exception.*;
 import org.kmb.eventhub.mapper.TagMapper;
@@ -96,22 +98,23 @@ public class UserService {
     @Transactional
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
 
-        if (Objects.isNull(organizerDTO.getName()))
-            throw new MissingFieldException("name");
-        if (Objects.isNull(organizerDTO.getDescription()))
-            throw new MissingFieldException("description");
-        if (Objects.isNull(organizerDTO.getIndustry()))
-            throw new MissingFieldException("industry");
-        if (Objects.isNull(organizerDTO.getAddress()))
-            throw new MissingFieldException("address");
-        if (Objects.isNull(organizerDTO.getIsAccredited()))
-            throw new MissingFieldException("isAccredited");
-
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.ORGANIZER.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
-        Organizer organizer = userMapper.dtoToOrganizer(organizerDTO);
-        organizer.setId(id);
+
+        Organizer organizer = organizerDao.fetchOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        if (Objects.nonNull(organizerDTO.getName()))
+            organizer.setName(organizerDTO.getName());
+        if (Objects.nonNull(organizerDTO.getDescription()))
+            organizer.setDescription(organizerDTO.getDescription());
+        if (Objects.nonNull(organizerDTO.getIndustry()))
+            organizer.setIndustry(organizerDTO.getIndustry());
+        if (Objects.nonNull(organizerDTO.getAddress()))
+            organizer.setAddress(organizerDTO.getAddress());
+        if (Objects.nonNull(organizerDTO.getIsAccredited()))
+            organizer.setIsAccredited(organizerDTO.getIsAccredited());
+
         organizerDao.update(organizer);
         return organizer;
     }
@@ -119,24 +122,31 @@ public class UserService {
     @Transactional
     public Member updateMember(Long id, MemberDTO memberDTO) {
 
-        if (Objects.isNull(memberDTO.getFirstName()))
-            throw new MissingFieldException("firstName");
-        if (Objects.isNull(memberDTO.getLastName()))
-            throw new MissingFieldException("lastName");
-        if (Objects.isNull(memberDTO.getPatronymic()))
-            throw new MissingFieldException("patronymic");
-        if (Objects.isNull(memberDTO.getBirthDate()))
-            throw new MissingFieldException("birthDate");
-        if (Objects.isNull(memberDTO.getBirthCity()))
-            throw new MissingFieldException("birthCity");
-        if (Objects.isNull(memberDTO.getPrivacy()))
-            throw new MissingFieldException("privacy");
-
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.MEMBER.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
-        Member member = userMapper.dtoToMember(memberDTO);
-        member.setId(id);
+
+        Member member = memberDao.fetchOptionalById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        if (Objects.nonNull(memberDTO.getFirstName()))
+            member.setFirstName(memberDTO.getFirstName());
+        if (Objects.nonNull(memberDTO.getLastName()))
+            member.setLastName(memberDTO.getLastName());
+        if (Objects.nonNull(memberDTO.getPatronymic()))
+            member.setPatronymic(memberDTO.getPatronymic());
+        if (Objects.nonNull(memberDTO.getBirthDate()))
+            member.setBirthDate(memberDTO.getBirthDate());
+        if (Objects.nonNull(memberDTO.getBirthCity()))
+            member.setBirthCity(memberDTO.getBirthCity());
+        if (Objects.nonNull(memberDTO.getPrivacy())) {
+            if (PrivacyEnum.PRIVATE.equals(memberDTO.getPrivacy()))
+                member.setPrivacy(PrivacyType.PRIVATE);
+            if (PrivacyEnum.PUBLIC.equals(memberDTO.getPrivacy()))
+                member.setPrivacy(PrivacyType.PUBLIC);
+            if (PrivacyEnum.ONLY_FRIENDS.equals(memberDTO.getPrivacy()))
+                member.setPrivacy(PrivacyType.ONLY_FRIENDS);
+        }
+
         memberDao.update(member);
         return member;
     }

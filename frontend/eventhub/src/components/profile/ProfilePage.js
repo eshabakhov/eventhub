@@ -16,14 +16,24 @@ class ProfilePage extends Component {
     const { user } = this.context;
     console.log(user)
     if (user && user.id) {
-      axios.get(`/api/users/${user.id}`)
-        .then((response) => {
-          this.setState({ formData: response.data, loading: false });
+      fetch('http://localhost:9500/api/auth/me', {
+        method: 'GET',
+        credentials: 'include', // если токен в куках
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+          }
+          const data = await response.json();
+          this.setState({ formData: data, loading: false });
         })
         .catch((error) => {
           console.error('Ошибка при загрузке профиля:', error);
           this.setState({ loading: false });
-        });
+        });      
     }
   }
 
@@ -41,19 +51,27 @@ class ProfilePage extends Component {
     e.preventDefault();
     const { user, setUser } = this.context;
   
-    console.log(this.state.formData)
+    // Определяем путь в зависимости от роли
+    const rolePathMap = {
+      ORGANIZER: 'organizers',
+      MEMBER: 'members',
+      MODERATOR: 'moderators'
+    };
+  
+    const rolePath = rolePathMap[user.role];
+    const endpoint = rolePath
+      ? `http://localhost:9500/api/v1/users/${rolePath}/${user.id}`
+      : `http://localhost:9500/api/v1/users/${user.id}`;
+  
     try {
-      const response = await fetch(`http://localhost:9500/api/v1/users/${user.id}`, {
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'  
-          // Добавь Authorization, если нужен JWT:
-          // 'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(this.state.formData),
-        credentials: 'include' // если нужно отправлять куки
+        credentials: 'include'
       });
-  
   
       if (!response.ok) {
         throw new Error(`Ошибка HTTP: ${response.status}`);
@@ -68,6 +86,7 @@ class ProfilePage extends Component {
       console.error('Ошибка при обновлении профиля:', error);
     }
   };
+  
   
 
   render() {

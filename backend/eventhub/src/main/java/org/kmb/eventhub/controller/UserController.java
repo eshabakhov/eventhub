@@ -128,6 +128,24 @@ public class UserController {
         return userService.updateMember(id, memberDTO);
     }
 
+    @Operation(summary = "Обновить информацию модератора.",
+            description = "Обновить информацию модератора по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация о модераторе обновлена.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Moderator.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/moderators/{id}")
+    public Moderator updateModerator(
+            @PathVariable Long id,
+            @RequestBody @Valid ModeratorDTO moderatorDTO) {
+        return userService.updateModerator(id, moderatorDTO);
+    }
+
     @Operation(summary = "Получить информацию об участнике.",
                     description = "Возвращает информацию об участнике по ID.")
     @ApiResponse(responseCode = "200",
@@ -142,21 +160,6 @@ public class UserController {
     @GetMapping(value = "/members/{id}")
     public Member getMember(@PathVariable Long id) {
         return userService.getMember(id);
-    }
-
-
-    @Operation(summary = "Получить список мероприятий пользователя.",
-            description = "Возвращает все мероприятия, в которых участвует пользователь.")
-    @ApiResponse(responseCode = "200",
-            description = "Список всех мероприятий.",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Event.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/members/{id}/events")
-    public ResponseList<Event> getMemberEvents(@PathVariable Long id,
-                                               @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return subscribeService.getEventsByMemberId(id, page, pageSize);
     }
 
     @Operation(summary = "Получить информацию об организаторе.",
@@ -175,24 +178,6 @@ public class UserController {
         return userService.getOrganizer(id);
     }
 
-    @Operation(summary = "Обновить информацию модератора.",
-                    description = "Обновить информацию модератора по ID.")
-    @ApiResponse(responseCode = "200",
-                    description = "Информация о модераторе обновлена.",
-                    content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Moderator.class)))
-    @ApiResponse(responseCode = "404",
-                    description = "Участник не найден",
-                    content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @PutMapping(value = "/moderators/{id}")
-    public Moderator updateModerator(
-            @PathVariable Long id,
-            @RequestBody @Valid ModeratorDTO moderatorDTO) {
-        return userService.updateModerator(id, moderatorDTO);
-    }
-
     @Operation(summary = "Удалить пользователя.",
                     description = "Удаляет пользователя по ID.")
     @ApiResponse(responseCode = "200",
@@ -207,6 +192,20 @@ public class UserController {
     @DeleteMapping(value = "/{id}")
     public Long delete(@PathVariable Long id) {
         return userService.delete(id);
+    }
+
+    @Operation(summary = "Получить список мероприятий пользователя.",
+            description = "Возвращает все мероприятия, в которых участвует пользователь.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/members/{id}/events")
+    public ResponseList<Event> getMemberEvents(@PathVariable Long id,
+                                               @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        return subscribeService.getEventsByMemberId(id, page, pageSize);
     }
 
     @Operation(summary = "Добавление новых тегов в избранное пользователя.",
