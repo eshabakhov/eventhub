@@ -92,10 +92,23 @@ class Login extends React.Component {
             console.log(data); 
             ctx.setUser({ 
               id: data.user.id,
-              name: username, 
               role: data.user.role,
               email: data.user.email,
-              loggedIn: true, 
+              username: username,
+              displayName: data.user.displayName,
+              loggedIn: true,
+              memberLastName: data.customUser.lastName,
+              memberFirstName: data.customUser.firstName,
+              memberPatronymic: data.customUser.patronymic,
+              memberBirthDate: data.customUser.birthDate,
+              memberBirthCity: data.customUser.birthCity,
+              mebmerPrivacy: data.customUser.privacy,
+              organizerName: data.customUser.name,
+              organizerDescription: data.customUser.description,
+              organizerIndustry: data.customUser.industry,
+              organizerAddress: data.customUser.address,
+              organizerAccredited: data.customUser.isAccredited,
+              moderatorIsAdmin: data.customUser.isAdmin
               //token: data.token
             });
             this.setState({ redirect: true }); // ← редирект после входа
@@ -155,39 +168,6 @@ class Login extends React.Component {
     }
   };
   
-
-  handleLogin = () => {
-    const { username, password } = this.state;
-    fetch("http://localhost:9500/api/auth/login", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        const ctx = this.context;
-        if (
-            //.token &&
-            ctx.setUser) {
-          //localStorage.setItem('token', data.token);
-          console.log(data); 
-          ctx.setUser({
-            name: data.username || username,
-            role: data.role,
-            email: data.email,
-            loggedIn: true,
-            //token: data.token
-          });
-          alert("Успешный вход");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Ошибка входа");
-      });
-  };
-
   handleRegistration = () => {
     const {
       username, email, password, role,

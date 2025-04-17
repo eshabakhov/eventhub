@@ -14,6 +14,7 @@ class ProfilePage extends Component {
 
   componentDidMount() {
     const { user } = this.context;
+    console.log(user)
     if (user && user.id) {
       axios.get(`/api/users/${user.id}`)
         .then((response) => {
@@ -39,15 +40,35 @@ class ProfilePage extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     const { user, setUser } = this.context;
+  
+    console.log(this.state.formData)
     try {
-      const response = await axios.put(`/api/users/${user.id}`, this.state.formData);
-      setUser(response.data);
+      const response = await fetch(`http://localhost:9500/api/v1/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'  
+          // Добавь Authorization, если нужен JWT:
+          // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(this.state.formData),
+        credentials: 'include' // если нужно отправлять куки
+      });
+  
+  
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+  
+      const updatedUser = await response.json();
+      setUser(updatedUser);
       this.setState({ successMessage: 'Профиль успешно обновлён' });
+  
       setTimeout(() => this.setState({ successMessage: '' }), 3000);
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
     }
   };
+  
 
   render() {
     const { user } = this.context;
@@ -77,7 +98,7 @@ class ProfilePage extends Component {
                 className="profile-input"
                 type="email"
                 name="email"
-                value={formData.email || ''}
+                value={formData.email || user.email}
                 onChange={this.handleChange}
               />
             </label>
@@ -87,7 +108,7 @@ class ProfilePage extends Component {
                 className="profile-input"
                 type="text"
                 name="username"
-                value={formData.username || ''}
+                value={formData.username || user.username}
                 onChange={this.handleChange}
               />
             </label>
@@ -97,7 +118,7 @@ class ProfilePage extends Component {
                 className="profile-input"
                 type="text"
                 name="displayName"
-                value={formData.displayName || ''}
+                value={formData.displayName || user.displayName}
                 onChange={this.handleChange}
               />
             </label>
@@ -107,7 +128,7 @@ class ProfilePage extends Component {
                 className="profile-input"
                 type="password"
                 name="password"
-                value={formData.password || ''}
+                value={formData.password || user.password}
                 onChange={this.handleChange}
               />
             </label>
@@ -121,7 +142,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="organizationName"
-                    value={formData.organizationName || ''}
+                    value={formData.organizationName || user.organizerName}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -130,7 +151,7 @@ class ProfilePage extends Component {
                   <textarea
                     className="profile-input"
                     name="description"
-                    value={formData.description || ''}
+                    value={formData.description || user.organizerDescription}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -140,7 +161,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="industry"
-                    value={formData.industry || ''}
+                    value={formData.industry || user.organizerIndustry}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -150,7 +171,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="address"
-                    value={formData.address || ''}
+                    value={formData.address || user.organizerAddress}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -160,7 +181,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="accreditation"
-                    value={formData.accreditation || ''}
+                    value={formData.accreditation || user.organizerAccredited}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -176,7 +197,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="lastName"
-                    value={formData.lastName || ''}
+                    value={formData.lastName || user.memberLastName}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -186,7 +207,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="firstName"
-                    value={formData.firstName || ''}
+                    value={formData.firstName || user.memberFirstName}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -196,7 +217,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="middleName"
-                    value={formData.middleName || ''}
+                    value={formData.middleName || user.memberPatronymic}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -206,7 +227,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="date"
                     name="birthDate"
-                    value={formData.birthDate || ''}
+                    value={formData.birthDate || user.memberBirthDate}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -216,7 +237,7 @@ class ProfilePage extends Component {
                     className="profile-input"
                     type="text"
                     name="birthCity"
-                    value={formData.birthCity || ''}
+                    value={formData.birthCity || user.memberBirthCity}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -225,7 +246,7 @@ class ProfilePage extends Component {
                   <select
                     className="profile-input"
                     name="privacy"
-                    value={formData.privacy || 'public'}
+                    value={formData.privacy || user.mebmerPrivacy}
                     onChange={this.handleChange}
                   >
                     <option value="public">Публично</option>
@@ -243,7 +264,7 @@ class ProfilePage extends Component {
                   className="profile-input"
                     type="checkbox"
                     name="isAdmin"
-                    checked={formData.isAdmin || false}
+                    checked={formData.isAdmin || user.moderatorIsAdmin}
                     onChange={this.handleChange}
                   />
               </label>
@@ -251,7 +272,7 @@ class ProfilePage extends Component {
 
             <div className="card-buttons mt-4">
               <button type="submit" className="profile-button">
-                Сохранить изменения
+                Сохранить изменения 
               </button>
             </div>
             {successMessage && <p className="success-message">{successMessage}</p>}

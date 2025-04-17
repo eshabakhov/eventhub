@@ -272,6 +272,7 @@
   .right-panel {
     width: 50%;
     padding: 16px;
+    z-index: 0;
     /*
     display: flex;
     flex-direction: column;
