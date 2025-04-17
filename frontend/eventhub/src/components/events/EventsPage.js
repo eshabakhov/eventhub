@@ -251,6 +251,7 @@ class EventsPage extends Component {
         const { navigate } = this.props;
         const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
+        const groupedEvents = this.groupEventsByPosition(events);
 
         return (
             <div className="events-container">
