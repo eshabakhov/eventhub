@@ -281,7 +281,7 @@ class EventsPage extends Component {
                     </motion.div>
                     {/* Карта */}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-                        <MapContainer center={[55.75, 37.61]} zoom={11} style={{ height: "100%" }}>
+                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{ height: "100%" }} maxBounds={[[-90, -180],[90, 180]]}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
                             {events.length > 0 && <FitToAllMarkers events={events} />}
                             {this.state.focusedEvent && this.state.focusedMarkerId && (
