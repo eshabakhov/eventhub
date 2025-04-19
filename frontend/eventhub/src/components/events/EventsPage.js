@@ -10,6 +10,8 @@ import "../../css/EventsPage.css";
 import UserContext from "../../UserContext";
 import { useNavigate } from "react-router-dom";
 import EventHubLogo from "../../img/eventhub.png";
+import ProfileDropdown from "../profile/ProfileDropdown";
+import { th } from "framer-motion/client";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
@@ -87,6 +89,7 @@ class EventsPage extends Component {
     }
 
     componentDidMount() {
+        this.checkAuth();
         this.loadEvents(1, this.state.search);
         this.loadTags();
     }
@@ -193,7 +196,7 @@ class EventsPage extends Component {
         const { user, setUser } = this.context;
 
         // Если пользователь уже есть в контексте, пропускаем
-        if (user && user.id) return;
+        //if (user && user.id) return;
 
         fetch("http://localhost:9500/api/auth/me", {
             method: 'GET',
@@ -203,8 +206,29 @@ class EventsPage extends Component {
             if (!res.ok) throw new Error("Не авторизован");
             return res.json();
         })
-        .then((userData) => {
-            setUser(userData); // сохраняем в context + localStorage
+        .then((data) => {
+            const ctx = this.context;
+            ctx.setUser({ 
+                id: data.user.id,
+                role: data.user.role,
+                email: data.user.email,
+                username: data.user.username,
+                displayName: data.user.displayName,
+                loggedIn: true,
+                memberLastName: data.customUser.lastName,
+                memberFirstName: data.customUser.firstName,
+                memberPatronymic: data.customUser.patronymic,
+                memberBirthDate: data.customUser.birthDate,
+                memberBirthCity: data.customUser.birthCity,
+                mebmerPrivacy: data.customUser.privacy,
+                organizerName: data.customUser.name,
+                organizerDescription: data.customUser.description,
+                organizerIndustry: data.customUser.industry,
+                organizerAddress: data.customUser.address,
+                organizerAccredited: data.customUser.isAccredited,
+                moderatorIsAdmin: data.customUser.isAdmin
+                //token: data.token
+              }); // сохраняем в context + localStorage
         })
         .catch((err) => {
             console.log("Ошибка авторизации:", err.message);
@@ -217,6 +241,8 @@ class EventsPage extends Component {
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
         const groupedEvents = this.groupEventsByLocation(events);
 
+        console.log(this.context.user);
+
         return (
             <div className="events-container">
                 <div className="header-bar">
@@ -224,26 +250,7 @@ class EventsPage extends Component {
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="login-button-container">
-                            {this.context.user && this.context.user.id ? (
-                                <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                    <button onClick={this.toggleDropdown} className="login-button">
-                                        Профиль
-                                    </button>
-                                    {this.state.showDropdown && (
-                                        <div className="dropdown-menu">
-                                            <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
-                                            <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
-                                            <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
-                                        </div>
-                                    )}
-                                </div>
-                                ) : (
-                                <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                    <button onClick={() => navigate("/login")} className="login-button">
-                                        Войти
-                                    </button>
-                                </div>
-                            )}
+                        <ProfileDropdown navigate={navigate} />
                     </div>
                 </div>
 

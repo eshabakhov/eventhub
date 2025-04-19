@@ -1,12 +1,13 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import UserContext from '../contexts/UserContext';
+import { Link, useNavigate } from 'react-router-dom';
+import UserContext from '../../UserContext';
 import '../../css/ProfileDropdown.css';
 
 const ProfileDropdown = () => {
   const { user } = useContext(UserContext);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => setOpen((prev) => !prev);
 
@@ -21,18 +22,73 @@ const ProfileDropdown = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!user) return null;
+  if (!user || !user.id) {
+    return (
+      <div className="profile-dropdown-container" ref={dropdownRef}>
+        <button onClick={() => navigate('/login')} className="login-button">
+          Войти
+        </button>
+      </div>
+    );
+  }
+
+  const { role, displayName, moderatorIsAdmin } = user;
+
+  let menuItems = [];
+
+  if (role === 'MODERATOR') {
+    if (moderatorIsAdmin) {
+      menuItems = [
+        { label: 'Профиль', path: '/profile' },
+        { label: 'Управление модераторами', path: '/moderator-management' },
+        { label: 'Аккредитация', path: '/accreditation' },
+        { label: 'Выйти', path: '/logout' },
+      ];
+    } else {
+      menuItems = [
+        { label: 'Профиль', path: '/profile' },
+        { label: 'Аккредитация', path: '/accreditation' },
+        { label: 'Выйти', path: '/logout' },
+      ];
+    }
+  } else {
+    const menuItemsByRole = {
+      MEMBER: [
+        { label: 'Профиль', path: '/profile' },
+        { label: 'Друзья', path: '/friends' },
+        { label: 'Мои мероприятия', path: '/my-events' },
+        { label: 'Выйти', path: '/logout' },
+      ],
+      ORGANIZER: [
+        { label: 'Профиль', path: '/profile' },
+        { label: 'Мои мероприятия', path: '/my-events' },
+        { label: 'Выйти', path: '/logout' },
+      ],
+    };
+
+    menuItems = menuItemsByRole[role] || [
+      { label: 'Профиль', path: '/profile' },
+      { label: 'Выйти', path: '/logout' },
+    ];
+  }
+
+  const handleItemClick = (path) => {
+    setOpen(false);
+    navigate(path);
+  };
 
   return (
-    <div className="dropdown" ref={dropdownRef}>
+    <div className="profile-dropdown-container" ref={dropdownRef}>
       <button className="dropdown-toggle" onClick={toggleDropdown}>
-        Профиль
+        {displayName || 'Профиль'}
       </button>
       {open && (
         <ul className="dropdown-menu">
-          <li><Link to="/profile">{user.displayName || 'Мой профиль'}</Link></li>
-          <li><Link to="/friends">Друзья</Link></li>
-          <li><Link to="/logout">Выйти</Link></li>
+          {menuItems.map((item, index) => (
+            <li key={index} onClick={() => handleItemClick(item.path)}>
+              {item.label}
+            </li>
+          ))}
         </ul>
       )}
     </div>
