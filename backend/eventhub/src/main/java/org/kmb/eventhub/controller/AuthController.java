@@ -49,6 +49,8 @@ public class AuthController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        return ResponseEntity.ok(userDetails); // или DTO
+        AuthResponse authResponse = userDetailsService.createAuthResponse(userDetails);
+
+        return ResponseEntity.ok(authResponse); // или DTO
     }
 }
