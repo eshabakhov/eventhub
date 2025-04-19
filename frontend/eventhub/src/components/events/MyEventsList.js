@@ -1,5 +1,5 @@
 ﻿import {useNavigate} from "react-router-dom";
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png"
 import EditIcon from "../../img/edit.png";
@@ -113,17 +113,18 @@ class MyEventsList extends Component {
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
         const currentUser = this.context.user
-        let organizerIdParam = null;
-        let memberIdParam = null;
-        organizerIdParam = "";
-        memberIdParam = "";
+        let url;
         if (currentUser && currentUser.role === "ORGANIZER") {
-            organizerIdParam = currentUser.id ? `&organizerId=${currentUser.id}` : "";
+            url = `http://localhost:9500/api/v1/users/organizers/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         else if (currentUser && currentUser.role === "MEMBER") {
-            memberIdParam = currentUser.id ? `&memberId=${currentUser.id}` : "";
+            url = `http://localhost:9500/api/v1/users/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
-        fetch(`http://localhost:9500/api/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}${organizerIdParam}${memberIdParam}`)
+        fetch(url, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => {
                 const loadedEvents = data.list.map((e) => ({
@@ -165,7 +166,7 @@ class MyEventsList extends Component {
                 ? prevState.selectedTags.filter((t) => t !== tagName)
                 : [...prevState.selectedTags, tagName];
             this.loadEvents(1, this.state.search, selectedTags);
-            return { selectedTags };
+            return {selectedTags};
         });
     };
 
