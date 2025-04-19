@@ -16,7 +16,6 @@ import org.kmb.eventhub.tables.daos.ModeratorDao;
 import org.kmb.eventhub.tables.daos.OrganizerDao;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.tables.daos.UserDao;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
