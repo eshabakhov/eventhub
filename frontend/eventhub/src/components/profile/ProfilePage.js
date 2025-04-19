@@ -79,41 +79,114 @@ class ProfilePage extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     const { user, setUser } = this.context;
-
+    const { formData } = this.state;
+  
     const rolePathMap = {
       ORGANIZER: 'organizers',
       MEMBER: 'members',
       MODERATOR: 'moderators'
     };
-
+  
     const rolePath = rolePathMap[user.role];
-    const endpoint = rolePath
+    const commonEndpoint = `http://localhost:9500/api/v1/users/${user.id}`;
+    const roleEndpoint = rolePath
       ? `http://localhost:9500/api/v1/users/${rolePath}/${user.id}`
-      : `http://localhost:9500/api/v1/users/${user.id}`;
-
+      : null;
+  
+    const {
+      role,
+      email,
+      username,
+      displayName,
+      password,
+      ...restFields
+    } = formData;
+  
+    const commonFields = {
+      role,
+      email,
+      username,
+      displayName,
+      password
+    };
+  
     try {
-      const response = await fetch(endpoint, {
+      // 1. Обновление общих данных
+      const commonResponse = await fetch(commonEndpoint, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(commonFields)
+      });
+  
+      if (!commonResponse.ok) {
+        throw new Error(`Ошибка при обновлении общих данных: ${commonResponse.status}`);
+      }
+  
+      // 2. Обновление ролевых данных
+      if (roleEndpoint) {
+        const roleResponse = await fetch(roleEndpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(restFields)
+        });
+  
+        if (!roleResponse.ok) {
+          throw new Error(`Ошибка при обновлении ролевых данных: ${roleResponse.status}`);
+        }
+      }
+  
+      // 3. Загрузка обновлённых данных
+      const meResponse = await fetch('http://localhost:9500/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(this.state.formData),
-        credentials: 'include'
+        }
       });
-
-      if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status}`);
+  
+      if (!meResponse.ok) {
+        throw new Error(`Ошибка при получении данных пользователя: ${meResponse.status}`);
       }
-
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      this.setState({ successMessage: 'Профиль успешно обновлён' });
-
+  
+      const data = await meResponse.json();
+  
+      const updatedFormData = {
+        role: data.user.role || '',
+        email: data.user.email || '',
+        username: data.user.username || '',
+        displayName: data.user.displayName || '',
+        password: '',
+        ...(data.customUser && {
+          organizationName: data.customUser.name || '',
+          description: data.customUser.description || '',
+          industry: data.customUser.industry || '',
+          address: data.customUser.address || '',
+          accreditation: data.customUser.isAccredited || '',
+          lastName: data.customUser.lastName || '',
+          firstName: data.customUser.firstName || '',
+          patronymic: data.customUser.patronymic || '',
+          birthDate: data.customUser.birthDate || '',
+          birthCity: data.customUser.birthCity || '',
+          privacy: data.customUser.privacy || 'public',
+          isAdmin: !!data.customUser.isAdmin
+        })
+      };
+  
+      // 4. Обновление состояния и контекста
+      this.setState({
+        formData: updatedFormData,
+        successMessage: 'Профиль успешно обновлён'
+      });
+  
+      setUser(data.user);
+  
       setTimeout(() => this.setState({ successMessage: '' }), 3000);
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
     }
-  };
+  };  
 
   getRoleDisplayName = (role) => {
     switch (role) {

@@ -12,7 +12,7 @@ public class MemberDTO {
     private String firstName;
     private String lastName;
     private String patronymic;
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
     private String birthCity;
     private PrivacyEnum privacy;

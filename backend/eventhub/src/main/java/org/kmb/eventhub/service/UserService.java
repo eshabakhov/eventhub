@@ -6,6 +6,7 @@ import org.kmb.eventhub.dto.*;
 import org.kmb.eventhub.enums.PrivacyEnum;
 import org.kmb.eventhub.enums.PrivacyType;
 import org.kmb.eventhub.enums.RoleEnum;
+import org.kmb.eventhub.enums.RoleType;
 import org.kmb.eventhub.exception.*;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.mapper.UserMapper;
@@ -191,19 +192,33 @@ public class UserService {
     @Transactional
     public User update(Long id, UserDTO userDTO) {
 
-        User user = userMapper.toEntity(userDTO);
-        if (Objects.isNull(user))
-            throw new UserNotFoundException(id);
-        if (Objects.nonNull(user.getIsActive()))
-            throw new ImmutableFieldException("isActive");
-
-        user.setId(id);
-        User userFromDb = userDao.findOptionalById(id)
+        User user = userDao.findOptionalById(id)
                 .filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        if (!Objects.equals(user.getEmail(), userFromDb.getEmail()))
-            throw new ImmutableFieldException("Email");
+        if (Objects.nonNull(userDTO.getRole())) {
+            /*if (!RoleType.MODERATOR.getLiteral().equals(userDTO.getRole().name())) {
+                throw new ImmutableFieldException("role");
+            }*/
+            if (RoleEnum.MEMBER.equals(userDTO.getRole()))
+                user.setRole(RoleType.MEMBER);
+            if (RoleEnum.ORGANIZER.equals(userDTO.getRole()))
+                user.setRole(RoleType.ORGANIZER);
+            if (RoleEnum.MODERATOR.equals(userDTO.getRole()))
+                user.setRole(RoleType.MODERATOR);
+        }
+        if (Objects.nonNull(userDTO.getEmail())) {
+            user.setEmail(userDTO.getEmail());
+        }
+        if (Objects.nonNull(userDTO.getIsActive())) {
+            user.setIsActive(userDTO.getIsActive());
+        }
+        if (Objects.nonNull(userDTO.getUsername()))
+            user.setUsername(userDTO.getUsername());
+        if (Objects.nonNull(userDTO.getDisplayName()))
+            user.setDisplayName(userDTO.getDisplayName());
+        if (Objects.nonNull(userDTO.getPassword()) && !userDTO.getPassword().isEmpty())
+            user.setPassword(userDTO.getPassword());
 
         userDao.update(user);
         return user;
