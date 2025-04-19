@@ -68,7 +68,6 @@ public class SecurityConfig {
                         .logoutUrl("/v1/auth/logout")
                         .addLogoutHandler(jwtCookieLogoutHandler())
                         .deleteCookies("JSESSIONID")
-                        .deleteCookies("token")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                         }))
@@ -124,7 +123,7 @@ public class SecurityConfig {
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setMaxAge(0);
-            cookie.setSecure(true); // если у тебя HTTPS
+            cookie.setSecure(true);
             response.addCookie(cookie);
         };
     }
