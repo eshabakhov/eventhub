@@ -214,6 +214,23 @@ public class UserController {
 
         return eventService.getList(page, pageSize, search, tags, null, id);
     }
+    @Operation(summary = "Отказаться от участия.",
+            description = "Удаляет участие пользователя в мероприятии.")
+    @ApiResponse(responseCode = "200",
+            description = "Участие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/members/{id}/events")
+    public void deleteParticipation(
+            @PathVariable Long id,
+            @RequestParam Long eventId) {
+        subscribeService.unsubscribeFromEvent(eventId, id);
+    }
 
     @Operation(summary = "Получить список мероприятий организатора.",
             description = "Возвращает все мероприятия, которые создал организатор.")
@@ -231,6 +248,22 @@ public class UserController {
             @RequestParam(value = "tags", required = false) String tags) {
 
         return eventService.getList(page, pageSize, search, tags, id, null);
+    }
+
+    @Operation(summary = "Удалить мероприятие.",
+            description = "Удаляет мероприятие по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Мероприятие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/organizers/{id}/events")
+    public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
+        return eventService.delete(id, eventId);
     }
 
     @Operation(summary = "Добавление новых тегов в избранное пользователя.",

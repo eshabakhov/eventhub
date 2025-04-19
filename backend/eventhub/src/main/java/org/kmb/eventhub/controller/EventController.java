@@ -135,21 +135,21 @@ public class EventController {
         return eventService.addTagsToEvent(id, eventTagsDTO.getTags());
     }
 
-    @Operation(summary = "Удалить мероприятие.",
-            description = "Удаляет мероприятие по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Мероприятие удалено.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Event.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Мероприятие не найдено",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}")
-    public Long delete(@PathVariable Long id) {
-        return eventService.delete(id);
-    }
+//    @Operation(summary = "Удалить мероприятие.",
+//            description = "Удаляет мероприятие по ID.")
+//    @ApiResponse(responseCode = "200",
+//            description = "Мероприятие удалено.",
+//            content = @Content(mediaType = "application/json",
+//            schema = @Schema(implementation = Event.class)))
+//    @ApiResponse(responseCode = "404",
+//            description = "Мероприятие не найдено",
+//            content = @Content(mediaType = "application/json",
+//            schema = @Schema(implementation = ResponseDTO.class)))
+//    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+//    @DeleteMapping(value = "/{id}")
+//    public Long delete(@PathVariable Long id) {
+//        return eventService.delete(id);
+//    }
 
     @Operation(summary = "Удалить тег у мероприятия.",
             description = "Удаляет тег по ID.")
