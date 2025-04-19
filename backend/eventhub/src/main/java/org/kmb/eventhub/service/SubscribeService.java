@@ -31,7 +31,7 @@ public class SubscribeService {
         eventService.get(eventId);
         userMapper.toMemberDto(userService.getMember(memberId));
 
-        if (!Objects.nonNull(subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1)))
+        if (Objects.nonNull(subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1)))
             throw new UnexpectedException(String.format("User %d already subscribed to event %d", memberId, eventId));
 
         EventMembers eventMembers = new EventMembers();
