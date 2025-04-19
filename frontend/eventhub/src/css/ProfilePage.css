@@ -1,13 +1,14 @@
 .profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 1rem;
-  background-color: #f3f4f6;
-  overflow-x: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .profile-card {
+  margin-top: 20px;
   background-color: #ffffff;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
@@ -100,4 +101,33 @@ textarea.profile-input {
   .profile-input {
     font-size: 0.875rem;
   }
+}
+
+.back-area {
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+.back-area:hover .back-button {
+  background-color: #f0f0f0;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+.back-button {
+  position: absolute;
+  top: 12px;
+  right: 20px; /* ближе к карточке */
+  font-size: 24px;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  border: none; /* убираем рамку */
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 2;
 }
