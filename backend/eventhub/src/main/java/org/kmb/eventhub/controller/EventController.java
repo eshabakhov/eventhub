@@ -60,10 +60,8 @@ public class EventController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) String tags,
-            @RequestParam(value = "organizerId", required = false) Long organizerId,
-            @RequestParam(value = "memberId", required = false) Long memberId) {
-        return eventService.getList(page, pageSize, search, tags, organizerId, memberId);
+            @RequestParam(value = "tags", required = false) String tags) {
+        return eventService.getList(page, pageSize, search, tags, null, null);
     }
 
     @Operation(summary = "Получить информацию о мероприятии.",

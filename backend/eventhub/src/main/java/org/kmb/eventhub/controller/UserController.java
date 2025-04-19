@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.service.UserService;
@@ -23,6 +24,8 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    private final EventService eventService;
 
     private final SubscribeService subscribeService;
 
@@ -199,13 +202,35 @@ public class UserController {
     @ApiResponse(responseCode = "200",
             description = "Список всех мероприятий.",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Event.class)))
+            schema = @Schema(implementation = Event.class)))
     @ResponseStatus(value = HttpStatus.OK)
     @GetMapping(value = "/members/{id}/events")
-    public ResponseList<Event> getMemberEvents(@PathVariable Long id,
-                                               @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return subscribeService.getEventsByMemberId(id, page, pageSize);
+    public ResponseList<EventDTO> getMemberEvents(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+
+        return eventService.getList(page, pageSize, search, tags, null, id);
+    }
+
+    @Operation(summary = "Получить список мероприятий организатора.",
+            description = "Возвращает все мероприятия, которые создал организатор.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers/{id}/events")
+    public ResponseList<EventDTO> getOrganizerEvents(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+
+        return eventService.getList(page, pageSize, search, tags, id, null);
     }
 
     @Operation(summary = "Добавление новых тегов в избранное пользователя.",
