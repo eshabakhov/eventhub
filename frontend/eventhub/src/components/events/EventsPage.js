@@ -174,6 +174,43 @@ class EventsPage extends Component {
         return null;
     }
 
+    handleOutsideClick = (e) => {
+        if (this.dropdownRef && !this.dropdownRef.contains(e.target)) {
+            this.setState({ showDropdown: false });
+        }
+    };
+    
+    toggleDropdown = () => {
+        this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
+    };
+
+    handleMenuClick = (path) => {
+        this.setState({ showDropdown: false });
+        this.props.navigate(path);
+    };
+
+    checkAuth = () => {
+        const { user, setUser } = this.context;
+
+        // Если пользователь уже есть в контексте, пропускаем
+        if (user && user.id) return;
+
+        fetch("http://localhost:9500/api/auth/me", {
+            method: 'GET',
+            credentials: 'include',
+        })
+        .then((res) => {
+            if (!res.ok) throw new Error("Не авторизован");
+            return res.json();
+        })
+        .then((userData) => {
+            setUser(userData); // сохраняем в context + localStorage
+        })
+        .catch((err) => {
+            console.log("Ошибка авторизации:", err.message);
+        });
+    };
+
     render() {
         const { navigate } = this.props;
         const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
@@ -187,9 +224,26 @@ class EventsPage extends Component {
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="login-button-container">
-                        <button onClick={() => navigate("/login")} className="login-button">
-                            Войти
-                        </button>
+                            {this.context.user && this.context.user.id ? (
+                                <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                    <button onClick={this.toggleDropdown} className="login-button">
+                                        Профиль
+                                    </button>
+                                    {this.state.showDropdown && (
+                                        <div className="dropdown-menu">
+                                            <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
+                                            <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
+                                            <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
+                                        </div>
+                                    )}
+                                </div>
+                                ) : (
+                                <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
+                                    <button onClick={() => navigate("/login")} className="login-button">
+                                        Войти
+                                    </button>
+                                </div>
+                            )}
                     </div>
                 </div>
 
@@ -281,7 +335,7 @@ class EventsPage extends Component {
                     </motion.div>
                     {/* Карта */}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-                        <MapContainer center={[55.75, 37.61]} zoom={11} style={{ height: "100%" }}>
+                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{ height: "100%" }} maxBounds={[[-90, -180],[90, 180]]}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
                             {events.length > 0 && <FitToAllMarkers events={events} />}
                             {this.state.focusedEvent && this.state.focusedMarkerId && (
