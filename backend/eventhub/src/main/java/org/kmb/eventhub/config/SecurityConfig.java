@@ -74,7 +74,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users").permitAll()
-                        .requestMatchers( "/v1/events").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/events").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/users").hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers("/v1/users/{id}").hasRole(RoleEnum.MODERATOR.name())
 
