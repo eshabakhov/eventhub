@@ -6,6 +6,7 @@ import LoginForm from "./components/login/LoginForm"
 import EventsPage from "./components/events/EventsPage";
 import ProfilePage from "./components/profile/ProfilePage"
 import LogoutPage from "./components/logout/LogoutPage"
+import EventForm from "./components/eventForm/EventForm";
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -30,6 +31,7 @@ class App extends React.Component {
               <Route path='/events' exact={true} element={<EventsPage/>}/>
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
+              <Route path='/events/create' exact={true} element={<EventForm/>}/>
             </Routes>
           </UserProvider>
         </Router>
