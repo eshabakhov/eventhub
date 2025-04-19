@@ -32,7 +32,7 @@ class Login extends React.Component {
       middleName: '',
       birthDate: '',
       birthCity: '',
-      privacy: 'private',
+      privacy: 'PRIVATE',
 
       redirect: false
     };
@@ -66,105 +66,147 @@ class Login extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+  
     const {
-      step, username, password, confirmPassword, role, email, displayName,
-      orgName, shortDesc, fullDesc, industry, address,
-      lastName, firstName, middleName, birthDate, birthCity, privacy
+      isLogin,
+      step,
+      username,
+      password,
+      confirmPassword,
+      role,
+      email,
+      displayName,
+      orgName,
+      shortDesc,
+      fullDesc,
+      industry,
+      address,
+      accreditation,
+      lastName,
+      firstName,
+      middleName,
+      birthDate,
+      birthCity,
+      privacy
     } = this.state;
   
-    if (step !== 2) return;
+    if (isLogin) {
+      // Обработка входа
+      if (!username || !password) {
+        alert("Введите имя пользователя и пароль");
+        return;
+      }
   
-    let roleValid = true;
+      fetch("http://localhost:9500/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Неверные учетные данные");
+          return res.json();
+        })
+        .then(data => {
+          this.setState({ redirect: true });
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Ошибка при входе");
+        });
   
-    if (role === "ORGANIZER") {
-      roleValid = orgName && shortDesc && fullDesc && industry && address;
-    } else if (role === "MEMBER") {
-      roleValid = lastName && firstName && middleName && birthDate && birthCity && privacy;
+    } else if (step === 2) {
+      // Обработка регистрации
+      let roleValid = true;
+  
+      if (role === "ORGANIZER") {
+        roleValid = orgName && shortDesc && fullDesc && industry && address && accreditation;
+      } else if (role === "MEMBER") {
+        roleValid = lastName && firstName && middleName && birthDate && birthCity && privacy;
+      }
+  
+      if (!roleValid) {
+        alert("Пожалуйста, заполните все поля на втором шаге");
+        return;
+      }
+  
+      const commonData = {
+        username,
+        email,
+        password,
+        displayName,
+        role
+      };
+  
+      // 1. Создание пользователя
+      fetch("http://localhost:9500/api/v1/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(commonData)
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Ошибка при создании пользователя");
+          return res.json();
+        })
+        .then(user => {
+          const userId = user.id;
+  
+          // 2. Авторизация нового пользователя
+          return fetch("http://localhost:9500/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ username, password })
+          }).then(res => {
+            if (!res.ok) throw new Error("Ошибка при входе нового пользователя");
+            return { userId };
+          });
+        })
+        .then(({ userId }) => {
+          // 3. Отправка данных роли
+          let url = "";
+          let rolePayload = {};
+  
+          if (role === "ORGANIZER") {
+            url = `http://localhost:9500/api/v1/users/organizers/${userId}`;
+            rolePayload = {
+              name: orgName,
+              description: fullDesc,
+              shortDescription: shortDesc,
+              industry,
+              address,
+              isAccredited: accreditation
+            };
+          } else {
+            url = `http://localhost:9500/api/v1/users/members/${userId}`;
+            rolePayload = {
+              lastName,
+              firstName,
+              patronymic: middleName,
+              birthDate,
+              birthCity,
+              privacy
+            };
+          }
+  
+          return fetch(url, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(rolePayload)
+          });
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Ошибка при обновлении данных роли");
+          this.setState({ redirect: true });
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Ошибка при регистрации");
+        });
     }
-  
-    if (!roleValid) {
-      alert("Пожалуйста, заполните все поля на втором шаге");
-      return;
-    }
-  
-    const commonData = {
-      username,
-      email,
-      password,
-      displayName,
-      role
-    };
-  
-    let createdUserId = null;
-  
-    // 1. Создаём пользователя
-    fetch("http://localhost:9500/api/v1/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(commonData)
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Ошибка при создании пользователя");
-        return res.json();
-      })
-      .then(user => {
-        createdUserId = user.id;
-  
-        // 2. Авторизуем нового пользователя
-        return fetch("http://localhost:9500/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username, password })
-        });
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Ошибка при авторизации нового пользователя");
-  
-        // 3. Отправляем данные по роли
-        let rolePayload = {};
-        let url = "";
-  
-        if (role === "ORGANIZER") {
-          url = `http://localhost:9500/api/v1/users/organizers/${createdUserId}`;
-          rolePayload = {
-            name: orgName,
-            description: fullDesc,
-            shortDescription: shortDesc,
-            industry,
-            address
-          };
-        } else if (role === "MEMBER") {
-          url = `http://localhost:9500/api/v1/users/members/${createdUserId}`;
-          rolePayload = {
-            lastName,
-            firstName,
-            patronymic: middleName,
-            birthDate,
-            birthCity,
-            privacy
-          };
-        }
-  
-        return fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(rolePayload)
-        });
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Ошибка при обновлении данных роли");
-        this.setState({
-          redirect: true
-        });
-      })      
-      .catch(err => {
-        console.error(err);
-        alert("Ошибка при регистрации: " + err.message);
-      });
-  };    
+  };      
   
   handleRegistration = () => {
     const {
@@ -329,9 +371,9 @@ class Login extends React.Component {
               <input type="date" name="birthDate" onChange={this.handleChange} required />
               <input name="birthCity" placeholder="Город рождения" onChange={this.handleChange} required />
               <select name="privacy" onChange={this.handleChange}>
-                <option value="private">Приватный</option>
-                <option value="public">Публичный</option>
-                <option value="friends">Только для друзей</option>
+                <option value="PRIVATE">Приватный</option>
+                <option value="PUBLIC">Публичный</option>
+                <option value="ONLY_FRIENDS">Только для друзей</option>
               </select>
             </>
           )}
