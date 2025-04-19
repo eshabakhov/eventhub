@@ -25,7 +25,6 @@ class Login extends React.Component {
       fullDesc: '',
       industry: '',
       address: '',
-      accreditation: '',
 
       // Участник
       lastName: '',
@@ -67,111 +66,110 @@ class Login extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { isLogin, isRegisterStep2, username, password, confirmPassword, role, email } = this.state;
+    const {
+      step, username, password, confirmPassword, role, email, displayName,
+      orgName, shortDesc, fullDesc, industry, address,
+      lastName, firstName, middleName, birthDate, birthCity, privacy
+    } = this.state;
   
-    if (isLogin) {
-      // логика входа
-      const payload = { username, password };
-      fetch('http://localhost:9500/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'include'
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Ошибка входа');
-          return res.json();
-        })
-        .then(data => {
-          const ctx = this.context;
-          if (
-              //data.token &&
-              ctx.setUser) {
-            //document.cookie = `token=${data.token}; path=/; Secure; SameSite=Strict`;
-            //localStorage.setItem('token', data.token);
-            console.log(data); 
-            ctx.setUser({ 
-              id: data.user.id,
-              role: data.user.role,
-              email: data.user.email,
-              username: username,
-              displayName: data.user.displayName,
-              loggedIn: true,
-              memberLastName: data.customUser.lastName,
-              memberFirstName: data.customUser.firstName,
-              memberPatronymic: data.customUser.patronymic,
-              memberBirthDate: data.customUser.birthDate,
-              memberBirthCity: data.customUser.birthCity,
-              mebmerPrivacy: data.customUser.privacy,
-              organizerName: data.customUser.name,
-              organizerDescription: data.customUser.description,
-              organizerIndustry: data.customUser.industry,
-              organizerAddress: data.customUser.address,
-              organizerAccredited: data.customUser.isAccredited,
-              moderatorIsAdmin: data.customUser.isAdmin
-              //token: data.token
-            });
-            this.setState({ redirect: true }); // ← редирект после входа
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Ошибка при входе');
-        });
-    } else {
-      // Регистрация: шаг 1 → шаг 2
-      if (!isRegisterStep2) {
-        if (!role || !email || !username || !password || password !== confirmPassword) {
-          alert('Пожалуйста, заполните все поля корректно');
-          return;
-        }
-        this.setState({ isRegisterStep2: true });
-        return;
-      }
+    if (step !== 2) return;
   
-      // Регистрация: шаг 2 — отправка финальных данных
-      const payload = {
-        username,
-        password,
-        role,
-        email,
-        ...this.state.additionalData, // то, что ввели на втором шаге
-      };
+    let roleValid = true;
   
-      fetch('http://localhost:9500/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'include'
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Ошибка регистрации');
-          return res.json();
-        })
-        .then(() => {
-          alert('Регистрация завершена');
-          this.setState({
-            isLogin: true,
-            isRegisterStep2: false,
-            username: '',
-            password: '',
-            confirmPassword: '',
-            email: '',
-            role: '',
-            additionalData: {},
-          });
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Ошибка');
-        });
+    if (role === "ORGANIZER") {
+      roleValid = orgName && shortDesc && fullDesc && industry && address;
+    } else if (role === "MEMBER") {
+      roleValid = lastName && firstName && middleName && birthDate && birthCity && privacy;
     }
-  };
+  
+    if (!roleValid) {
+      alert("Пожалуйста, заполните все поля на втором шаге");
+      return;
+    }
+  
+    const commonData = {
+      username,
+      email,
+      password,
+      displayName,
+      role
+    };
+  
+    let createdUserId = null;
+  
+    // 1. Создаём пользователя
+    fetch("http://localhost:9500/api/v1/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(commonData)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Ошибка при создании пользователя");
+        return res.json();
+      })
+      .then(user => {
+        createdUserId = user.id;
+  
+        // 2. Авторизуем нового пользователя
+        return fetch("http://localhost:9500/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username, password })
+        });
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Ошибка при авторизации нового пользователя");
+  
+        // 3. Отправляем данные по роли
+        let rolePayload = {};
+        let url = "";
+  
+        if (role === "ORGANIZER") {
+          url = `http://localhost:9500/api/v1/users/organizers/${createdUserId}`;
+          rolePayload = {
+            name: orgName,
+            description: fullDesc,
+            shortDescription: shortDesc,
+            industry,
+            address
+          };
+        } else if (role === "MEMBER") {
+          url = `http://localhost:9500/api/v1/users/members/${createdUserId}`;
+          rolePayload = {
+            lastName,
+            firstName,
+            patronymic: middleName,
+            birthDate,
+            birthCity,
+            privacy
+          };
+        }
+  
+        return fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(rolePayload)
+        });
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Ошибка при обновлении данных роли");
+        this.setState({
+          redirect: true
+        });
+      })      
+      .catch(err => {
+        console.error(err);
+        alert("Ошибка при регистрации: " + err.message);
+      });
+  };    
   
   handleRegistration = () => {
     const {
       username, email, password, role,
-      orgName, shortDesc, fullDesc, industry, address, accreditation,
+      orgName, shortDesc, fullDesc, industry, address,
       lastName, firstName, middleName, birthDate, birthCity, privacy
     } = this.state;
 
@@ -179,7 +177,7 @@ class Login extends React.Component {
 
     let roleData = {};
     if (role === 'organizer') {
-      roleData = { orgName, shortDesc, fullDesc, industry, address, accreditation };
+      roleData = { orgName, shortDesc, fullDesc, industry, address };
     } else {
       roleData = { lastName, firstName, middleName, birthDate, birthCity, privacy };
     }
@@ -235,18 +233,29 @@ class Login extends React.Component {
     );
   }
   
+  handleNext = (e) => {
+    e.preventDefault();
+    const { username, email, password, confirmPassword, role, displayName } = this.state;
+  
+    if (!username || !email || !password || password !== confirmPassword || !role || !displayName) {
+      alert("Пожалуйста, заполните все поля корректно");
+      return;
+    }
+  
+    this.setState({ step: 2 });
+  };  
 
   renderStep1() {
-    const { username, password, confirmPassword, email, role } = this.state;
+    const { username, password, confirmPassword, email, role, displayName } = this.state;
   
     return (
       <>
         <h2>Регистрация</h2>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleNext}>
           <select name="role" value={role} onChange={this.handleChange} required>
             <option value="">Выберите роль</option>
-            <option value="organizer">Организатор</option>
-            <option value="participant">Участник</option>
+            <option value="ORGANIZER">Организатор</option>
+            <option value="MEMBER">Участник</option>
           </select>
           <input
             type="email"
@@ -259,7 +268,7 @@ class Login extends React.Component {
           <input
             type="text"
             name="username"
-            placeholder="Имя пользователя"
+            placeholder="Логин"
             value={username}
             onChange={this.handleChange}
             required
@@ -280,6 +289,14 @@ class Login extends React.Component {
             onChange={this.handleChange}
             required
           />
+          <input
+            type="text"
+            name="displayName"
+            placeholder="Отображаемое имя пользователя"
+            value={displayName}
+            onChange={this.handleChange}
+            required
+          />
           <button type="submit">Далее</button>
         </form>
         <p onClick={this.handleToggle} className="toggle-link">
@@ -296,14 +313,13 @@ class Login extends React.Component {
       <>
         <h2>Регистрация</h2>
         <form onSubmit={this.handleSubmit}>
-          {role === 'organizer' ? (
+          {role === 'ORGANIZER' ? (
             <>
               <input name="orgName" placeholder="Название организации" onChange={this.handleChange} required />
               <input name="shortDesc" placeholder="Краткое описание" onChange={this.handleChange} required />
               <textarea name="fullDesc" placeholder="Полное описание" onChange={this.handleChange} required />
               <input name="industry" placeholder="Сфера деятельности" onChange={this.handleChange} required />
               <input name="address" placeholder="Адрес" onChange={this.handleChange} required />
-              <input name="accreditation" placeholder="Аккредитация" onChange={this.handleChange} required />
             </>
           ) : (
             <>
@@ -327,7 +343,7 @@ class Login extends React.Component {
   
 
   render() {
-    const { isLogin, isRegisterStep2, redirect } = this.state;
+    const { isLogin, step, redirect } = this.state;
 
     if (redirect) {
       return <Navigate to="/events" replace />;
@@ -337,7 +353,7 @@ class Login extends React.Component {
       <div className="auth-container">
         {isLogin
           ? this.renderLogin()
-          : isRegisterStep2
+          : step === 2
             ? this.renderStep2()
             : this.renderStep1()}
       </div>
