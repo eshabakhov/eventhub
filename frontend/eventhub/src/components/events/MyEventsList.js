@@ -70,6 +70,57 @@ function FitToAllMarkers({ events }) {
     return null;
 }
 
+// Модальное окно для подтверждения отказа от участия или удаления мероприятия
+const ConfirmModal = ({ isOpen, onClose, onConfirm, eventTitle, user }) => {
+    if (!isOpen) return null;
+    return (
+        // Если участник, удаляем участие
+       user.role === "MEMBER" && (
+           <div className="modal-overlay">
+               <motion.div
+                   className="modal-content"
+                   initial={{ scale: 0.9, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   exit={{ scale: 0.9, opacity: 0 }}
+               >
+                   <h3>Подтверждение</h3>
+                   <p>Вы уверены, что хотите отказаться от участия в мероприятии "{eventTitle}"?</p>
+                   <div className="modal-buttons">
+                       <button className="modal-button cancel" onClick={onClose}>
+                           Отмена
+                       </button>
+                       <button className="modal-button confirm" onClick={onConfirm}>
+                           Подтвердить
+                       </button>
+                   </div>
+               </motion.div>
+           </div>
+       ) ||
+           // Если организатор, удаляем мероприятие
+       user.role === "ORGANIZER" && (
+           <div className="modal-overlay">
+               <motion.div
+                   className="modal-content"
+                   initial={{ scale: 0.9, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   exit={{ scale: 0.9, opacity: 0 }}
+               >
+                   <h3>Внимание!</h3>
+                   <p>Вы уверены, что хотите навсегда удалить мероприятие "{eventTitle}"? Действие невозможно будет отменить!</p>
+                   <div className="modal-buttons">
+                       <button className="modal-button cancel" onClick={onClose}>
+                           Отмена
+                       </button>
+                       <button className="modal-button confirm" onClick={onConfirm}>
+                           Удалить
+                       </button>
+                   </div>
+               </motion.div>
+           </div>
+        )
+    );
+};
+
 class MyEventsList extends Component {
     static contextType = UserContext;
 
@@ -86,6 +137,8 @@ class MyEventsList extends Component {
             totalEvents: 0,
             tags: [],
             selectedTags: [],
+            showConfirmModal: false,
+            selectedEvent: null,
         };
     }
 
@@ -93,6 +146,7 @@ class MyEventsList extends Component {
         this.loadEvents(1, this.state.search);
         this.loadTags();
     }
+
     // Загрузка тегов
     loadTags = () => {
         fetch("http://localhost:9500/api/v1/tags", {
@@ -146,11 +200,96 @@ class MyEventsList extends Component {
             })
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
+
+    // Открытие модального окна для отказа от участия
+    handleDeclineClick = (event) => {
+        this.setState({
+            showConfirmModal: true,
+            selectedEvent: event
+        });
+    };
+    // Открытие модального окна удаления мероприятия
+    handleDeleteClick = (event) => {
+        this.setState({
+            showConfirmModal: true,
+            selectedEvent: event
+        });
+    }
+
+    // Закрытие модального окна
+    handleCloseModal = () => {
+        this.setState({
+            showConfirmModal: false,
+            selectedEvent: null
+        });
+    };
+
+    // Подтверждение
+    handleConfirmDecline = () => {
+        const { selectedEvent } = this.state;
+        const { user } = this.context;
+        if (!selectedEvent || !user) {
+            this.handleCloseModal();
+            return;
+        }
+        if (user.role === "MEMBER") {
+            this.refuceToParticipation(selectedEvent, user);
+        }
+        if (user.role === "ORGANIZER") {
+            this.deleteEvent(selectedEvent, user);
+        }
+
+    };
+    // Отмена участия
+    refuceToParticipation = (selectedEvent, user) => {
+        const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
+        fetch(`http://localhost:9500/api/v1/users/members/${user.id}/events?${eventParam}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
+            .then((res) => {
+                if (res.ok) {
+                    // Обновляем список мероприятий после успешного отказа
+                    this.loadEvents(this.state.currentPage, this.state.search, this.state.selectedTags);
+                } else {
+                    console.error("Ошибка при отказе от участия");
+                }
+            })
+            .catch((err) => console.error("Ошибка при отказе от участия:", err))
+            .finally(() => {
+                this.handleCloseModal();
+            });
+    }
+
+    // Удаление мероприятия
+    deleteEvent = (selectedEvent, user) => {
+        const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
+        fetch(`http://localhost:9500/api/v1/users/organizers/${user.id}/events?${eventParam}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
+            .then((res) => {
+                if (res.ok) {
+                    // Обновляем список мероприятий после успешного удаления
+                    this.loadEvents(this.state.currentPage, this.state.search, this.state.selectedTags);
+                } else {
+                    console.error("Ошибка при удалении мероприятия");
+                }
+            })
+            .catch((err) => console.error("Ошибка при удалении мероприятия:", err))
+            .finally(() => {
+                this.handleCloseModal();
+            });
+    }
+
     // Обработка изменения поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
         this.setState({ search: newSearch });
     };
+
     // Обработка перехода на другую страницу
     handlePageClick = (pageNumber) => {
         this.loadEvents(pageNumber, this.state.search, this.state.selectedTags);
@@ -180,6 +319,7 @@ class MyEventsList extends Component {
         }
         return groups;
     }
+
     // Получение маркера для события
     getMarkerIdForEvent(event) {
         const grouped = this.groupEventsByLocation(this.state.events);
@@ -228,14 +368,21 @@ class MyEventsList extends Component {
 
     render() {
         const { navigate } = this.props;
-        const { events, tags, search, currentPage, eventsPerPage, totalEvents } = this.state;
+        const { events, tags, search, currentPage, eventsPerPage, totalEvents, showConfirmModal, selectedEvent } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
         const groupedEvents = this.groupEventsByLocation(events);
 
-        console.log(this.context.user);
-
         return (
             <div className="events-container">
+                {/* Модальное окно подтверждения */}
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    onClose={this.handleCloseModal}
+                    onConfirm={this.handleConfirmDecline}
+                    eventTitle={selectedEvent?.title || ""}
+                    user={this.context.user}
+                />
+
                 <div className="header-bar">
                     <div className="top-logo">
                         <img src={EventHubLogo} alt="Logo" className="logo" />
@@ -284,21 +431,26 @@ class MyEventsList extends Component {
                         {/* Карточки событий */}
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
-
+                                {/*Кнопки в карточке в зависимости от роли*/}
                                 {this.context.user && this.context.user.role === "ORGANIZER" && (
                                     <div className="params-buttons">
                                         <button className="edit-button" title='Редактировать мероприятие'>
                                             <img src={EditIcon} alt='Редактировать' className="icon"/>
                                         </button>
-                                        <button className="delete-button" title='Удалить мероприятие'>
+                                        <button className="delete-button" title='Удалить мероприятие'
+                                                onClick={() => this.handleDeleteClick(event)}
+                                        >
                                             <img src={DeleteIcon} alt='Удалить' className="icon"/>
                                         </button>
                                     </div>
                                 )}
-
                                 {this.context.user && this.context.user.role === "MEMBER" && (
                                     <div className="params-buttons">
-                                        <button className="delete-button" title='Отказаться от участия'>
+                                        <button
+                                            className="delete-button"
+                                            title='Отказаться от участия'
+                                            onClick={() => this.handleDeclineClick(event)}
+                                        >
                                             <img src={CrossIcon} alt='Удалить' className="icon"/>
                                         </button>
                                     </div>
@@ -342,6 +494,7 @@ class MyEventsList extends Component {
                             ))}
                         </div>
                     </motion.div>
+                    {/*Карта*/}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                         <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{ height: "100%" }} maxBounds={[[-90, -180],[90, 180]]}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
@@ -368,7 +521,6 @@ class MyEventsList extends Component {
                             })}
                         </MapContainer>
                     </motion.div>
-
                 </div>
             </div>
         );
