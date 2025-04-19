@@ -218,7 +218,7 @@ public class UserService {
         if (Objects.nonNull(userDTO.getDisplayName()))
             user.setDisplayName(userDTO.getDisplayName());
         if (Objects.nonNull(userDTO.getPassword()) && !userDTO.getPassword().isEmpty())
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
 
         userDao.update(user);
         return user;
