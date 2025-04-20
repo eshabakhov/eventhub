@@ -107,7 +107,7 @@
   }
   
   .add-button,
-  .accept-button,
+  .accept-frineds-button,
   .remove-button {
     padding: 6px 12px;
     background-color: #28a745;
@@ -120,7 +120,7 @@
   }
   
   .add-button:hover,
-  .accept-button:hover {
+  .accept-frineds-button:hover {
     background-color: #218838;
   }
   

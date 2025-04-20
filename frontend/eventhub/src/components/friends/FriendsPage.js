@@ -111,7 +111,7 @@ class FriendsPage extends Component {
   handleRemoveFriend = (friendId) => {
     const { userId } = this.state;
 
-    fetch(`http://localhost:9500/api/v1/users/members/${userId}/friends?=${friendId}`, {
+    fetch(`http://localhost:9500/api/v1/users/members/${userId}/friends?idFrom=${friendId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -210,7 +210,7 @@ class FriendsPage extends Component {
                         {incomingRequests.map(user => (
                             <li key={user.id} className="incoming-request-item">
                             <span>{user.displayName || user.username}</span>
-                            <button className="accept-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять</button>
+                            <button className="accept-frineds-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять</button>
                             </li>
                         ))}
                         </ul>
