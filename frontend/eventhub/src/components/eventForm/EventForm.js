@@ -1,10 +1,11 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import {withNavigation} from "../events/EventsPage";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import "../../css/EventForm.css";
 import axios from "axios";
+import ProfileDropdown from "../profile/ProfileDropdown";
 
 
 const formatDateForBackend = (dateTimeString) => {
@@ -53,7 +54,7 @@ class EventForm extends React.Component {
     };
 
     validate = () => {
-        const { description, location, startDateTime, endDateTime } = this.state;
+        const {description, location, startDateTime, endDateTime} = this.state;
         const errors = {};
 
         if (!description) errors.description = 'Описание обязательно';
@@ -65,13 +66,14 @@ class EventForm extends React.Component {
             errors.endDateTime = 'Дата окончания должна быть после даты начала';
         }
 
-        this.setState({ errors });
+        this.setState({errors});
         return Object.keys(errors).length === 0;
     };
 
     handleSubmit = (e) => {
+        console.log('handleSubmit');
         e.preventDefault();
-        const { user } = this.context;
+        const {user} = this.context;
 
         if (this.validate()) {
             const eventData = {
@@ -102,8 +104,7 @@ class EventForm extends React.Component {
             })
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
-                    //navigate('/');
-                    this.props.navigate('/events');
+                    this.props.navigate('/my-events');
                 })
                 .catch(error => {
                     console.error('Error saving event:', error);
@@ -114,131 +115,103 @@ class EventForm extends React.Component {
     };
 
     render() {
-        const { errors } = this.state;
-        const { navigate } = this.props;
+        const {title, description, shortDescription, location, errors} = this.state;
+        const {navigate} = this.props;
 
         return (
+            <div>
                 <div className="header-bar">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
-                        <img src={EventHubLogo} alt="Logo" className="logo" />
+                    <div className="top-logo">
+                        <img src={EventHubLogo} alt="Logo" className="logo"/>
                     </div>
                     <label className="panel-title">Создание мероприятия</label>
                     <div className="return-button-container">
-                        <button onClick={() => navigate("/events")} className="return-button">
-                            Просмотр мероприятий
+                        <button className="create-button" onClick={() => navigate("/my-events")}>
+                            Мои мероприятия
                         </button>
+                        <ProfileDropdown navigate={navigate}/>
                     </div>
-
-
-
-                <div className="event-form">
-                    <form onSubmit={this.handleSubmit}>
-                        <div className="form-group">
-                            <label className="event-label">
-                                Название мероприятия:
-                                <input
-                                    className="event-input"
-                                    type="text"
-                                    name="title"
-                                    value={this.state.title}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.title && <span className="error-message">{errors.title}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Описание:
-                                <input
-                                    className="event-input"
-                                    type="text"
-                                    name="description"
-                                    value={this.state.description}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.description && <span className="error-message">{errors.description}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Краткое описание:
-                                <input
-                                    className="event-input"
-                                    type="text"
-                                    name="shortDescription"
-                                    value={this.state.shortDescription}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.shortDescription && <span className="error-message">{errors.shortDescription}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Локация:
-                                <input
-                                    className="event-input"
-                                    type="text"
-                                    name="location"
-                                    value={this.state.location}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.location && <span className="error-message">{errors.location}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Дата начала:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="startDateTime"
-                                    value={this.state.startDateTime}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.startDateTime && <span className="error-message">{errors.startDate}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Дата окончания:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="endDateTime"
-                                    value={this.state.endDateTime}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
-                            </label>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="event-label">
-                                Тип мероприятия:
-                                <select
-                                    className="event-time-input"
-                                    name="format"
-                                    value={this.state.format}
-                                    onChange={this.handleChange}
-                                >
-                                    <option value="OFFLINE">Оффлайн</option>
-                                    <option value="ONLINE">Онлайн</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <div className="card-buttons mt-4">
-                            <button type="submit" className="event-button">
-                                Создать мероприятие
-                            </button>
-                        </div>
-                    </form>
                 </div>
+
+                <div className="event-form-container">
+                    <div className="back-area" onClick={this.handleBack}>
+                        <button className="back-button">←</button>
+                    </div>
+                    <div className="event-form-card">
+                        <form onSubmit={this.handleSubmit}>
+                            <label className="event-form-label">
+                                Название:
+                                <input className="event-form-input" type="text" name="title" value={title}
+                                       onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-form-label">
+                                Описание:
+                                <textarea className="event-form-input" name="description" value={description}
+                                          onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-form-label">
+                                Краткое описание:
+                                <input className="event-form-input" type="text" name="shortDescription"
+                                       value={shortDescription} onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-edit-label">
+                                Локация:
+                                <input className="event-form-input" type="text" name="location" value={location}
+                                       onChange={this.handleChange}/>
+                            </label>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Дата начала:
+                                    <input
+                                        className="event-time-input"
+                                        type="datetime-local"
+                                        name="startDateTime"
+                                        value={this.state.startDateTime}
+                                        onChange={this.handleChange}
+                                    />
+                                    {errors.startDateTime &&
+                                        <span className="error-message">{errors.startDateTime}</span>}
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Дата окончания:
+                                    <input
+                                        className="event-time-input"
+                                        type="datetime-local"
+                                        name="endDateTime"
+                                        value={this.state.endDateTime}
+                                        onChange={this.handleChange}
+                                    />
+                                    {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Тип мероприятия:
+                                    <select
+                                        className="event-format-input"
+                                        name="format"
+                                        value={this.state.format}
+                                        onChange={this.handleChange}
+                                    >
+                                        <option value="OFFLINE">Оффлайн</option>
+                                        <option value="ONLINE">Онлайн</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div className="card-buttons mt-4">
+                                <button type="submit" className="event-button">
+                                    Создать мероприятие
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         );
     }
 }

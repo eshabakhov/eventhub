@@ -370,7 +370,7 @@ class EventEdit extends React.Component {
                                 <input className="event-edit-input" type="text" name="title" value={title}
                                        onChange={this.handleChange}/>
                             </label>
-                            <label className="profile-label">
+                            <label className="event-edit-label">
                                 Описание:
                                 <textarea className="event-edit-input" name="description" value={description}
                                           onChange={this.handleChange}/>
