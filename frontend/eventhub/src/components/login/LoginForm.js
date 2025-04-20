@@ -2,7 +2,7 @@ import React from "react"
 import "../../css/AuthPage.css";
 import UserContext from "../../UserContext";
 import { Navigate } from "react-router";
-import { em } from "framer-motion/client";
+import { em, u } from "framer-motion/client";
 
 class Login extends React.Component {
   static contextType = UserContext;
@@ -81,7 +81,6 @@ class Login extends React.Component {
       fullDesc,
       industry,
       address,
-      accreditation,
       lastName,
       firstName,
       middleName,
@@ -120,11 +119,11 @@ class Login extends React.Component {
       let roleValid = true;
   
       if (role === "ORGANIZER") {
-        roleValid = orgName && shortDesc && fullDesc && industry && address && accreditation;
+        roleValid = orgName && shortDesc && fullDesc && industry && address;
       } else if (role === "MEMBER") {
         roleValid = lastName && firstName && middleName && birthDate && birthCity && privacy;
       }
-  
+
       if (!roleValid) {
         alert("Пожалуйста, заполните все поля на втором шаге");
         return;
@@ -175,8 +174,7 @@ class Login extends React.Component {
               description: fullDesc,
               shortDescription: shortDesc,
               industry,
-              address,
-              isAccredited: accreditation
+              address
             };
           } else {
             url = `http://localhost:9500/api/v1/users/members/${userId}`;
