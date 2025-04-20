@@ -13,6 +13,59 @@ import UserContext from "../../UserContext";
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
 }
+
+// Модальное окно для подтверждения аккредитации
+const ConfirmModal = ({ isOpen, onClose, onConfirm, org, user }) => {
+    if (!isOpen) return null;
+    return (
+
+        // Если не аккредитована, нужно аккредитовать
+        !org.isAccredited && (
+            <div className="modal-overlay">
+                <motion.div
+                    className="modal-content"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                >
+                    <h3>Подтверждение</h3>
+                    <p>Аккредитовать организацию "{org.name}"?</p>
+                    <div className="modal-buttons">
+                        <button className="modal-button cancel" onClick={onClose}>
+                            Отмена
+                        </button>
+                        <button className="modal-button confirm" onClick={onConfirm}>
+                            Подтвердить
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        ) ||
+        // Если аккредитована, снимаем аккредитацию
+        org.isAccredited && (
+            <div className="modal-overlay">
+                <motion.div
+                    className="modal-content"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                >
+                    <h3>Подтверждение</h3>
+                    <p>Отменить аккредитацию организации "{org.name}"?</p>
+                    <div className="modal-buttons">
+                        <button className="modal-button cancel" onClick={onClose}>
+                            Отмена
+                        </button>
+                        <button className="modal-button confirm" onClick={onConfirm}>
+                            Подтверждение
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        )
+    );
+};
+
 class AccreditationPage extends Component {
     static contextType = UserContext;
 
@@ -73,11 +126,87 @@ class AccreditationPage extends Component {
         this.setState({ search: newSearch });
     };
 
+    // Закрытие модального окна
+    handleCloseModal = () => {
+        this.setState({
+            showConfirmModal: false,
+            selectedOrg: null
+        });
+    };
+
+    // Подтверждение
+    handleConfirm = () => {
+        const { selectedOrg } = this.state;
+        const { user } = this.context;
+        if (!selectedOrg || !user) {
+            this.handleCloseModal();
+            return;
+        }
+
+        if (selectedOrg.isAccredited) {
+            this.cancelAccreditation(selectedOrg, user);
+        }
+        if (!selectedOrg.isAccredited) {
+            this.approveAccreditation(selectedOrg, user);
+        }
+    };
+
+    cancelAccreditation = (selectedOrg, user) => {
+        const updatedData = {"isAccredited": "false"};
+        fetch(`http://localhost:9500/api/v1/users/organizers/${selectedOrg.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(updatedData)
+        })
+            .then((res) => {
+                if (res.ok) {
+                    // Обновляем список
+                    this.loadOrgs(this.state.currentPage, this.state.search);
+                } else {
+                    console.error("Ошибка при отмене аккредитации");
+                }
+            })
+            .catch((err) => console.error("Ошибка при отмене аккредитации", err))
+            .finally(() => {
+                this.handleCloseModal();
+            });
+    }
+    approveAccreditation = (selectedOrg, user) => {
+        const updatedData = {"isAccredited": "true"};
+        fetch(`http://localhost:9500/api/v1/users/organizers/${selectedOrg.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(updatedData)
+        })
+            .then((res) => {
+                if (res.ok) {
+                    // Обновляем список
+                    this.loadOrgs(this.state.currentPage, this.state.search);
+                } else {
+                    console.error("Ошибка при добавлении аккредитации");
+                }
+            })
+            .catch((err) => console.error("Ошибка при добавлении аккредитации", err))
+            .finally(() => {
+                this.handleCloseModal();
+            });
+    }
+
     // Обработка перехода на другую страницу
     handlePageClick = (pageNumber) => {
         this.loadOrgs(pageNumber, this.state.search);
         const el = document.getElementsByClassName("content-panel")[0];
         el.scrollTo(0, 0);
+    };
+
+    // Открытие модального окна изменения аккредитации
+    handleChangeAccrClick = (org) => {
+        this.setState({
+            showConfirmModal: true,
+            selectedOrg: org
+        });
     };
 
     render() {
@@ -87,11 +216,19 @@ class AccreditationPage extends Component {
 
         return (
             <div className="orgs-container">
+                {/* Модальное окно подтверждения */}
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    onClose={this.handleCloseModal}
+                    onConfirm={this.handleConfirm}
+                    org={selectedOrg}
+                    user={this.context.user}
+                />
                 <div className="header">
                     <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
-                    <label className="panel-title">Аккредитация организаций</label>
+                    <h1 className="panel-title">Аккредитация организаций</h1>
                     <div className="login-button-container">
                         <ProfileDropdown navigate={navigate} />
                     </div>
@@ -129,18 +266,17 @@ class AccreditationPage extends Component {
                         {orgs.map((org) => (
                             <motion.div key={org.id} className="event-card" whileHover={{ scale: 1.02 }}>
 
-                                    <div className="params-buttons">
+                                    <div className="buttons">
                                         <h3 className="org-title">{org.name}</h3>
                                         {org.isAccredited && (
                                             <button className="accept-button accr" title='Отменить акредитацию'
-                                                    onClick={() => this.handleDeleteClick(org)}
+                                                    onClick={() => this.handleChangeAccrClick(org)}
                                             >
-                                                {/*<img src={AcceptIcon} alt='Отменить акредитацию' className="icon"/>*/}
                                             </button>
                                         )}
                                         {!org.isAccredited && (
-                                            <button className='accept-button not-accr' title='Акредитовать организацию'>
-                                                {/*<img src={AcceptIcon} alt='Акредитовать организацию' className="icon"/>*/}
+                                            <button className='accept-button not-accr' title='Акредитовать организацию'
+                                                    onClick={() => this.handleChangeAccrClick(org)}>
                                             </button>
                                         )}
                                     </div>
