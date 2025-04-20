@@ -317,7 +317,7 @@ class EventsPage extends Component {
                                 </div>
                                 <div className="card-buttons">
                                     <div className="button-group">
-                                        <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+                                        <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                                             Подробнее
                                         </button>
                                         <button
@@ -394,7 +394,7 @@ function MultiEventPopup({ events, navigate, initialEventId }) {
             <strong>{event.title}</strong>
             <p>{event.shortDescription}</p>
             <p>{event.date}</p>
-            <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+            <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                 Подробнее
             </button>
             {total > 1 && (

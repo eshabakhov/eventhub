@@ -10,6 +10,7 @@ import EventForm from "./components/eventForm/EventForm";
 import MyEventsList from "./components/events/MyEventsList";
 import FriendsPage from './components/friends/FriendsPage';
 import AccreditationPage from "./components/accreditation/AccreditationPage";
+import EventDetailsPage from "./components/events/EventDetailsPage";
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -38,6 +39,7 @@ class App extends React.Component {
               <Route path='/events/create' exact={true} element={<EventForm/>}/>
               <Route path="/accreditation" element={<AccreditationPage />} />
               <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/events/:id" element={<EventDetailsPage />} />
             </Routes>
           </UserProvider>
         </Router>
