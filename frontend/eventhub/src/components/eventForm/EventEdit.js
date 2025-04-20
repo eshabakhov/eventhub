@@ -313,6 +313,11 @@ class EventEdit extends React.Component {
                 fileContent: fileContentBase64
             };
 
+            let addedFile = {
+                fileId: null,
+                fileName: undefined
+            };
+
             try {
                 const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
                     method: "POST",
@@ -326,8 +331,14 @@ class EventEdit extends React.Component {
 
                 if (!res.ok) throw new Error("Ошибка при загрузке файла");
 
+
+                addedFile.fileId = await res.json(); // Получаем данные ответа
+                addedFile.fileName = eventFileDTO.fileName;
+
+
+
                 this.setState(prevState => ({
-                    files: [...prevState.files, eventFileDTO],
+                    files: [...prevState.files, addedFile],
                     selectedFile: null
                 }));
 
