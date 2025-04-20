@@ -118,43 +118,20 @@ class EventForm extends React.Component {
         const { navigate } = this.props;
 
         return (
-            <div className="events-f">
-                {/* Верхняя панель */}
                 <div className="header-bar">
                     <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
+                    <label className="panel-title">Создание мероприятия</label>
                     <div className="return-button-container">
                         <button onClick={() => navigate("/events")} className="return-button">
                             Просмотр мероприятий
                         </button>
                     </div>
-                    <div className="login-button-container">
-                        {this.context.user && this.context.user.id ? (
-                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                <button onClick={this.toggleDropdown} className="login-button">
-                                    Профиль
-                                </button>
-                                {this.state.showDropdown && (
-                                    <div className="dropdown-menu">
-                                        <button onClick={() => this.handleMenuClick("/profile")} className="dropdown-item">Профиль</button>
-                                        <button onClick={() => this.handleMenuClick("/friends")} className="dropdown-item">Друзья</button>
-                                        <button onClick={() => this.handleMenuClick("/logout")} className="dropdown-item">Выйти</button>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="profile-dropdown-container" ref={(ref) => (this.dropdownRef = ref)}>
-                                <button onClick={() => navigate("/login")} className="login-button">
-                                    Войти
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
+
+
 
                 <div className="event-form">
-                    <h2>Создание нового мероприятия</h2>
                     <form onSubmit={this.handleSubmit}>
                         <div className="form-group">
                             <label className="event-label">
@@ -262,7 +239,6 @@ class EventForm extends React.Component {
                         </div>
                     </form>
                 </div>
-            </div>
         );
     }
 }

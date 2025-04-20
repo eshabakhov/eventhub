@@ -1,3 +1,15 @@
+.event-form-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    place-items: center;
+}
+
+
+
 .return-button-container {
     margin-left: auto;
     display: block;
