@@ -395,7 +395,7 @@ class MyEventsList extends Component {
                     {/* Кнопка создания мероприятия */}
                     <div className="login-button-container">
                         {this.context.user && this.context.user.role === "ORGANIZER" && this.context.user.organizerAccredited && (
-                            <button className="create-button" onClick={() => navigate("/events/create")}>
+                            <button className="create-button" onClick={() => navigate("/create-event")}>
                                 <span> + </span>
                                 Создать мероприятие
                             </button>

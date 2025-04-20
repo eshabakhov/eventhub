@@ -12,6 +12,9 @@ import FriendsPage from './components/friends/FriendsPage';
 import AccreditationPage from "./components/accreditation/AccreditationPage";
 import EventDetailsPage from "./components/events/EventDetailsPage";
 import EventEditForm from "./components/eventForm/EventEdit";
+import ModeratorsPage from "./components/ModeratorManagement/ModeratorManagement";
+import ModeratorManagement from "./components/ModeratorManagement/ModeratorManagement";
+import ModeratorCreate from "./components/ModeratorManagement/ModeratorCreate";
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -37,11 +40,13 @@ class App extends React.Component {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="/my-events" element={<MyEventsList />} />
-              <Route path='/events/create' exact={true} element={<EventForm/>}/>
+              <Route path='/create-event' exact={true} element={<EventForm/>}/>
               <Route path="/accreditation" element={<AccreditationPage />} />
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
               <Route path="/event-edit/:eventId" element={<EventEditForm />} />
+              <Route path="/moderator-management" element={<ModeratorsPage />} />
+              <Route path="/moderators/create" element={<ModeratorCreate/>}/>
             </Routes>
           </UserProvider>
         </Router>

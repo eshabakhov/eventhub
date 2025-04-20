@@ -1,13 +1,13 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { withNavigation } from "../events/EventsPage";
+import {useParams} from 'react-router-dom';
+import {withNavigation} from "../events/EventsPage";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import "../../css/EventEdit.css";
 import ProfileDropdown from "../profile/ProfileDropdown";
 
 export function withParams(Component) {
-    return props => <Component {...props} params={useParams()} />;
+    return props => <Component {...props} params={useParams()}/>;
 }
 
 const formatDateForBackend = (dateTimeString) => {
@@ -42,21 +42,24 @@ class EventEdit extends React.Component {
             format: 'OFFLINE',
             organizerId: '',
             tags: [],
+            files: [],
             newTag: '',
             errors: {},
-            isEditing: false
+            isEditing: false,
+            selectedFile: null,
+            uploadedFiles: []
         };
     }
 
     componentDidMount() {
         console.log('ok')
-        const { eventId } = this.props.params;
+        const {eventId} = this.props.params;
         console.log(eventId)
 
         if (eventId) {
             fetch(`http://localhost:9500/api/v1/events/${eventId}`, {
                 credentials: 'include',
-                headers: { 'Accept': 'application/json' }
+                headers: {'Accept': 'application/json'}
             })
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка загрузки');
@@ -68,6 +71,7 @@ class EventEdit extends React.Component {
                         startDateTime: formatDateForInput(data.startDateTime),
                         endDateTime: formatDateForInput(data.endDateTime),
                         tags: data.tags || [],
+                        files: data.files || [],
                         isEditing: true
                     });
                 })
@@ -86,16 +90,16 @@ class EventEdit extends React.Component {
     };
 
     handleTagInputChange = (e) => {
-        this.setState({ newTag: e.target.value });
+        this.setState({newTag: e.target.value});
     };
 
     handleAddTag = (e) => {
         e.preventDefault();
-        const { newTag, tags } = this.state;
-        const { eventId } = this.props.params;
+        const {newTag, tags} = this.state;
+        const {eventId} = this.props.params;
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
-            const updatedTags = [...tags, { name: newTag.trim() }];
+            const updatedTags = [...tags, {name: newTag.trim()}];
 
             fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
                 method: 'POST',
@@ -105,7 +109,7 @@ class EventEdit extends React.Component {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    tags: [{ name: newTag.trim() }]
+                    tags: [{name: newTag.trim()}]
                 })
             })
                 .then(res => {
@@ -123,7 +127,7 @@ class EventEdit extends React.Component {
     };
 
     handleRemoveTag = (tagToRemove) => {
-        const { eventId } = this.props.params;
+        const {eventId} = this.props.params;
 
         fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
             method: 'DELETE',
@@ -133,8 +137,8 @@ class EventEdit extends React.Component {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                    id: tagToRemove.id,
-                    name: tagToRemove.name
+                id: tagToRemove.id,
+                name: tagToRemove.name
             })
         })
             .then(res => {
@@ -146,8 +150,32 @@ class EventEdit extends React.Component {
             .catch(err => console.error('Ошибка при удалении тега:', err));
     };
 
+    handleRemoveFile = (fileToRemove) => {
+        const {eventId} = this.props.params;
+
+        fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                fileId: fileToRemove.fileId,
+                fileName: fileToRemove.fileName
+            })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Ошибка удаления файла');
+                this.setState(prevState => ({
+                    files: prevState.files.filter(file => file.fileId !== (fileToRemove.fileId || fileToRemove))
+                }));
+            })
+            .catch(err => console.error('Ошибка при удалении файла:', err));
+    };
+
     validate = () => {
-        const { description, location, startDateTime, endDateTime } = this.state;
+        const {description, location, startDateTime, endDateTime} = this.state;
         const errors = {};
 
         if (!description) errors.description = 'Описание обязательно';
@@ -159,15 +187,15 @@ class EventEdit extends React.Component {
             errors.endDateTime = 'Дата окончания должна быть после даты начала';
         }
 
-        this.setState({ errors });
+        this.setState({errors});
         return Object.keys(errors).length === 0;
     };
 
     handleSubmit = (e) => {
         e.preventDefault();
-        const { user } = this.context;
-        const { navigate } = this.props;
-        const { eventId } = this.props.params;
+        const {user} = this.context;
+        const {navigate} = this.props;
+        const {eventId} = this.props.params;
 
         if (this.validate()) {
             const eventData = {
@@ -198,58 +226,170 @@ class EventEdit extends React.Component {
             })
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка при сохранении');
-                    navigate('/my-events');
                 })
                 .catch(err => console.error('Ошибка сохранения:', err));
         }
     };
 
+    handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const {eventId} = this.props.params;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const fileContentBase64 = reader.result.split(',')[1]; // удаляем "data:*/*;base64,"
+
+            const eventFileDTO = {
+                eventId: parseInt(eventId),
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                fileContent: fileContentBase64
+            };
+
+            try {
+                const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(eventFileDTO)
+                });
+
+                if (!res.ok) throw new Error("Ошибка загрузки файла");
+                console.log("Файл успешно загружен!")
+                console.log(res.json())
+                alert("Файл успешно загружен!");
+            } catch (err) {
+                console.error("Ошибка при загрузке файла:", err);
+                alert("Не удалось загрузить файл.");
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+
+    handleSelectFile = () => {
+        this.fileInputRef.click();
+    };
+
+    handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            this.setState({selectedFile: file});
+        }
+    };
+
+    handleUploadFile = () => {
+        const {selectedFile} = this.state;
+        const {eventId} = this.props.params;
+
+        if (!selectedFile) {
+            alert("Сначала выберите файл");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const fileContentBase64 = reader.result.split(',')[1];
+
+            const eventFileDTO = {
+                eventId: parseInt(eventId),
+                fileName: selectedFile.name,
+                fileType: selectedFile.type,
+                fileSize: selectedFile.size,
+                fileContent: fileContentBase64
+            };
+
+            try {
+                const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(eventFileDTO)
+                });
+
+                if (!res.ok) throw new Error("Ошибка при загрузке файла");
+
+                this.setState(prevState => ({
+                    files: [...prevState.files, eventFileDTO],
+                    selectedFile: null
+                }));
+
+
+                alert("Файл успешно загружен!");
+                this.setState({selectedFile: null});
+            } catch (err) {
+                console.error("Ошибка при загрузке файла:", err);
+                alert("Не удалось загрузить файл.");
+            }
+        };
+
+        reader.readAsDataURL(selectedFile);
+    };
+
+    handleBack = () => {
+        this.props.navigate('/my-events');
+    };
+
     render() {
-        const { errors, isEditing, tags, newTag } = this.state;
-        const { navigate } = this.props;
+        const {title, description, shortDescription, location, errors, isEditing, tags, newTag, files} = this.state;
+        const {navigate} = this.props;
 
         return (
-            <div className="events-f">
+            <div>
                 <div className="header-bar">
                     <div className="top-logo">
-                        <img src={EventHubLogo} alt="Logo" className="logo" />
+                        <img src={EventHubLogo} alt="Logo" className="logo"/>
                     </div>
                     <label className="panel-title">Редактирование мероприятия</label>
                     <div className="login-button-container">
                         <button className="create-button" onClick={() => navigate("/my-events")}>
                             Мои мероприятия
                         </button>
-                        <ProfileDropdown navigate={navigate} />
+                        <ProfileDropdown navigate={navigate}/>
                     </div>
                 </div>
-                <div className="event-form">
-                    <form onSubmit={this.handleSubmit}>
-                        {[
-                            { name: "title", label: "Название мероприятия" },
-                            { name: "description", label: "Описание" },
-                            { name: "shortDescription", label: "Краткое описание" },
-                            { name: "location", label: "Локация" },
-                        ].map(({ name, label }) => (
-                            <div className="form-group" key={name}>
-                                <label className="event-label">
-                                    {label}:
-                                    <input
-                                        className="event-input"
-                                        type="text"
-                                        name={name}
-                                        value={this.state[name]}
-                                        onChange={this.handleChange}
-                                    />
-                                    {errors[name] && <span className="error-message">{errors[name]}</span>}
-                                </label>
-                            </div>
-                        ))}
+                <div className="event-edit-container">
+                    <div className="back-area" onClick={this.handleBack}>
+                        <button className="back-button">←</button>
+                    </div>
+                    <div className="event-edit-card">
+                        <form onSubmit={this.handleSubmit}>
 
-                        {/* Поле для добавления тегов */}
-                        <div className="form-group">
-                            <label className="event-label">
+                            <label className="event-edit-label">
+                                Название:
+                                <input className="event-edit-input" type="text" name="title" value={title}
+                                       onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-edit-label">
+                                Описание:
+                                <textarea className="event-edit-input" name="description" value={description}
+                                          onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-edit-label">
+                                Краткое описание:
+                                <input className="event-edit-input" type="text" name="shortDescription"
+                                       value={shortDescription} onChange={this.handleChange}/>
+                            </label>
+                            <label className="event-edit-label">
+                                Локация:
+                                <input className="event-edit-input" type="text" name="location" value={location}
+                                       onChange={this.handleChange}/>
+                            </label>
+
+                            {/* Поле для добавления тегов */}
+
+                            <label className="event-edit-label">
                                 Теги:
-                                <div className="tags-input-container">
+                                <div className="event-edit-input">
                                     <input
                                         type="text"
                                         className="event-input"
@@ -258,7 +398,7 @@ class EventEdit extends React.Component {
                                         placeholder="Добавьте тег"
                                     />
                                     <button
-                                        className="add-tag-button"
+                                        className="event-edit-button"
                                         onClick={this.handleAddTag}
                                     >
                                         Добавить
@@ -279,57 +419,118 @@ class EventEdit extends React.Component {
                                     ))}
                                 </div>
                             </label>
-                        </div>
 
-                        <div className="form-group">
                             <label className="event-label">
-                                Дата начала:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="startDateTime"
-                                    value={this.state.startDateTime}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.startDateTime && <span className="error-message">{errors.startDateTime}</span>}
-                            </label>
-                        </div>
+                                Прикрепление файла:
 
-                        <div className="form-group">
-                            <label className="event-label">
-                                Дата окончания:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="endDateTime"
-                                    value={this.state.endDateTime}
-                                    onChange={this.handleChange}
-                                />
-                                {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
-                            </label>
-                        </div>
+                                <div className="file-upload-buttons">
+                                    <input
+                                        type="file"
+                                        accept="*/*"
+                                        style={{display: "none"}}
+                                        ref={(ref) => (this.fileInputRef = ref)}
+                                        onChange={this.handleFileChange}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="event-edit-button"
+                                        onClick={this.handleSelectFile}
+                                    >
+                                        Прикрепить файл
+                                    </button>
 
-                        <div className="form-group">
-                            <label className="event-label">
-                                Тип мероприятия:
-                                <select
-                                    className="event-time-input"
-                                    name="format"
-                                    value={this.state.format}
-                                    onChange={this.handleChange}
-                                >
-                                    <option value="OFFLINE">Оффлайн</option>
-                                    <option value="ONLINE">Онлайн</option>
-                                </select>
-                            </label>
-                        </div>
+                                    <button
+                                        type="button"
+                                        className="event-edit-button"
+                                        onClick={this.handleUploadFile}
+                                        disabled={!this.state.selectedFile}
+                                    >
+                                        ⬆️ Загрузить
+                                    </button>
 
-                        <div className="card-buttons mt-4">
-                            <button type="submit" className="event-button">
-                                {isEditing ? 'Сохранить изменения' : 'Создать мероприятие'}
-                            </button>
-                        </div>
-                    </form>
+                                    {this.state.selectedFile && (
+                                        <div className="selected-file-info">
+                                            Файл: <strong>{this.state.selectedFile.name}</strong>
+                                        </div>
+                                    )}
+                                </div>
+                            </label>
+
+                            {/* Поле для добавления файлов */}
+                            <div className="form-group">
+                                <label className="event-label">
+                                    <div className="files-input-container">
+                                    </div>
+                                    <div className="files-container">
+                                        {files.map((file, index) => (
+                                            <span key={file.id || index} className="file">
+                                                {file.fileName || file}
+                                                <button
+                                                    type="button"
+                                                    className="file-remove"
+                                                    onClick={() => this.handleRemoveFile(file)}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Дата начала:
+                                    <input
+                                        className="event-time-input"
+                                        type="datetime-local"
+                                        name="startDateTime"
+                                        value={this.state.startDateTime}
+                                        onChange={this.handleChange}
+                                    />
+                                    {errors.startDateTime &&
+                                        <span className="error-message">{errors.startDateTime}</span>}
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Дата окончания:
+                                    <input
+                                        className="event-time-input"
+                                        type="datetime-local"
+                                        name="endDateTime"
+                                        value={this.state.endDateTime}
+                                        onChange={this.handleChange}
+                                    />
+                                    {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="event-label">
+                                    Тип мероприятия:
+                                    <select
+                                        className="event-format-input"
+                                        name="format"
+                                        value={this.state.format}
+                                        onChange={this.handleChange}
+                                    >
+                                        <option value="OFFLINE">Офлайн</option>
+                                        <option value="ONLINE">Онлайн</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div className="card-buttons mt-4">
+                                <button type="submit" className="event-edit-button">
+                                    Сохранить изменения
+                                </button>
+                            </div>
+
+
+                        </form>
+                    </div>
                 </div>
             </div>
         );
