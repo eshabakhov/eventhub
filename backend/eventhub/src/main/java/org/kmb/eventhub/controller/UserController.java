@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.enums.RoleEnum;
 import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.TagService;
@@ -180,6 +181,20 @@ public class UserController {
     public Organizer getOrganizer(@PathVariable Long id) {
         return userService.getOrganizer(id);
     }
+    @Operation(summary = "Получить список всех организаторов.",
+            description = "Возвращает всех организаторов.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех организаторов.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers")
+    public ResponseList<Organizer> getAllOrganizers(
+                     @RequestParam(value = "page", defaultValue = "1") Integer page,
+                     @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                     @RequestParam(value = "search", required = false) String search) {
+        return userService.getOrgList(page, pageSize, search);
+    }
 
     @Operation(summary = "Удалить пользователя.",
                     description = "Удаляет пользователя по ID.")
@@ -301,5 +316,4 @@ public class UserController {
             @RequestBody @Valid TagDTO tagDTO) {
         return tagService.deleteTagFromUser(id, tagDTO);
     }
-
 }

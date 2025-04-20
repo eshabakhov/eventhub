@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.user;
+import static org.kmb.eventhub.tables.User.USER;
 
 @Service
 @AllArgsConstructor
@@ -54,6 +56,25 @@ public class UserService {
 
         responseList.setList(list);
         responseList.setTotal(userRepository.count(condition));
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
+    }
+
+    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize,String search) {
+        ResponseList<Organizer> responseList = new ResponseList<>();
+        Condition condition = trueCondition();
+        if (Objects.nonNull(search) && !search.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Organizer.ORGANIZER.NAME.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Organizer.ORGANIZER.ADDRESS.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Organizer.ORGANIZER.DESCRIPTION.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Organizer.ORGANIZER.INDUSTRY.containsIgnoreCase(search));
+        }
+
+        List<Organizer> list =  userRepository.fetchOrganizers(condition, page, pageSize);
+
+        responseList.setList(list);
+        responseList.setTotal(userRepository.countOrgs(condition));
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
         return responseList;
