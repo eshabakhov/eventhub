@@ -1,11 +1,19 @@
 package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.dto.EventDTO;
+import org.kmb.eventhub.dto.EventMemberDTO;
+import org.kmb.eventhub.dto.MemberDTO;
 import org.kmb.eventhub.dto.ResponseList;
-import org.kmb.eventhub.exception.UnexpectedException;
+import org.kmb.eventhub.exception.*;
+import org.kmb.eventhub.mapper.EventMapper;
+import org.kmb.eventhub.mapper.EventMemberMapper;
 import org.kmb.eventhub.mapper.UserMapper;
 import org.kmb.eventhub.repository.SubscribeRepository;
+import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.EventMembersDao;
+import org.kmb.eventhub.tables.daos.MemberDao;
+import org.kmb.eventhub.tables.daos.UserDao;
 import org.kmb.eventhub.tables.pojos.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -26,6 +34,14 @@ public class SubscribeService {
     private final SubscribeRepository subscribeRepository;
 
     private final EventMembersDao eventMembersDao;
+
+    private final EventDao eventDao;
+
+    private final EventMapper eventMapper;
+    private final EventMemberMapper eventMemberMapper;
+    private final UserDao userDao;
+    private final MemberDao memberDao;
+
 
     public void subscribeToEvent(Long eventId, Long memberId) {
         eventService.get(eventId);
@@ -63,5 +79,23 @@ public class SubscribeService {
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
         return responseList;
+    }
+    public EventMemberDTO checkSubscription(Long eventId, Long memberId) {
+        EventDTO eventDTO = eventMapper.toDto(eventDao.fetchOptionalById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId)));
+
+        MemberDTO memberDTO = userMapper.toMemberDto(memberDao.fetchOptionalById(memberId)
+                .orElseThrow(() -> new MemberNotFound(memberId)));
+
+        EventMemberDTO eventMembersDTO = eventMemberMapper.toDto(subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1));
+
+        if (Objects.isNull(eventMembersDTO)) {
+            throw new EventMemberNotFound(memberId, eventId);
+        }
+
+        eventMembersDTO.setUserId(memberId);
+
+        return eventMembersDTO;
+
     }
 }
