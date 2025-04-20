@@ -3,14 +3,15 @@ package org.kmb.eventhub.repository;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.kmb.eventhub.enums.RoleType;
+import org.kmb.eventhub.tables.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static org.kmb.eventhub.Tables.ORGANIZER;
-import static org.kmb.eventhub.Tables.USER;
+import static org.kmb.eventhub.Tables.*;
 
 @Repository
 @AllArgsConstructor
@@ -40,6 +41,20 @@ public class UserRepository {
                 .offset((page - 1) * pageSize)
                 .fetchInto(Organizer.class);
     }
+
+    public List<User> fetchModerators (String search, Integer page, Integer pageSize) {
+        return dslContext
+                .select(USER.fields())
+                .from(USER)
+                .innerJoin(MODERATOR).on(USER.ID.eq(MODERATOR.ID))
+                .where(USER.ROLE.eq(RoleType.MODERATOR))
+                .and(USER.IS_ACTIVE.eq(true))
+                .and(MODERATOR.IS_ADMIN.eq(false))
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchInto(User.class);
+    }
+
     public Long countOrgs(Condition condition) {
         return dslContext
                 .selectCount()
