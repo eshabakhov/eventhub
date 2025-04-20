@@ -72,4 +72,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+
+        // пути, которые не требуют авторизации вообще
+        return path.startsWith("/swagger-ui")
+                || path.startsWith("/swagger-ui.html")
+                || path.startsWith("/api-docs"); // можешь добавить свои публичные ручки
+    }
 }
