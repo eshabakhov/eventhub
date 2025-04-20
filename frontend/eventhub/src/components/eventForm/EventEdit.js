@@ -93,36 +93,44 @@ class EventEdit extends React.Component {
         this.setState({newTag: e.target.value});
     };
 
-    handleAddTag = (e) => {
+    handleAddTag = async (e) => {
         e.preventDefault();
-        const {newTag, tags} = this.state;
-        const {eventId} = this.props.params;
+        const { newTag, tags } = this.state;
+        const { eventId } = this.props.params;
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
-            const updatedTags = [...tags, {name: newTag.trim()}];
+            try {
+                const response = await fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tags: [{ name: newTag.trim() }]
+                    })
+                });
 
-            fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    tags: [{name: newTag.trim()}]
-                })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Ошибка добавления тега');
-                    return res.json();
-                })
-                .then(() => {
-                    this.setState({
-                        tags: updatedTags,
-                        newTag: ''
-                    });
-                })
-                .catch(err => console.error('Ошибка при добавлении тега:', err));
+                if (!response.ok) {
+                    throw new Error('Ошибка добавления тега');
+                }
+
+                const result = await response.json();
+
+                const addedTag = Array.isArray(result) ? result[0] : result;
+
+                this.setState(prevState => ({
+                    tags: [...prevState.tags, addedTag], // Добавляем тег с ID
+                    newTag: ''
+                }));
+
+                console.log('Тег успешно добавлен:', addedTag);
+            } catch (err) {
+                console.error('Ошибка при добавлении тега:', err);
+                // Можно добавить отображение ошибки пользователю
+                this.setState({ error: 'Не удалось добавить тег' });
+            }
         }
     };
 
@@ -305,6 +313,11 @@ class EventEdit extends React.Component {
                 fileContent: fileContentBase64
             };
 
+            let addedFile = {
+                fileId: null,
+                fileName: undefined
+            };
+
             try {
                 const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
                     method: "POST",
@@ -318,11 +331,16 @@ class EventEdit extends React.Component {
 
                 if (!res.ok) throw new Error("Ошибка при загрузке файла");
 
+
+                addedFile.fileId = await res.json(); // Получаем данные ответа
+                addedFile.fileName = eventFileDTO.fileName;
+
+
+
                 this.setState(prevState => ({
-                    files: [...prevState.files, eventFileDTO],
+                    files: [...prevState.files, addedFile],
                     selectedFile: null
                 }));
-
 
                 alert("Файл успешно загружен!");
                 this.setState({selectedFile: null});
@@ -420,41 +438,37 @@ class EventEdit extends React.Component {
                                 </div>
                             </label>
 
-                            <label className="event-label">
-                                Прикрепление файла:
 
-                                <div className="file-upload-buttons">
-                                    <input
-                                        type="file"
-                                        accept="*/*"
-                                        style={{display: "none"}}
-                                        ref={(ref) => (this.fileInputRef = ref)}
-                                        onChange={this.handleFileChange}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="event-edit-button"
-                                        onClick={this.handleSelectFile}
-                                    >
-                                        Прикрепить файл
-                                    </button>
+                            <div className="file-upload-buttons">
+                                <input
+                                    type="file"
+                                    accept="*/*"
+                                    style={{display: "none"}}
+                                    ref={(ref) => (this.fileInputRef = ref)}
+                                    onChange={this.handleFileChange}
+                                />
+                                <button
+                                    type="button"
+                                    className="event-edit-button"
+                                    onClick={this.handleSelectFile}
+                                >
+                                    Прикрепить файл
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        className="event-edit-button"
-                                        onClick={this.handleUploadFile}
-                                        disabled={!this.state.selectedFile}
-                                    >
-                                        ⬆️ Загрузить
-                                    </button>
-
-                                    {this.state.selectedFile && (
-                                        <div className="selected-file-info">
-                                            Файл: <strong>{this.state.selectedFile.name}</strong>
-                                        </div>
-                                    )}
-                                </div>
-                            </label>
+                                <button
+                                    type="button"
+                                    className="event-edit-button"
+                                    onClick={this.handleUploadFile}
+                                    disabled={!this.state.selectedFile}
+                                >
+                                    ⬆️ Загрузить
+                                </button>
+                                {this.state.selectedFile && (
+                                    <div className="selected1-file-info">
+                                        Файл: <strong>{this.state.selectedFile.name}</strong>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Поле для добавления файлов */}
                             <div className="form-group">
@@ -463,7 +477,7 @@ class EventEdit extends React.Component {
                                     </div>
                                     <div className="files-container">
                                         {files.map((file, index) => (
-                                            <span key={file.id || index} className="file">
+                                            <span key={file.fileId || index} className="file">
                                                 {file.fileName || file}
                                                 <button
                                                     type="button"
