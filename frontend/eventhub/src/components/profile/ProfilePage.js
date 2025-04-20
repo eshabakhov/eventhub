@@ -220,7 +220,7 @@ class ProfilePage extends Component {
                 <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                     <img src={EventHubLogo} alt="Logo" className="logo" />
                 </div>
-                <h1 className="friends-title">Мои друзья</h1>
+                <h1 className="friends-title">Мои профиль</h1>
                 <div className="login-button-container">
                     <ProfileDropdown navigate={navigate} />
                 </div>
@@ -230,7 +230,6 @@ class ProfilePage extends Component {
             <button className="back-button">←</button>
           </div>
           <div className="profile-card">
-            <h2 className="profile-title">Профиль пользователя</h2>
             <form onSubmit={this.handleSubmit}>
               {user.role === 'ORGANIZER' && (
                 <div className="profile-label">
