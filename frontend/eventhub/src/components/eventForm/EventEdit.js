@@ -93,36 +93,44 @@ class EventEdit extends React.Component {
         this.setState({newTag: e.target.value});
     };
 
-    handleAddTag = (e) => {
+    handleAddTag = async (e) => {
         e.preventDefault();
-        const {newTag, tags} = this.state;
-        const {eventId} = this.props.params;
+        const { newTag, tags } = this.state;
+        const { eventId } = this.props.params;
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
-            const updatedTags = [...tags, {name: newTag.trim()}];
+            try {
+                const response = await fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tags: [{ name: newTag.trim() }]
+                    })
+                });
 
-            fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    tags: [{name: newTag.trim()}]
-                })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Ошибка добавления тега');
-                    return res.json();
-                })
-                .then(() => {
-                    this.setState({
-                        tags: updatedTags,
-                        newTag: ''
-                    });
-                })
-                .catch(err => console.error('Ошибка при добавлении тега:', err));
+                if (!response.ok) {
+                    throw new Error('Ошибка добавления тега');
+                }
+
+                const result = await response.json();
+
+                const addedTag = Array.isArray(result) ? result[0] : result;
+
+                this.setState(prevState => ({
+                    tags: [...prevState.tags, addedTag], // Добавляем тег с ID
+                    newTag: ''
+                }));
+
+                console.log('Тег успешно добавлен:', addedTag);
+            } catch (err) {
+                console.error('Ошибка при добавлении тега:', err);
+                // Можно добавить отображение ошибки пользователю
+                this.setState({ error: 'Не удалось добавить тег' });
+            }
         }
     };
 
