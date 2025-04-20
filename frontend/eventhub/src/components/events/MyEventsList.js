@@ -387,7 +387,7 @@ class MyEventsList extends Component {
                     <div className="top-logo">
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
-                    <label className="panel-title">Мои мероприятия</label>
+                    <h1 className="friends-title">Мои мероприятия</h1>
                     {/* Кнопка создания мероприятия */}
                     <div className="login-button-container">
                         {this.context.user && this.context.user.role === "ORGANIZER" && (
