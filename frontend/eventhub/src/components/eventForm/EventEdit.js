@@ -239,46 +239,6 @@ class EventEdit extends React.Component {
         }
     };
 
-    handleFileChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const {eventId} = this.props.params;
-
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const fileContentBase64 = reader.result.split(',')[1]; // удаляем "data:*/*;base64,"
-
-            const eventFileDTO = {
-                eventId: parseInt(eventId),
-                fileName: file.name,
-                fileType: file.type,
-                fileSize: file.size,
-                fileContent: fileContentBase64
-            };
-
-            try {
-                const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify(eventFileDTO)
-                });
-
-                if (!res.ok) throw new Error("Ошибка загрузки файла");
-                console.log("Файл успешно загружен!")
-                console.log(res.json())
-                alert("Файл успешно загружен!");
-            } catch (err) {
-                console.error("Ошибка при загрузке файла:", err);
-                alert("Не удалось загрузить файл.");
-            }
-        };
-        reader.readAsDataURL(file);
-    };
 
 
     handleSelectFile = () => {
