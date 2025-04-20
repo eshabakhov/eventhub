@@ -439,38 +439,36 @@ class EventEdit extends React.Component {
                             </label>
 
 
-                                <div className="file-upload-buttons">
-                                    <input
-                                        type="file"
-                                        accept="*/*"
-                                        style={{display: "none"}}
-                                        ref={(ref) => (this.fileInputRef = ref)}
-                                        onChange={this.handleFileChange}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="event-edit-button"
-                                        onClick={this.handleSelectFile}
-                                    >
-                                        Прикрепить файл
-                                    </button>
+                            <div className="file-upload-buttons">
+                                <input
+                                    type="file"
+                                    accept="*/*"
+                                    style={{display: "none"}}
+                                    ref={(ref) => (this.fileInputRef = ref)}
+                                    onChange={this.handleFileChange}
+                                />
+                                <button
+                                    type="button"
+                                    className="event-edit-button"
+                                    onClick={this.handleSelectFile}
+                                >
+                                    Прикрепить файл
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        className="event-edit-button"
-                                        onClick={this.handleUploadFile}
-                                        disabled={!this.state.selectedFile}
-                                    >
-                                        ⬆️ Загрузить
-                                    </button>
-
-                                    {this.state.selectedFile && (
-                                        <div className="selected-file-info">
-                                            Файл: <strong>{this.state.selectedFile.name}</strong>
-                                        </div>
-                                    )}
-                                </div>
-                            </label>
+                                <button
+                                    type="button"
+                                    className="event-edit-button"
+                                    onClick={this.handleUploadFile}
+                                    disabled={!this.state.selectedFile}
+                                >
+                                    ⬆️ Загрузить
+                                </button>
+                                {this.state.selectedFile && (
+                                    <div className="selected1-file-info">
+                                        Файл: <strong>{this.state.selectedFile.name}</strong>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Поле для добавления файлов */}
                             <div className="form-group">
@@ -479,7 +477,7 @@ class EventEdit extends React.Component {
                                     </div>
                                     <div className="files-container">
                                         {files.map((file, index) => (
-                                            <span key={file.id || index} className="file">
+                                            <span key={file.fileId || index} className="file">
                                                 {file.fileName || file}
                                                 <button
                                                     type="button"
