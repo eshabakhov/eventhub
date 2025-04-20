@@ -1,0 +1,49 @@
+/* Стили для тегов */
+.tags-input-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.add-tag-button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-tag-button:hover {
+    background-color: #45a049;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 14px;
+}
+
+.tag-remove {
+    margin-left: 6px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tag-remove:hover {
+    color: #f44336;
+}
