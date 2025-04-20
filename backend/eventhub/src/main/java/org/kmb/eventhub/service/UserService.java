@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.kmb.eventhub.Tables.USER;
 import static org.jooq.impl.DSL.trueCondition;
 
 @Service
@@ -46,9 +47,17 @@ public class UserService {
 
     private final TagMapper tagMapper;
 
-    public ResponseList<User> getList(Integer page, Integer pageSize) {
+    public ResponseList<User> getList(Integer page, Integer pageSize, String search) {
+
         ResponseList<User> responseList = new ResponseList<>();
+
         Condition condition = trueCondition();
+
+        if (Objects.nonNull(search)) {
+            condition = condition
+                    .and(USER.USERNAME.eq(search))
+                    .and(USER.ROLE.eq(RoleType.MEMBER));
+        }
 
         List<User> list =  userRepository.fetch(condition, page, pageSize);
 

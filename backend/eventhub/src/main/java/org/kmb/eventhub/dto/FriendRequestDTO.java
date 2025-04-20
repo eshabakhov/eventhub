@@ -5,8 +5,8 @@ import org.kmb.eventhub.enums.FriendRequestStatusEnum;
 
 @Data
 public class FriendRequestDTO {
-    private Long senderId;
-    private Long recipientId;
+    private RequesterDTO sender;
+    private RequesterDTO recipient;
     private FriendRequestStatusEnum friendRequestStatus;
 }
 

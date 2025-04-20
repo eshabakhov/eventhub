@@ -7,6 +7,7 @@ import EventsPage from "./components/events/EventsPage";
 import ProfilePage from "./components/profile/ProfilePage"
 import LogoutPage from "./components/logout/LogoutPage"
 import MyEventsList from "./components/events/MyEventsList";
+import FriendsPage from './components/friends/FriendsPage';
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -32,6 +33,7 @@ class App extends React.Component {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="/my-events" element={<MyEventsList />} />
+              <Route path="/friends" element={<FriendsPage />} />
             </Routes>
           </UserProvider>
         </Router>

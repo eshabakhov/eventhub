@@ -57,8 +57,9 @@ public class UserController {
     @GetMapping
     public ResponseList<User> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return userService.getList(page, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search) {
+        return userService.getList(page, pageSize, search);
     }
 
     @Operation(summary = "Получить информацию о пользователе.",
