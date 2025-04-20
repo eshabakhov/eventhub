@@ -394,7 +394,7 @@ class MyEventsList extends Component {
                     <h1 className="friends-title">Мои мероприятия</h1>
                     {/* Кнопка создания мероприятия */}
                     <div className="login-button-container">
-                        {this.context.user && this.context.user.role === "ORGANIZER" && (
+                        {this.context.user && this.context.user.role === "ORGANIZER" && this.context.user.organizerAccredited && (
                             <button className="create-button" onClick={() => navigate("/events/create")}>
                                 <span> + </span>
                                 Создать мероприятие
@@ -472,7 +472,7 @@ class MyEventsList extends Component {
                                 </div>
                                 <div className="card-buttons">
                                     <div className="button-group">
-                                        <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+                                        <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                                             Подробнее
                                         </button>
                                         <button
@@ -550,7 +550,7 @@ function MultiEventPopup({ events, navigate, initialEventId }) {
             <strong>{event.title}</strong>
             <p>{event.shortDescription}</p>
             <p>{event.date}</p>
-            <button onClick={() => navigate(`/event/${event.id}`)} className="event-button details">
+            <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                 Подробнее
             </button>
             {total > 1 && (

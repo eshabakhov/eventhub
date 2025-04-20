@@ -1,0 +1,18 @@
+version: '3.9'
+services:
+  frontend:
+    image: node:20
+    container_name: eventhub_frontend
+    working_dir: /app
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app 
+    command: >
+      sh -c "yarn install && yarn start"
+    networks:
+      eventhub_network:
+
+networks:
+  eventhub_network:
+    name: 'eventhub_network'

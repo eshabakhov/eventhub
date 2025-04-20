@@ -99,6 +99,22 @@ public class EventController {
         return subscribeService.getMembersByEventId(id, page, pageSize);
     }
 
+    @Operation(summary = "Получить мероприятие, если пользователь участвует.",
+            description = "Возвращаем id участника и мероприятия.")
+    @ApiResponse(responseCode = "200",
+            description = "Id участника и мероприятия.",
+            content = @Content(mediaType = "application/json",
+           schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members/{memberId}")
+    public EventMemberDTO getEventIfSubcribed(@PathVariable Long id, @PathVariable Long memberId) {
+        return subscribeService.checkSubscription(id, memberId);
+    }
+
     @Operation(summary = "Обновить информацию о мероприятии.",
             description = "Обновить информацию мероприятия по ID.")
     @ApiResponse(responseCode = "200",

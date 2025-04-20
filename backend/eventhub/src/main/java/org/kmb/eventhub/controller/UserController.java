@@ -248,6 +248,7 @@ public class UserController {
         subscribeService.unsubscribeFromEvent(eventId, id);
     }
 
+
     @Operation(summary = "Получить список мероприятий организатора.",
             description = "Возвращает все мероприятия, которые создал организатор.")
     @ApiResponse(responseCode = "200",
