@@ -342,7 +342,6 @@ class EventEdit extends React.Component {
                     selectedFile: null
                 }));
 
-
                 alert("Файл успешно загружен!");
                 this.setState({selectedFile: null});
             } catch (err) {
