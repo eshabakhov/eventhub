@@ -26,8 +26,6 @@ import java.util.Set;
 
 import static org.kmb.eventhub.Tables.USER;
 import static org.jooq.impl.DSL.trueCondition;
-import static org.jooq.impl.DSL.user;
-import static org.kmb.eventhub.tables.User.USER;
 
 @Service
 @AllArgsConstructor
