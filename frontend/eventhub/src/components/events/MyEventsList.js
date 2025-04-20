@@ -243,7 +243,6 @@ class MyEventsList extends Component {
         if (user.role === "ORGANIZER") {
             this.deleteEvent(selectedEvent, user);
         }
-
     };
     // Отмена участия
     refuceToParticipation = (selectedEvent, user) => {
