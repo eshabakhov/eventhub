@@ -4,9 +4,10 @@ Eventhub - интерактивная платформа, на которой в
 
 ## Требования к окружению
 
-1. jdk-21
-2. maven2
-3. docker compose
+1. jdk v21.*
+2. maven v2.*
+3. node v20.*
+4. docker compose v2.*
 
 ## Запуск приложения
 
