@@ -438,8 +438,6 @@ class EventEdit extends React.Component {
                                 </div>
                             </label>
 
-                            <label className="event-label">
-                                Прикрепление файла:
 
                                 <div className="file-upload-buttons">
                                     <input
