@@ -1,8 +1,6 @@
 package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.MemberDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.exception.UnexpectedException;
 import org.kmb.eventhub.mapper.UserMapper;
@@ -19,6 +17,8 @@ public class SubscribeService {
 
     private final EventService eventService;
 
+    private final UserSecurityService userSecurityService;
+
     private final UserService userService;
 
     private final UserMapper userMapper;
@@ -31,7 +31,7 @@ public class SubscribeService {
         eventService.get(eventId);
         userMapper.toMemberDto(userService.getMember(memberId));
 
-        if (!Objects.nonNull(subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1)))
+        if (Objects.nonNull(subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1)))
             throw new UnexpectedException(String.format("User %d already subscribed to event %d", memberId, eventId));
 
         EventMembers eventMembers = new EventMembers();
@@ -41,8 +41,10 @@ public class SubscribeService {
 
     }
     public void unsubscribeFromEvent(Long eventId, Long memberId) {
-        EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
-        eventMembersDao.delete(eventMembers);
+        if (userSecurityService.isUserOwnData(memberId)) {
+            EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
+            eventMembersDao.delete(eventMembers);
+        }
     }
 
     public ResponseList<Event> getEventsByMemberId(Long memberId, Integer page, Integer pageSize) {

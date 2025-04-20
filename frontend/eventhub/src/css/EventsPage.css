@@ -297,40 +297,43 @@
     display: flex;
     height: 90vh;
   }
-.pagination-controls {
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
+  .pagination-controls {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 20px;
+  }
 
-.pagination-controls button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
+  .pagination-controls button {
+    background-color: transparent;
+    color: black;
+    border: transparent 1px solid;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
 
-.pagination-controls button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
+  }
+  .pagination-controls button:hover {
+    border: #007bff 1px solid;
+    cursor: pointer;
+  }
+  .pagination-controls button:disabled {
+    background-color: #007bff;
+    cursor: not-allowed;
+    color: white;
+  }
 
-.pagination-controls span {
-  font-weight: bold;
-}
+  .pagination-controls span {
+    font-weight: bold;
+  }
 
 .tags-filter-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 0 10px 50px 0;
+  margin: 0 10px 70px 0;
 }
 
 .tag-button {
@@ -416,6 +419,18 @@
 
 .dropdown-item:hover {
   background-color: #f0f0f0;
+}
+
+.popup-pagination {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup-page-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .create-button-container {

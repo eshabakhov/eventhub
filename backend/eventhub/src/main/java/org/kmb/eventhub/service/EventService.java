@@ -15,6 +15,7 @@ import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.EventRepository;
+import org.kmb.eventhub.repository.SubscribeRepository;
 import org.kmb.eventhub.repository.TagRepository;
 import org.kmb.eventhub.tables.daos.*;
 import org.kmb.eventhub.tables.pojos.Event;
@@ -51,11 +52,15 @@ public class EventService {
 
     private final OrganizerDao organizerDao;
 
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags) {
+    private final SubscribeRepository subscribeRepository;
+
+    private final EventSecurityService eventSecurityService;
+
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags, Long orgId, Long memberId) {
         ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
 
-        if (search != null && !search.trim().isEmpty()) {
+        if (Objects.nonNull(search) && !search.trim().isEmpty()) {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.TITLE.containsIgnoreCase(search));
             condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.SHORT_DESCRIPTION.containsIgnoreCase(search));
             condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.LOCATION.containsIgnoreCase(search));
@@ -76,8 +81,15 @@ public class EventService {
             }
 
         }
-        if (tags != null && !tags.trim().isEmpty()) {
+        if (Objects.nonNull(tags) && !tags.trim().isEmpty()) {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(eventRepository.fetchEventIdsBySelectedTags(tags)));
+        }
+
+        if (Objects.nonNull(orgId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ORGANIZER_ID.eq(orgId));
+        }
+        if (Objects.nonNull(memberId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
         }
 
         List<Event> eventList = eventRepository.fetch(condition, page, pageSize);
@@ -191,10 +203,14 @@ public class EventService {
         return event;
     }
     @Transactional
-    public Long delete(Long id) {
-        eventDao.findOptionalById(id).orElseThrow(() -> new EventNotFoundException(id));
-        eventDao.deleteById(id);
-        return id;
+    public Long delete(Long orgId, Long eventId) {
+        if (eventSecurityService.isUserOwnEvent(eventId))
+        {
+            eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+            eventDao.deleteById(eventId);
+        }
+
+        return eventId;
     }
 
     @Transactional

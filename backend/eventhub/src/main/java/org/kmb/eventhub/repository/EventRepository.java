@@ -26,6 +26,13 @@ public class EventRepository {
                 .fetchInto(Event.class);
     }
 
+    public Event fetchById(Long id) {
+        return dslContext
+                .selectFrom(EVENT)
+                .where(EVENT.ID.eq(id))
+                .fetchOneInto(Event.class);
+    }
+
     public Long count(Condition condition) {
         return dslContext
                 .selectCount()
