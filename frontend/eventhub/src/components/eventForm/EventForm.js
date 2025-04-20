@@ -198,7 +198,7 @@ class EventForm extends React.Component {
                                         value={this.state.format}
                                         onChange={this.handleChange}
                                     >
-                                        <option value="OFFLINE">Оффлайн</option>
+                                        <option value="OFFLINE">Офлайн</option>
                                         <option value="ONLINE">Онлайн</option>
                                     </select>
                                 </label>

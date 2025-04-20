@@ -318,7 +318,6 @@ class EventEdit extends React.Component {
 
                 if (!res.ok) throw new Error("Ошибка при загрузке файла");
 
-
                 this.setState(prevState => ({
                     files: [...prevState.files, eventFileDTO],
                     selectedFile: null
@@ -517,7 +516,7 @@ class EventEdit extends React.Component {
                                         value={this.state.format}
                                         onChange={this.handleChange}
                                     >
-                                        <option value="OFFLINE">Оффлайн</option>
+                                        <option value="OFFLINE">Офлайн</option>
                                         <option value="ONLINE">Онлайн</option>
                                     </select>
                                 </label>
