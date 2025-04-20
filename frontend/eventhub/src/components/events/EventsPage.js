@@ -249,11 +249,11 @@ class EventsPage extends Component {
                     <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
-                    <div className="create-button-container">
-                        <button onClick={() => navigate("/events/create")} className="create-button">
-                            Создать мероприятие
-                        </button>
-                    </div>
+                    {/*<div className="create-button-container">*/}
+                    {/*    <button onClick={() => navigate("/events/create")} className="create-button">*/}
+                    {/*        Создать мероприятие*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
                     <div className="login-button-container">
                         <ProfileDropdown navigate={navigate} />
                     </div>

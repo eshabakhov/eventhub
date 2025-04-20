@@ -91,10 +91,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/v1/users").hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers("/v1/users/{id}").hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(HttpMethod.GET, "/v1/users/organizers/{id}").hasRole(RoleEnum.ORGANIZER.name())
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/organizers/{id}").hasRole(RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.GET, "/v1/users/organizers/{id}").hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/v1/users/organizers/{id}").hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
+
                         .requestMatchers(HttpMethod.GET, "/v1/users/organizers/{id}/events").hasRole(RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.DELETE, "/v1/users/organizers/{id}/events").hasRole(RoleEnum.ORGANIZER.name())
+
                         .requestMatchers(HttpMethod.GET, "/v1/users/moderators/{id}").hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.PUT, "/v1/users/moderators/{id}").hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.GET, "/v1/users/members/**").hasRole(RoleEnum.MEMBER.name())

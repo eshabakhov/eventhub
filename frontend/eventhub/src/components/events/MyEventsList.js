@@ -216,6 +216,11 @@ class MyEventsList extends Component {
         });
     }
 
+    // Переход к редактированию мероприятия
+    handleEditClick = (event) => {
+        this.props.navigate(`/event-edit/${event.id}`);
+    }
+
     // Закрытие модального окна
     handleCloseModal = () => {
         this.setState({
@@ -238,7 +243,6 @@ class MyEventsList extends Component {
         if (user.role === "ORGANIZER") {
             this.deleteEvent(selectedEvent, user);
         }
-
     };
     // Отмена участия
     refuceToParticipation = (selectedEvent, user) => {
@@ -391,7 +395,7 @@ class MyEventsList extends Component {
                     {/* Кнопка создания мероприятия */}
                     <div className="login-button-container">
                         {this.context.user && this.context.user.role === "ORGANIZER" && (
-                            <button className="create-button" onClick={() => navigate("/create-event")}>
+                            <button className="create-button" onClick={() => navigate("/events/create")}>
                                 <span> + </span>
                                 Создать мероприятие
                             </button>
@@ -434,7 +438,9 @@ class MyEventsList extends Component {
                                 {/*Кнопки в карточке в зависимости от роли*/}
                                 {this.context.user && this.context.user.role === "ORGANIZER" && (
                                     <div className="params-buttons">
-                                        <button className="edit-button" title='Редактировать мероприятие'>
+                                        <button className="edit-button" title='Редактировать мероприятие'
+                                                onClick={() => this.handleEditClick(event)}
+                                        >
                                             <img src={EditIcon} alt='Редактировать' className="icon"/>
                                         </button>
                                         <button className="delete-button" title='Удалить мероприятие'
