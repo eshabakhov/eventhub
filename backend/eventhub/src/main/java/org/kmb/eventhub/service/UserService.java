@@ -47,6 +47,8 @@ public class UserService {
 
     private final TagMapper tagMapper;
 
+    private final AdminSecurityService adminSecurityService;
+
     public ResponseList<User> getList(Integer page, Integer pageSize, String search) {
 
         ResponseList<User> responseList = new ResponseList<>();
@@ -84,6 +86,24 @@ public class UserService {
         responseList.setTotal(userRepository.countOrgs(condition));
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
+        return responseList;
+    }
+
+    public ResponseList<User> getModerList(Integer page, Integer pageSize,String search) {
+
+        ResponseList<User> responseList = new ResponseList<>();
+
+        if (adminSecurityService.isAdmin()) {
+             responseList = new ResponseList<>();
+
+            List<User> list = userRepository.fetchModerators(search, page, pageSize);
+
+            responseList.setList(list);
+            responseList.setTotal((long) list.size());
+            responseList.setCurrentPage(page);
+            responseList.setPageSize(pageSize);
+            return responseList;
+        }
         return responseList;
     }
 

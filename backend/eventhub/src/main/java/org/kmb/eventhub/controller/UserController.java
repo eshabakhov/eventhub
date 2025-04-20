@@ -182,6 +182,7 @@ public class UserController {
     public Organizer getOrganizer(@PathVariable Long id) {
         return userService.getOrganizer(id);
     }
+
     @Operation(summary = "Получить список всех организаторов.",
             description = "Возвращает всех организаторов.")
     @ApiResponse(responseCode = "200",
@@ -195,6 +196,21 @@ public class UserController {
                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                      @RequestParam(value = "search", required = false) String search) {
         return userService.getOrgList(page, pageSize, search);
+    }
+
+    @Operation(summary = "Получить список всех модераторов.",
+            description = "Возвращает всех модераторов.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех организаторов.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = User.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/moderators")
+    public ResponseList<User> getAllModerators(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search) {
+        return userService.getModerList(page, pageSize, search);
     }
 
     @Operation(summary = "Удалить пользователя.",
