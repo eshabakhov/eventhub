@@ -121,7 +121,7 @@ class EventForm extends React.Component {
             <div className="events-f">
                 {/* Верхняя панель */}
                 <div className="header-bar">
-                    <div className="top-logo">
+                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="return-button-container">

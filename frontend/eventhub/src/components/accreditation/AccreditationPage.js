@@ -88,7 +88,7 @@ class AccreditationPage extends Component {
         return (
             <div className="orgs-container">
                 <div className="header">
-                    <div className="top-logo">
+                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <label className="panel-title">Аккредитация организаций</label>

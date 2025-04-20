@@ -246,7 +246,7 @@ class EventsPage extends Component {
         return (
             <div className="events-container">
                 <div className="header-bar">
-                    <div className="top-logo">
+                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <div className="create-button-container">

@@ -384,7 +384,7 @@ class MyEventsList extends Component {
                 />
 
                 <div className="header-bar">
-                    <div className="top-logo">
+                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
                     <h1 className="friends-title">Мои мероприятия</h1>
