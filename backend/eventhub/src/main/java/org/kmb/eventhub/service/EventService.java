@@ -15,6 +15,7 @@ import org.kmb.eventhub.mapper.EventMapper;
 import org.kmb.eventhub.mapper.EventFileMapper;
 import org.kmb.eventhub.mapper.TagMapper;
 import org.kmb.eventhub.repository.EventRepository;
+import org.kmb.eventhub.repository.SubscribeRepository;
 import org.kmb.eventhub.repository.TagRepository;
 import org.kmb.eventhub.tables.daos.*;
 import org.kmb.eventhub.tables.pojos.Event;
@@ -51,10 +52,45 @@ public class EventService {
 
     private final OrganizerDao organizerDao;
 
+    private final SubscribeRepository subscribeRepository;
 
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize) {
+    private final EventSecurityService eventSecurityService;
+
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags, Long orgId, Long memberId) {
         ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
+
+        if (Objects.nonNull(search) && !search.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.TITLE.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.SHORT_DESCRIPTION.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.LOCATION.containsIgnoreCase(search));
+
+
+            Map<String, String> formatRuMap = Map.of(
+                    "ONLINE", "Онлайн",
+                    "OFFLINE", "Офлайн"
+            );
+
+            List<EventFormat> matchingFormats = formatRuMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().toLowerCase().contains(search.toLowerCase()))
+                    .map(entry -> EventFormat.valueOf(entry.getKey()))
+                    .collect(Collectors.toList());
+
+            if (!matchingFormats.isEmpty()) {
+                condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.FORMAT.in(matchingFormats));
+            }
+
+        }
+        if (Objects.nonNull(tags) && !tags.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(eventRepository.fetchEventIdsBySelectedTags(tags)));
+        }
+
+        if (Objects.nonNull(orgId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ORGANIZER_ID.eq(orgId));
+        }
+        if (Objects.nonNull(memberId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
+        }
 
         List<Event> eventList = eventRepository.fetch(condition, page, pageSize);
         List<EventDTO> eventDTOList = new ArrayList<>();
@@ -79,6 +115,9 @@ public class EventService {
         if (Objects.isNull(eventDTO.getFormat()))
             throw new MissingFieldException("format");
 
+        if (Objects.isNull(eventDTO.getShortDescription()))
+            throw new MissingFieldException("shortDescription");
+
         if (Objects.isNull(eventDTO.getStartDateTime()))
             throw new MissingFieldException("startDateTime");
 
@@ -97,7 +136,7 @@ public class EventService {
 
         if (Objects.nonNull(eventDTO.getLocation()) && !eventDTO.getLocation().isEmpty()
                 && Objects.isNull(eventDTO.getLatitude()) && Objects.isNull(eventDTO.getLongitude())) {
-            var coordinates = mapService.getCoordinates(eventDTO.getLocation());
+            var coordinates = mapService.getCoordinates(eventDTO.getLocation(), eventDTO.getFormat() == EventFormat.ONLINE);
             eventDTO.setLatitude(coordinates.getLatitude());
             eventDTO.setLongitude(coordinates.getLongitude());
         }
@@ -132,6 +171,9 @@ public class EventService {
         if (Objects.nonNull(eventDTO.getDescription()))
             event.setDescription(eventDTO.getDescription());
 
+        if (Objects.nonNull(eventDTO.getShortDescription()))
+            event.setDescription(eventDTO.getShortDescription());
+
         if (Objects.nonNull(eventDTO.getTitle()))
             event.setTitle(eventDTO.getTitle());
 
@@ -161,10 +203,14 @@ public class EventService {
         return event;
     }
     @Transactional
-    public Long delete(Long id) {
-        eventDao.findOptionalById(id).orElseThrow(() -> new EventNotFoundException(id));
-        eventDao.deleteById(id);
-        return id;
+    public Long delete(Long orgId, Long eventId) {
+        if (eventSecurityService.isUserOwnEvent(eventId))
+        {
+            eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+            eventDao.deleteById(eventId);
+        }
+
+        return eventId;
     }
 
     @Transactional

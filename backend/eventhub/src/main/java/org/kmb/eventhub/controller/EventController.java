@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/events")
@@ -59,8 +58,10 @@ public class EventController {
     @GetMapping
     public ResponseList<EventDTO> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return eventService.getList(page, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+        return eventService.getList(page, pageSize, search, tags, null, null);
     }
 
     @Operation(summary = "Получить информацию о мероприятии.",
@@ -96,6 +97,22 @@ public class EventController {
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @PathVariable Long id) {
         return subscribeService.getMembersByEventId(id, page, pageSize);
+    }
+
+    @Operation(summary = "Получить мероприятие, если пользователь участвует.",
+            description = "Возвращаем id участника и мероприятия.")
+    @ApiResponse(responseCode = "200",
+            description = "Id участника и мероприятия.",
+            content = @Content(mediaType = "application/json",
+           schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members/{memberId}")
+    public EventMemberDTO getEventIfSubcribed(@PathVariable Long id, @PathVariable Long memberId) {
+        return subscribeService.checkSubscription(id, memberId);
     }
 
     @Operation(summary = "Обновить информацию о мероприятии.",
@@ -134,21 +151,21 @@ public class EventController {
         return eventService.addTagsToEvent(id, eventTagsDTO.getTags());
     }
 
-    @Operation(summary = "Удалить мероприятие.",
-            description = "Удаляет мероприятие по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Мероприятие удалено.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Event.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Мероприятие не найдено",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}")
-    public Long delete(@PathVariable Long id) {
-        return eventService.delete(id);
-    }
+//    @Operation(summary = "Удалить мероприятие.",
+//            description = "Удаляет мероприятие по ID.")
+//    @ApiResponse(responseCode = "200",
+//            description = "Мероприятие удалено.",
+//            content = @Content(mediaType = "application/json",
+//            schema = @Schema(implementation = Event.class)))
+//    @ApiResponse(responseCode = "404",
+//            description = "Мероприятие не найдено",
+//            content = @Content(mediaType = "application/json",
+//            schema = @Schema(implementation = ResponseDTO.class)))
+//    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+//    @DeleteMapping(value = "/{id}")
+//    public Long delete(@PathVariable Long id) {
+//        return eventService.delete(id);
+//    }
 
     @Operation(summary = "Удалить тег у мероприятия.",
             description = "Удаляет тег по ID.")
@@ -165,7 +182,7 @@ public class EventController {
     public Long deleteTagFromEvent(
             @PathVariable Long id,
             @RequestBody @Valid TagDTO tagDTO) {
-        return tagService.delete(id, tagDTO);
+        return tagService.deleteTagFromEvent(id, tagDTO);
     }
 
     @Operation(summary = "Добавление нового файла.",

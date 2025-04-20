@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
-import org.kmb.eventhub.dto.EventDTO;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.stereotype.Repository;
 
@@ -46,12 +45,24 @@ public class TagRepository {
     }
 
     public boolean tagIsUsed(Long id) {
-        return dslContext
+        /*return dslContext
                 .selectCount()
                 .from(EVENT_TAGS)
                 .where(EVENT_TAGS.TAG_ID.eq(id))
-                .fetchOneInto(Long.class) > 0;
+                .fetchOneInto(Long.class) > 0;*/
+        return dslContext.fetchExists(
+                dslContext.selectOne()
+                        .from(EVENT_TAGS)
+                        .where(EVENT_TAGS.TAG_ID.eq(id))
+                        .limit(1)
+        ) || dslContext.fetchExists(
+                dslContext.selectOne()
+                        .from(USER_TAGS)
+                        .where(USER_TAGS.TAG_ID.eq(id))
+                        .limit(1)
+        );
     }
+
 
     public Tag findTagByName(String name) {
         return dslContext.selectFrom(TAG)
@@ -91,10 +102,28 @@ public class TagRepository {
         batch.execute();
     }
 
-    public void delete(Long tagId, Long eventId) {
+    public void assignNewUserTag(Long userId, List<Tag> tags) {
+        var batch = dslContext.batch(
+                tags.stream()
+                        .map(tag -> dslContext.insertInto(USER_TAGS)
+                                .set(USER_TAGS.USER_ID, userId)
+                                .set(USER_TAGS.TAG_ID, tag.getId()))
+                        .toArray(Insert[]::new)
+        );
+        batch.execute();
+    }
+
+    public void deleteTagFromEvent(Long tagId, Long eventId) {
         dslContext.deleteFrom(EVENT_TAGS)
                 .where(EVENT_TAGS.EVENT_ID.eq(eventId))
                 .and(EVENT_TAGS.TAG_ID.eq(tagId))
+                .execute();
+    }
+
+    public void deleteTagFromUser(Long tagId, Long userId) {
+        dslContext.deleteFrom(USER_TAGS)
+                .where(USER_TAGS.USER_ID.eq(userId))
+                .and(USER_TAGS.TAG_ID.eq(tagId))
                 .execute();
     }
 }

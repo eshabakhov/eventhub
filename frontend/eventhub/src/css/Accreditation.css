@@ -1,0 +1,126 @@
+﻿.content-panel {
+    height: 90vh;
+    width: 50%;
+    align-self: center;
+    margin-top: 20px;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* <-- выравнивание по вертикали */
+    padding: 16px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e5e7eb;
+    height: 5vh;
+}
+.panel-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #1774cf;
+}
+.orgs-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.org-status {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    color: white;
+}
+
+.true {
+    background-color: #2e7d32;
+}
+
+.false {
+    background-color: #c62828;
+}
+
+.accept-button {
+    background-size: cover;
+    height: 35px;
+    width: 35px;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}
+.not-accr {
+    background-color: lightgray;
+    background-image: url("../img/accept.png");
+}
+
+.accr {
+    background-color: forestgreen;
+    background-image: url("../img/accept.png");
+}
+
+.not-accr:hover {
+    background-color: green;
+}
+
+.accr:hover {
+    background-color: red;
+    background-image: url("../img/decline.png");
+}
+
+/*.accept-button:hover {*/
+/*    background-color: green;*/
+/*}*/
+
+
+.decline-button {
+    background-color: transparent;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+}
+
+.decline-button:hover {
+    background-color: red;
+}
+
+.icon {
+    height: 20px;
+    justify-content: flex-start;
+    width: 20px;
+}
+
+.field-name {
+    font-size: 0.875rem;
+    color: #777;
+    font-style: italic;
+}
+
+.field {
+    margin-bottom: 50px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    gap: 5px;
+    margin-bottom: 0;
+}
+
+.org-title {
+    font-size: 1.125rem;
+    color: black;
+    font-weight: bold;
+}
+.login-button-container {
+       display: flex;
+       align-items: center;
+}

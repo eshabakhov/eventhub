@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.enums.RoleEnum;
+import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.service.SubscribeService;
+import org.kmb.eventhub.service.TagService;
 import org.kmb.eventhub.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
 import org.springframework.http.HttpStatus;
@@ -22,7 +25,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    private final EventService eventService;
+
     private final SubscribeService subscribeService;
+
+    private final TagService tagService;
 
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
@@ -50,8 +58,9 @@ public class UserController {
     @GetMapping
     public ResponseList<User> getList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return userService.getList(page, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search) {
+        return userService.getList(page, pageSize, search);
     }
 
     @Operation(summary = "Получить информацию о пользователе.",
@@ -124,6 +133,24 @@ public class UserController {
         return userService.updateMember(id, memberDTO);
     }
 
+    @Operation(summary = "Обновить информацию модератора.",
+            description = "Обновить информацию модератора по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Информация о модераторе обновлена.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Moderator.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PutMapping(value = "/moderators/{id}")
+    public Moderator updateModerator(
+            @PathVariable Long id,
+            @RequestBody @Valid ModeratorDTO moderatorDTO) {
+        return userService.updateModerator(id, moderatorDTO);
+    }
+
     @Operation(summary = "Получить информацию об участнике.",
                     description = "Возвращает информацию об участнике по ID.")
     @ApiResponse(responseCode = "200",
@@ -138,22 +165,6 @@ public class UserController {
     @GetMapping(value = "/members/{id}")
     public Member getMember(@PathVariable Long id) {
         return userService.getMember(id);
-    }
-
-
-    @Operation(summary = "Получить список мероприятий пользователя.",
-            description = "Возвращает все мероприятия, в которых участвует пользователь.")
-    @ApiResponse(responseCode = "200",
-            description = "Список всех мероприятий.",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Event.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/members/{id}/events")
-
-    public ResponseList<Event> getMemberEvents(@PathVariable Long id,
-                                               @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return subscribeService.getEventsByMemberId(id, page, pageSize);
     }
 
     @Operation(summary = "Получить информацию об организаторе.",
@@ -171,23 +182,19 @@ public class UserController {
     public Organizer getOrganizer(@PathVariable Long id) {
         return userService.getOrganizer(id);
     }
-
-    @Operation(summary = "Обновить информацию модератора.",
-                    description = "Обновить информацию модератора по ID.")
+    @Operation(summary = "Получить список всех организаторов.",
+            description = "Возвращает всех организаторов.")
     @ApiResponse(responseCode = "200",
-                    description = "Информация о модераторе обновлена.",
-                    content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Moderator.class)))
-    @ApiResponse(responseCode = "404",
-                    description = "Участник не найден",
-                    content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
+            description = "Список всех организаторов.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PutMapping(value = "/moderators/{id}")
-    public Moderator updateModerator(
-            @PathVariable Long id,
-            @RequestBody @Valid ModeratorDTO moderatorDTO) {
-        return userService.updateModerator(id, moderatorDTO);
+    @GetMapping(value = "/organizers")
+    public ResponseList<Organizer> getAllOrganizers(
+                     @RequestParam(value = "page", defaultValue = "1") Integer page,
+                     @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                     @RequestParam(value = "search", required = false) String search) {
+        return userService.getOrgList(page, pageSize, search);
     }
 
     @Operation(summary = "Удалить пользователя.",
@@ -206,6 +213,76 @@ public class UserController {
         return userService.delete(id);
     }
 
+    @Operation(summary = "Получить список мероприятий пользователя.",
+            description = "Возвращает все мероприятия, в которых участвует пользователь.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/members/{id}/events")
+    public ResponseList<EventDTO> getMemberEvents(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+
+        return eventService.getList(page, pageSize, search, tags, null, id);
+    }
+    @Operation(summary = "Отказаться от участия.",
+            description = "Удаляет участие пользователя в мероприятии.")
+    @ApiResponse(responseCode = "200",
+            description = "Участие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/members/{id}/events")
+    public void deleteParticipation(
+            @PathVariable Long id,
+            @RequestParam Long eventId) {
+        subscribeService.unsubscribeFromEvent(eventId, id);
+    }
+
+
+    @Operation(summary = "Получить список мероприятий организатора.",
+            description = "Возвращает все мероприятия, которые создал организатор.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers/{id}/events")
+    public ResponseList<EventDTO> getOrganizerEvents(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+
+        return eventService.getList(page, pageSize, search, tags, id, null);
+    }
+
+    @Operation(summary = "Удалить мероприятие.",
+            description = "Удаляет мероприятие по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Мероприятие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/organizers/{id}/events")
+    public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
+        return eventService.delete(id, eventId);
+    }
+
     @Operation(summary = "Добавление новых тегов в избранное пользователя.",
             description = "Добавляет новые теги в избранное пользователя мероприятию.")
     @ApiResponse(responseCode = "201",
@@ -217,9 +294,28 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/tags")
-    public List<Tag> addTagsToUser(@RequestBody UserTagsDTO userTagsDTO) {
-        return userService.addTagsToUser(userTagsDTO.getUserId(), userTagsDTO.getTags());
+    @PostMapping("/{id}/tag")
+    public List<Tag> addTagsToUser(
+            @PathVariable Long id,
+            @RequestBody UserTagsDTO userTagsDTO) {
+        return userService.addTagsToUser(id, userTagsDTO.getTags());
     }
 
+    @Operation(summary = "Удалить тег из избранного пользователя.",
+            description = "Удаляет тег по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Тег удален.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Tag.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Тег не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{id}/tag")
+    public Long deleteTagFromUser(
+            @PathVariable Long id,
+            @RequestBody @Valid TagDTO tagDTO) {
+        return tagService.deleteTagFromUser(id, tagDTO);
+    }
 }

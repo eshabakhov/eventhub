@@ -1,6 +1,7 @@
 package org.kmb.eventhub.controller;
 
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.dto.FriendRequestDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.service.FriendService;
 import org.kmb.eventhub.tables.pojos.FriendRequest;
@@ -16,7 +17,7 @@ public class FriendController {
 
     @ResponseStatus(value = HttpStatus.OK)
     @GetMapping
-    public ResponseList<FriendRequest> getList(
+    public ResponseList<FriendRequestDTO> getList(
             @PathVariable Long id,
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -45,6 +46,14 @@ public class FriendController {
             @PathVariable Long id,
             @RequestParam Long idFrom) {
         friendService.rejectFriendRequest(idFrom, id);
+    }
+
+    @ResponseStatus(value = HttpStatus.OK)
+    @DeleteMapping
+    public void removeUserFromFriends(
+            @PathVariable Long id,
+            @RequestParam Long idFrom) {
+        friendService.removeUserFromFriends(idFrom, id);
     }
 
 }

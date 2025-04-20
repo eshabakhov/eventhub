@@ -1,24 +1,41 @@
 ﻿.auth-container {
-  max-width: 400px;
+  max-width: 500px;
   margin: 80px auto;
   padding: 2rem;
   border-radius: 8px;
   background-color: #f3f3f3;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
 
-.auth-container input {
+.auth-container h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-container input,
+.auth-container textarea,
+.auth-container select {
   width: 100%;
   padding: 10px;
-  margin: 0.5rem 0;
   font-size: 1rem;
   border-radius: 4px;
   border: 1px solid #ccc;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.auth-container textarea {
+  min-height: 80px;
 }
 
 .auth-container button {
-  width: 100%;
   padding: 10px;
   background-color: #0077ff;
   color: white;
@@ -27,6 +44,7 @@
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .auth-container button:hover {
@@ -38,4 +56,13 @@
   cursor: pointer;
   margin-top: 1rem;
   display: inline-block;
+  font-size: 0.95rem;
+}
+
+.auth-container select {
+  background-color: white;
+}
+
+.auth-container input[type="date"] {
+  color: #333;
 }

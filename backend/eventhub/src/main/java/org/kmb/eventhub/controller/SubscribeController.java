@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/v1/members/{id}/subscribe")
+@RequestMapping(value = "/v1/members/{memberId}/subscribe")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Участие в мероприятие", description = "Управление участием в мероприятии")
 public class SubscribeController {
 
@@ -31,9 +31,10 @@ public class SubscribeController {
     @PostMapping(value = "/{eventId}")
     public void subscribeToEvent(
             @PathVariable Long eventId,
-            @RequestParam Long memberId) {
+            @PathVariable Long memberId) {
         subscribeService.subscribeToEvent(eventId, memberId);
     }
+
 
     @Operation(summary = "Отказаться от участия в мероприятии.",
             description = "Отказаться от участия.")
