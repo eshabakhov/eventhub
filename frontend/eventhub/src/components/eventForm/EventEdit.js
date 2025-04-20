@@ -198,7 +198,7 @@ class EventEdit extends React.Component {
             })
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка при сохранении');
-                    navigate('/events');
+                    navigate('/my-events');
                 })
                 .catch(err => console.error('Ошибка сохранения:', err));
         }

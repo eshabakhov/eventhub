@@ -35,6 +35,7 @@ public class SubscribeController {
         subscribeService.subscribeToEvent(eventId, memberId);
     }
 
+
     @Operation(summary = "Отказаться от участия в мероприятии.",
             description = "Отказаться от участия.")
     @ApiResponse(responseCode = "201",
