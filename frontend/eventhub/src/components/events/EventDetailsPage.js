@@ -12,6 +12,19 @@ const formatDateRange = (start, end) => {
     return `${startStr} - ${endStr}`;
 };
 
+function checkSubscription(id, user, setIsSubscribed) {
+    fetch(`http://localhost:9500/api/v1/events/${id}/members/${user.id}`, {
+        method: "GET",
+        credentials: "include",
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            console.log(data);
+            if (data.eventId == id && data.userId == user.id)
+                setIsSubscribed(true);
+        })
+}
+
 const EventDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -30,7 +43,7 @@ const EventDetailsPage = () => {
                 setEvent(data);
                 setLoading(false);
                 // Проверим, подписан ли пользователь на мероприятие
-                setIsSubscribed(data.participants.some(participant => participant.id === user.id));
+                checkSubscription(id, user, setIsSubscribed);
             })
             .catch((err) => {
                 console.error("Ошибка загрузки мероприятия:", err);
@@ -101,7 +114,7 @@ const EventDetailsPage = () => {
                         <button className="back-button-event-details" onClick={() => navigate("/events")}>Назад к списку</button>
 
                         {/* Кнопка для подписки */}
-                        <button className="subscription-button" onClick={handleSubscription}>
+                        <button className={`subscription-button ${isSubscribed ? "non-subscribed" : ""}`} onClick={handleSubscription}>
                             {isSubscribed ? "Отказаться от участия" : "Принять участие"}
                         </button>
                     </div>

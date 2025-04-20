@@ -89,3 +89,19 @@
     background-color: #388e3c;
     transform: translateY(0);
 }
+
+.subscription-button.non-subscribed {
+    background-color: #F44336;
+    color: white;
+    border: 1px solid #F44336;
+}
+
+.subscription-button.non-subscribed:hover {
+    background-color: #E53935;
+    transform: translateY(-2px);
+}
+
+.subscription-button.non-subscribed:active {
+    background-color: #C62828;
+    transform: translateY(0);
+}
