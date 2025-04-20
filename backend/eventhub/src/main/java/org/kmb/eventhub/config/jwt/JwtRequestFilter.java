@@ -78,7 +78,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // пути, которые не требуют авторизации вообще
-        return path.startsWith("/swagger-ui")
+        return path.startsWith("/auth/login")
+                || path.startsWith("/swagger-ui")
                 || path.startsWith("/swagger-ui.html")
                 || path.startsWith("/api-docs"); // можешь добавить свои публичные ручки
     }
