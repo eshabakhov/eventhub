@@ -432,3 +432,23 @@
   border: none;
   cursor: pointer;
 }
+
+.create-button-container {
+  margin-left: auto;
+  display: block;
+  align-items: center;
+  padding: 16px;
+}
+
+.create-button {
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
+

@@ -3,11 +3,13 @@ package org.kmb.eventhub.repository;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static org.kmb.eventhub.Tables.ORGANIZER;
 import static org.kmb.eventhub.Tables.USER;
 
 @Repository
@@ -24,6 +26,26 @@ public class UserRepository {
                 .limit(pageSize)
                 .offset((page - 1) * pageSize)
                 .fetchInto(User.class);
+    }
+
+
+    public List<Organizer> fetchOrganizers (Condition condition, Integer page, Integer pageSize) {
+        return dslContext
+                .select(ORGANIZER.fields())
+                .from(ORGANIZER)
+                .join(USER).on(ORGANIZER.ID.eq(USER.ID))
+                .where(condition)
+                .and(USER.IS_ACTIVE.eq(true))
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchInto(Organizer.class);
+    }
+    public Long countOrgs(Condition condition) {
+        return dslContext
+                .selectCount()
+                .from(ORGANIZER)
+                .where(condition)
+                .fetchOneInto(Long.class);
     }
 
     public User fetchByUsername(String username) {

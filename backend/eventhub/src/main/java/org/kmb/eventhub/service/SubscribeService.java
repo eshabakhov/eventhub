@@ -1,8 +1,6 @@
 package org.kmb.eventhub.service;
 
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.dto.EventDTO;
-import org.kmb.eventhub.dto.MemberDTO;
 import org.kmb.eventhub.dto.ResponseList;
 import org.kmb.eventhub.exception.UnexpectedException;
 import org.kmb.eventhub.mapper.UserMapper;
@@ -18,6 +16,8 @@ import java.util.Objects;
 public class SubscribeService {
 
     private final EventService eventService;
+
+    private final UserSecurityService userSecurityService;
 
     private final UserService userService;
 
@@ -41,8 +41,10 @@ public class SubscribeService {
 
     }
     public void unsubscribeFromEvent(Long eventId, Long memberId) {
-        EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
-        eventMembersDao.delete(eventMembers);
+        if (userSecurityService.isUserOwnData(memberId)) {
+            EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
+            eventMembersDao.delete(eventMembers);
+        }
     }
 
     public ResponseList<Event> getEventsByMemberId(Long memberId, Integer page, Integer pageSize) {

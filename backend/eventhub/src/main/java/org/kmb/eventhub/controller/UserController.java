@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.dto.*;
+import org.kmb.eventhub.enums.RoleEnum;
 import org.kmb.eventhub.service.EventService;
 import org.kmb.eventhub.service.SubscribeService;
 import org.kmb.eventhub.service.TagService;
@@ -181,6 +182,20 @@ public class UserController {
     public Organizer getOrganizer(@PathVariable Long id) {
         return userService.getOrganizer(id);
     }
+    @Operation(summary = "Получить список всех организаторов.",
+            description = "Возвращает всех организаторов.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех организаторов.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers")
+    public ResponseList<Organizer> getAllOrganizers(
+                     @RequestParam(value = "page", defaultValue = "1") Integer page,
+                     @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                     @RequestParam(value = "search", required = false) String search) {
+        return userService.getOrgList(page, pageSize, search);
+    }
 
     @Operation(summary = "Удалить пользователя.",
                     description = "Удаляет пользователя по ID.")
@@ -215,6 +230,23 @@ public class UserController {
 
         return eventService.getList(page, pageSize, search, tags, null, id);
     }
+    @Operation(summary = "Отказаться от участия.",
+            description = "Удаляет участие пользователя в мероприятии.")
+    @ApiResponse(responseCode = "200",
+            description = "Участие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Участник не найден",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/members/{id}/events")
+    public void deleteParticipation(
+            @PathVariable Long id,
+            @RequestParam Long eventId) {
+        subscribeService.unsubscribeFromEvent(eventId, id);
+    }
 
     @Operation(summary = "Получить список мероприятий организатора.",
             description = "Возвращает все мероприятия, которые создал организатор.")
@@ -232,6 +264,22 @@ public class UserController {
             @RequestParam(value = "tags", required = false) String tags) {
 
         return eventService.getList(page, pageSize, search, tags, id, null);
+    }
+
+    @Operation(summary = "Удалить мероприятие.",
+            description = "Удаляет мероприятие по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Мероприятие удалено.",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/organizers/{id}/events")
+    public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
+        return eventService.delete(id, eventId);
     }
 
     @Operation(summary = "Добавление новых тегов в избранное пользователя.",
@@ -269,5 +317,4 @@ public class UserController {
             @RequestBody @Valid TagDTO tagDTO) {
         return tagService.deleteTagFromUser(id, tagDTO);
     }
-
 }

@@ -1,0 +1,58 @@
+.return-button-container {
+    margin-left: auto;
+    display: block;
+    align-items: center;
+    padding: 16px;
+}
+
+.return-button {
+    padding: 8px 16px;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.event-label {
+    font-size: 0.875rem;
+    color: #4b5563;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.event-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+
+.event-time-input {
+    display: flex;
+    gap: 1px;
+    width: 20%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+
+.event-button {
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}

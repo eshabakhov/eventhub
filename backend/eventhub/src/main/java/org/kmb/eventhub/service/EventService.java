@@ -54,6 +54,8 @@ public class EventService {
 
     private final SubscribeRepository subscribeRepository;
 
+    private final EventSecurityService eventSecurityService;
+
     public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags, Long orgId, Long memberId) {
         ResponseList<EventDTO> responseList = new ResponseList<>();
         Condition condition = trueCondition();
@@ -201,10 +203,14 @@ public class EventService {
         return event;
     }
     @Transactional
-    public Long delete(Long id) {
-        eventDao.findOptionalById(id).orElseThrow(() -> new EventNotFoundException(id));
-        eventDao.deleteById(id);
-        return id;
+    public Long delete(Long orgId, Long eventId) {
+        if (eventSecurityService.isUserOwnEvent(eventId))
+        {
+            eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+            eventDao.deleteById(eventId);
+        }
+
+        return eventId;
     }
 
     @Transactional

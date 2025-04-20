@@ -6,8 +6,10 @@ import LoginForm from "./components/login/LoginForm"
 import EventsPage from "./components/events/EventsPage";
 import ProfilePage from "./components/profile/ProfilePage"
 import LogoutPage from "./components/logout/LogoutPage"
+import EventForm from "./components/eventForm/EventForm";
 import MyEventsList from "./components/events/MyEventsList";
 import FriendsPage from './components/friends/FriendsPage';
+import AccreditationPage from "./components/accreditation/AccreditationPage";
 
 const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
@@ -33,6 +35,8 @@ class App extends React.Component {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="/my-events" element={<MyEventsList />} />
+              <Route path='/events/create' exact={true} element={<EventForm/>}/>
+              <Route path="/accreditation" element={<AccreditationPage />} />
               <Route path="/friends" element={<FriendsPage />} />
             </Routes>
           </UserProvider>
