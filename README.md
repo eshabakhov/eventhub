@@ -27,5 +27,9 @@ mvn -f ./backend/eventhub/pom.xml clean package -P build
 docker-compose -f ./backend/eventhub/docker-compose.yml -f ./frontend/eventhub/docker-compose.yml up
 ```
 
-## Спецификация АПИ
+## Подключение к платформе
+
+http://localhost:3000 - после запуска приложения
+
+## Спецификация API backend
 http://localhost:9500/api/swagger-ui/index.html после запуска приложения
