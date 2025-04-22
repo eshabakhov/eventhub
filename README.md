@@ -18,13 +18,13 @@ Eventhub - интерактивная платформа, на которой в
 
 1. Для сборки приложения использовать команду:
 ```
-mvn -f ./backend/eventhub/pom.xml clean package -P build
+mvn clean package -f ./backend/eventhub/pom.xml -DskipTests  
 ```
 Для сборки необходим запущенный докер, так как в нём поднимается тестовая БД, в которой применяются миграции и генерируются jooq-классы.
 
 2. Для запуска приложения (бэкенд, фронтенд) и БД в контейнерах:
 ```
-docker-compose -f ./backend/eventhub/docker-compose.yml -f ./frontend/eventhub/docker-compose.yml up
+docker-compose up -d --build 
 ```
 
 ## Подключение к платформе
