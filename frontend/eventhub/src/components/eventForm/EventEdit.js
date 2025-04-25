@@ -58,7 +58,7 @@ class EventEdit extends React.Component {
         console.log(eventId)
 
         if (eventId) {
-            fetch(`${API_BASE_URL}/events/${eventId}`, {
+            fetch(`${API_BASE_URL}/v1/events/${eventId}`, {
                 credentials: 'include',
                 headers: {'Accept': 'application/json'}
             })
@@ -101,7 +101,7 @@ class EventEdit extends React.Component {
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
             try {
-                const response = await fetch(`${API_BASE_URL}/events/${eventId}/tag`, {
+                const response = await fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -138,7 +138,7 @@ class EventEdit extends React.Component {
     handleRemoveTag = (tagToRemove) => {
         const {eventId} = this.props.params;
 
-        fetch(`${API_BASE_URL}/events/${eventId}/tag`, {
+        fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
@@ -162,7 +162,7 @@ class EventEdit extends React.Component {
     handleRemoveFile = (fileToRemove) => {
         const {eventId} = this.props.params;
 
-        fetch(`${API_BASE_URL}/events/${eventId}/eventFiles`, {
+        fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
@@ -221,8 +221,8 @@ class EventEdit extends React.Component {
 
             const method = this.state.isEditing ? 'PATCH' : 'POST';
             const url = this.state.isEditing
-                ? `${API_BASE_URL}/events/${eventId}`
-                : `${API_BASE_URL}/events`;
+                ? `${API_BASE_URL}/v1/events/${eventId}`
+                : `${API_BASE_URL}/v1/events`;
 
             fetch(url, {
                 method,

@@ -52,7 +52,7 @@ class ModeratorCreate extends Component {
         const {user, setUser} = this.context;
         const {formData, userId} = this.state;
 
-        const commonEndpoint = `${API_BASE_URL}/users`;
+        const commonEndpoint = `${API_BASE_URL}/v1/users`;
 
         const {
             role,
@@ -84,7 +84,7 @@ class ModeratorCreate extends Component {
             const userId = createdUser.id;
 
             // 2. Обновление ролевых данных
-            const roleEndpoint = `${API_BASE_URL}/users/moderators/${userId}`;
+            const roleEndpoint = `${API_BASE_URL}/v1/users/moderators/${userId}`;
 
             await fetch(roleEndpoint, {
                 method: 'PUT',

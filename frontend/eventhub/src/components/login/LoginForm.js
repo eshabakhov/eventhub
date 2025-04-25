@@ -139,7 +139,7 @@ class Login extends React.Component {
       };
   
       // 1. Создание пользователя
-      fetch(`${API_BASE_URL}/users`, {
+      fetch(`${API_BASE_URL}/v1/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -169,7 +169,7 @@ class Login extends React.Component {
           let rolePayload = {};
   
           if (role === "ORGANIZER") {
-            url = `${API_BASE_URL}/users/organizers/${userId}`;
+            url = `${API_BASE_URL}/v1/users/organizers/${userId}`;
             rolePayload = {
               name: orgName,
               description: fullDesc,
@@ -178,7 +178,7 @@ class Login extends React.Component {
               address
             };
           } else {
-            url = `${API_BASE_URL}/users/members/${userId}`;
+            url = `${API_BASE_URL}/v1/users/members/${userId}`;
             rolePayload = {
               lastName,
               firstName,

@@ -96,7 +96,7 @@ class EventsPage extends Component {
     }
     // Загрузка тегов
     loadTags = () => {
-        fetch(`${API_BASE_URL}/tags`, {
+        fetch(`${API_BASE_URL}/v1/tags`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -113,7 +113,7 @@ class EventsPage extends Component {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        fetch(`${API_BASE_URL}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
+        fetch(`${API_BASE_URL}/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
             .then((res) => res.json())
             .then((data) => {
                 const loadedEvents = data.list.map((e) => ({

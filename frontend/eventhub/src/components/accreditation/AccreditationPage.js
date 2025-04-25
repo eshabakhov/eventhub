@@ -96,7 +96,7 @@ class AccreditationPage extends Component {
         const { orgsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const currentUser = this.context.user
-        let url=`${API_BASE_URL}/users/organizers?${searchParam}&page=${page}&pageSize=${orgsPerPage}`;
+        let url=`${API_BASE_URL}/v1/users/organizers?${searchParam}&page=${page}&pageSize=${orgsPerPage}`;
         fetch(url, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -154,7 +154,7 @@ class AccreditationPage extends Component {
 
     cancelAccreditation = (selectedOrg, user) => {
         const updatedData = {"isAccredited": "false"};
-        fetch(`${API_BASE_URL}/users/organizers/${selectedOrg.id}`, {
+        fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -175,7 +175,7 @@ class AccreditationPage extends Component {
     }
     approveAccreditation = (selectedOrg, user) => {
         const updatedData = {"isAccredited": "true"};
-        fetch(`${API_BASE_URL}/users/organizers/${selectedOrg.id}`, {
+        fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

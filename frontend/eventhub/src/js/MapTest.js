@@ -7,7 +7,7 @@ const map = L.map('map').setView([55.75, 37.61], 10);
         maxZoom: 18,
     }).addTo(map);
 
-    fetch(`${API_BASE_URL}/events`)
+    fetch(`${API_BASE_URL}/v1/events`)
         .then(res => res.json())
         .then(data => {
             const bounds = [];

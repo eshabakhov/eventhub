@@ -14,7 +14,7 @@ const formatDateRange = (start, end) => {
 };
 
 function checkSubscription(id, user, setIsSubscribed) {
-    fetch(`${API_BASE_URL}/events/${id}/members/${user.id}`, {
+    fetch(`${API_BASE_URL}/v1/events/${id}/members/${user.id}`, {
         method: "GET",
         credentials: "include",
     })
@@ -35,7 +35,7 @@ const EventDetailsPage = () => {
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/events/${id}`, {
+        fetch(`${API_BASE_URL}/v1/events/${id}`, {
             method: "GET",
             credentials: "include",
         })
@@ -54,7 +54,7 @@ const EventDetailsPage = () => {
 
     const handleSubscription = () => {
         const method = isSubscribed ? "DELETE" : "POST";
-        fetch(`${API_BASE_URL}/members/${user.id}/subscribe/${id}`, {
+        fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${id}`, {
             method: method,
             credentials: "include",
         })

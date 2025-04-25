@@ -33,7 +33,7 @@ class FriendsPage extends Component {
   }
 
   fetchFriends = (id) => {
-    fetch(`${API_BASE_URL}/users/members/${id}/friends`, {
+    fetch(`${API_BASE_URL}/v1/users/members/${id}/friends`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -71,7 +71,7 @@ class FriendsPage extends Component {
       return;
     }
 
-    fetch(`${API_BASE_URL}/users?search=${encodeURIComponent(searchQuery)}`, {
+    fetch(`${API_BASE_URL}/v1/users?search=${encodeURIComponent(searchQuery)}`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -92,7 +92,7 @@ class FriendsPage extends Component {
   handleAddFriend = (recipientId) => {
     const { userId, searchResults } = this.state;
 
-    fetch(`${API_BASE_URL}/users/members/${userId}/friends/send/request?idTo=${recipientId}`, {
+    fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends/send/request?idTo=${recipientId}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
@@ -112,7 +112,7 @@ class FriendsPage extends Component {
   handleRemoveFriend = (friendId) => {
     const { userId } = this.state;
 
-    fetch(`${API_BASE_URL}/users/members/${userId}/friends?idFrom=${friendId}`, {
+    fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends?idFrom=${friendId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -123,7 +123,7 @@ class FriendsPage extends Component {
   handleAcceptRequest = (senderId) => {
     const { userId } = this.state;
 
-    fetch(`${API_BASE_URL}/users/members/${userId}/friends/accept/request?idFrom=${senderId}`, {
+    fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends/accept/request?idFrom=${senderId}`, {
       method: 'POST',
       credentials: 'include',
     })

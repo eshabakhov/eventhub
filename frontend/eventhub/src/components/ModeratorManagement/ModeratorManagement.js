@@ -55,7 +55,7 @@ class ModeratorsPage extends Component {
     }
 
     loadModerators = () => {
-        fetch(`${API_BASE_URL}/users/moderators`, {
+        fetch(`${API_BASE_URL}/v1/users/moderators`, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
             credentials: "include",
@@ -87,7 +87,7 @@ class ModeratorsPage extends Component {
     };
 
     handleDelete = (moderatorId) => {
-        fetch(`${API_BASE_URL}/users/${moderatorId}`, {
+        fetch(`${API_BASE_URL}/v1/users/${moderatorId}`, {
             method: "DELETE",
             credentials: "include",
         })

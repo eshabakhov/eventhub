@@ -94,7 +94,7 @@ class EventForm extends React.Component {
             // Здесь можно добавить вызов API для сохранения мероприятия
             // this.props.onSubmit(eventData);
 
-            fetch(`${API_BASE_URL}/events`, {
+            fetch(`${API_BASE_URL}/v1/events`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

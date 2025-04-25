@@ -91,9 +91,9 @@ class ProfilePage extends Component {
     };
   
     const rolePath = rolePathMap[user.role];
-    const commonEndpoint = `${API_BASE_URL}/users/${user.id}`;
+    const commonEndpoint = `${API_BASE_URL}/v1/users/${user.id}`;
     const roleEndpoint = rolePath
-      ? `${API_BASE_URL}/users/${rolePath}/${user.id}`
+      ? `${API_BASE_URL}/v1/users/${rolePath}/${user.id}`
       : null;
   
     const {
