@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import "../../css/ProfilePage.css";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 function ProfilePageWithNavigation(props) {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ class ProfilePage extends Component {
     const { user } = this.context;
 
     if (user && user.id) {
-      fetch('http://localhost:9500/api/auth/me', {
+      fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -90,9 +91,9 @@ class ProfilePage extends Component {
     };
   
     const rolePath = rolePathMap[user.role];
-    const commonEndpoint = `http://localhost:9500/api/v1/users/${user.id}`;
+    const commonEndpoint = `${API_BASE_URL}/users/${user.id}`;
     const roleEndpoint = rolePath
-      ? `http://localhost:9500/api/v1/users/${rolePath}/${user.id}`
+      ? `${API_BASE_URL}/users/${rolePath}/${user.id}`
       : null;
   
     const {
@@ -140,7 +141,7 @@ class ProfilePage extends Component {
       }
   
       // 3. Загрузка обновлённых данных
-      const meResponse = await fetch('http://localhost:9500/api/auth/me', {
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
         credentials: 'include',
         headers: {

@@ -1,6 +1,7 @@
 import React, { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../../UserContext";
+import API_BASE_URL from "../../config";
 
 const LogoutPage = () => {
     const { setUser } = useContext(UserContext);
@@ -8,7 +9,7 @@ const LogoutPage = () => {
 
     useEffect(() => {
         // Отправим запрос на logout (если сервер его поддерживает)
-        fetch("http://localhost:9500/api/v1/auth/logout", {
+        fetch(`${API_BASE_URL}/auth/logout`, {
             method: "POST",
             credentials: "include",
         })

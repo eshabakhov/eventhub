@@ -3,6 +3,7 @@ import '../../css/FriendsPage.css';
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../../config";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
@@ -19,7 +20,7 @@ class FriendsPage extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:9500/api/auth/me', {
+    fetch(`${API_BASE_URL}/auth/me`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -32,7 +33,7 @@ class FriendsPage extends Component {
   }
 
   fetchFriends = (id) => {
-    fetch(`http://localhost:9500/api/v1/users/members/${id}/friends`, {
+    fetch(`${API_BASE_URL}/users/members/${id}/friends`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -70,7 +71,7 @@ class FriendsPage extends Component {
       return;
     }
 
-    fetch(`http://localhost:9500/api/v1/users?search=${encodeURIComponent(searchQuery)}`, {
+    fetch(`${API_BASE_URL}/users?search=${encodeURIComponent(searchQuery)}`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -91,7 +92,7 @@ class FriendsPage extends Component {
   handleAddFriend = (recipientId) => {
     const { userId, searchResults } = this.state;
 
-    fetch(`http://localhost:9500/api/v1/users/members/${userId}/friends/send/request?idTo=${recipientId}`, {
+    fetch(`${API_BASE_URL}/users/members/${userId}/friends/send/request?idTo=${recipientId}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
@@ -111,7 +112,7 @@ class FriendsPage extends Component {
   handleRemoveFriend = (friendId) => {
     const { userId } = this.state;
 
-    fetch(`http://localhost:9500/api/v1/users/members/${userId}/friends?idFrom=${friendId}`, {
+    fetch(`${API_BASE_URL}/users/members/${userId}/friends?idFrom=${friendId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -122,7 +123,7 @@ class FriendsPage extends Component {
   handleAcceptRequest = (senderId) => {
     const { userId } = this.state;
 
-    fetch(`http://localhost:9500/api/v1/users/members/${userId}/friends/accept/request?idFrom=${senderId}`, {
+    fetch(`${API_BASE_URL}/users/members/${userId}/friends/accept/request?idFrom=${senderId}`, {
       method: 'POST',
       credentials: 'include',
     })

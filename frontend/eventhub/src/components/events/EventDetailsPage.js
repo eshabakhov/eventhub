@@ -4,6 +4,7 @@ import "../../css/EventDetailsPage.css";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 const formatDateRange = (start, end) => {
     const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
@@ -13,7 +14,7 @@ const formatDateRange = (start, end) => {
 };
 
 function checkSubscription(id, user, setIsSubscribed) {
-    fetch(`http://localhost:9500/api/v1/events/${id}/members/${user.id}`, {
+    fetch(`${API_BASE_URL}/events/${id}/members/${user.id}`, {
         method: "GET",
         credentials: "include",
     })
@@ -34,7 +35,7 @@ const EventDetailsPage = () => {
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
-        fetch(`http://localhost:9500/api/v1/events/${id}`, {
+        fetch(`${API_BASE_URL}/events/${id}`, {
             method: "GET",
             credentials: "include",
         })
@@ -53,7 +54,7 @@ const EventDetailsPage = () => {
 
     const handleSubscription = () => {
         const method = isSubscribed ? "DELETE" : "POST";
-        fetch(`http://localhost:9500/api/v1/members/${user.id}/subscribe/${id}`, {
+        fetch(`${API_BASE_URL}/members/${user.id}/subscribe/${id}`, {
             method: method,
             credentials: "include",
         })

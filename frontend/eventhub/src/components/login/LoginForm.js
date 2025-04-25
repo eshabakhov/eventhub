@@ -3,6 +3,7 @@ import "../../css/AuthPage.css";
 import UserContext from "../../UserContext";
 import { Navigate } from "react-router";
 import { em, u } from "framer-motion/client";
+import API_BASE_URL from "../../config";
 
 class Login extends React.Component {
   static contextType = UserContext;
@@ -96,7 +97,7 @@ class Login extends React.Component {
         return;
       }
   
-      fetch("http://localhost:9500/api/auth/login", {
+      fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -138,7 +139,7 @@ class Login extends React.Component {
       };
   
       // 1. Создание пользователя
-      fetch("http://localhost:9500/api/v1/users", {
+      fetch(`${API_BASE_URL}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -152,7 +153,7 @@ class Login extends React.Component {
           const userId = user.id;
   
           // 2. Авторизация нового пользователя
-          return fetch("http://localhost:9500/api/auth/login", {
+          return fetch(`${API_BASE_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -168,7 +169,7 @@ class Login extends React.Component {
           let rolePayload = {};
   
           if (role === "ORGANIZER") {
-            url = `http://localhost:9500/api/v1/users/organizers/${userId}`;
+            url = `${API_BASE_URL}/users/organizers/${userId}`;
             rolePayload = {
               name: orgName,
               description: fullDesc,
@@ -177,7 +178,7 @@ class Login extends React.Component {
               address
             };
           } else {
-            url = `http://localhost:9500/api/v1/users/members/${userId}`;
+            url = `${API_BASE_URL}/users/members/${userId}`;
             rolePayload = {
               lastName,
               firstName,
@@ -224,7 +225,7 @@ class Login extends React.Component {
 
     const payload = { ...commonData, ...roleData };
 
-    fetch("http://localhost:9500/api/auth/register", {
+    fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

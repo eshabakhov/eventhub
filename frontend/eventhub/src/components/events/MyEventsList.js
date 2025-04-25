@@ -13,6 +13,7 @@ import onlineIconImg from "../../img/online-marker.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
@@ -149,7 +150,7 @@ class MyEventsList extends Component {
 
     // Загрузка тегов
     loadTags = () => {
-        fetch("http://localhost:9500/api/v1/tags", {
+        fetch(`${API_BASE_URL}/tags`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -169,10 +170,10 @@ class MyEventsList extends Component {
         const currentUser = this.context.user
         let url;
         if (currentUser && currentUser.role === "ORGANIZER") {
-            url = `http://localhost:9500/api/v1/users/organizers/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/users/organizers/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         else if (currentUser && currentUser.role === "MEMBER") {
-            url = `http://localhost:9500/api/v1/users/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/users/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         fetch(url, {
             method: "GET",
@@ -247,7 +248,7 @@ class MyEventsList extends Component {
     // Отмена участия
     refuceToParticipation = (selectedEvent, user) => {
         const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
-        fetch(`http://localhost:9500/api/v1/users/members/${user.id}/events?${eventParam}`, {
+        fetch(`${API_BASE_URL}/users/members/${user.id}/events?${eventParam}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -269,7 +270,7 @@ class MyEventsList extends Component {
     // Удаление мероприятия
     deleteEvent = (selectedEvent, user) => {
         const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
-        fetch(`http://localhost:9500/api/v1/users/organizers/${user.id}/events?${eventParam}`, {
+        fetch(`${API_BASE_URL}/users/organizers/${user.id}/events?${eventParam}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -354,7 +355,7 @@ class MyEventsList extends Component {
         // Если пользователь уже есть в контексте, пропускаем
         if (user && user.id) return;
 
-        fetch("http://localhost:9500/api/auth/me", {
+        fetch(`${API_BASE_URL}/auth/me`, {
             method: 'GET',
             credentials: 'include',
         })
