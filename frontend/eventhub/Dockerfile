@@ -1,7 +1,14 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY . .
-RUN npm install && npm run build
+RUN npm install
+COPY . .
+
+# Используем ARG для передачи переменных при сборке
+ARG REACT_APP_API_BASE_URL
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
+RUN npm run build
 
 FROM node:20-alpine
 WORKDIR /app

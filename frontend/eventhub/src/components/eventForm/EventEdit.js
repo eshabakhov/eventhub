@@ -280,7 +280,7 @@ class EventEdit extends React.Component {
             };
 
             try {
-                const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+                const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
                     method: "POST",
                     credentials: "include",
                     headers: {

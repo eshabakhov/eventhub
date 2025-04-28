@@ -9,7 +9,7 @@ const LogoutPage = () => {
 
     useEffect(() => {
         // Отправим запрос на logout (если сервер его поддерживает)
-        fetch(`${API_BASE_URL}/auth/logout`, {
+        fetch(`${API_BASE_URL}/v1/auth/logout`, {
             method: "POST",
             credentials: "include",
         })
