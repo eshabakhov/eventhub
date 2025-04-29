@@ -18,7 +18,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,6 +37,22 @@ import java.util.List;
 @EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
+
+    private static final String V1_USERS = "/v1/users";
+    private static final String V1_USERS_ID = "/v1/users/{id}";
+
+    private static final String V1_EVENTS = "/v1/events";
+    private static final String V1_TAGS = "/v1/tags";
+
+    private static final String V1_USERS_ORGANIZERS_ID = "/v1/users/organizers/{id}";
+
+    private static final String V1_USERS_ORGANIZERS_ID_EVENTS = "/v1/users/organizers/{id}/events";
+
+    private static final String V1_USERS_MODERATORS_ID = "/v1/users/moderators/{id}";
+
+    private static final String V1_USERS_MEMBERS_ALL = "/v1/users/members/**";
+
+    private static final String V1_USERS_MEMBER_ID_EVENTS = "/v1/users/members/{id}/events";
 
     private JwtRequestFilter jwtRequestFilter;
 
@@ -73,9 +88,8 @@ public class SecurityConfig {
                         .logoutUrl("/v1/auth/logout")
                         .addLogoutHandler(jwtCookieLogoutHandler())
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        }))
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_OK)))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
@@ -92,27 +106,29 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/api-docs/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/users/{id}").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/{id}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/events").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/tags").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/users").hasRole(RoleEnum.MODERATOR.name())
-                        .requestMatchers("/v1/users/{id}").hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(HttpMethod.GET, "/v1/users/organizers/{id}").hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/organizers/{id}").hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
+                        .requestMatchers(HttpMethod.POST, V1_USERS).permitAll()
+                        .requestMatchers(HttpMethod.GET, V1_USERS).hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(HttpMethod.GET, "/v1/users/organizers/{id}/events").hasRole(RoleEnum.ORGANIZER.name())
-                        .requestMatchers(HttpMethod.DELETE, "/v1/users/organizers/{id}/events").hasRole(RoleEnum.ORGANIZER.name())
+                        .requestMatchers(V1_USERS_ID).hasRole(RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ID).permitAll()
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_ID).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/v1/users/moderators/{id}").hasRole(RoleEnum.MODERATOR.name())
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/moderators/{id}").hasRole(RoleEnum.MODERATOR.name())
-                        .requestMatchers(HttpMethod.GET, "/v1/users/members/**").hasRole(RoleEnum.MEMBER.name())
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/members/**").hasRole(RoleEnum.MEMBER.name())
-                        .requestMatchers(HttpMethod.GET, "/v1/users/members/{id}/events").hasRole(RoleEnum.MEMBER.name())
-                        .requestMatchers(HttpMethod.DELETE, "/v1/users/members/{id}/events").hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS_ALL).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_MEMBERS_ALL).hasRole(RoleEnum.MEMBER.name())
+
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.DELETE, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBER_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.DELETE, V1_USERS_MEMBER_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
+
+                        .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
 
                         .anyRequest().authenticated()
                 )
