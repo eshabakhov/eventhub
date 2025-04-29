@@ -10,11 +10,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=${DB_URL}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USERNAME=${DB_USER}
-    env_file:
-      - .env
+      - POSTGRES_DB=${DB_URL:-jdbc:postgresql://localhost:5432/postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_USERNAME=${DB_USER:-postgres}
     networks:
       eventhub_network:
 
@@ -25,17 +23,19 @@ services:
       - "9500:9500"
     volumes:
       - ./backend/eventhub/target/eventhub-0.0.1-SNAPSHOT.jar:/opt/app.jar
-    command: java -jar -Ddb.url=jdbc:postgresql://eventhub_postgres:5432/${DB_NAME} /opt/app.jar
+    command: java -jar -Ddb.url=jdbc:postgresql://eventhub_postgres:5432/${DB_NAME:-postgres} /opt/app.jar
+    environment:
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     depends_on:
       - postgres
     networks:
       eventhub_network:
-    env_file:
-      - .env
 
   frontend:
     build:
       context: ./frontend/eventhub
+      args:
+        - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-http://localhost:9500/api}  # Передаем из .env
     ports:
       - "3000:3000"
     container_name: frontend_backend

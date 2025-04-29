@@ -6,6 +6,7 @@ import EventHubLogo from "../../img/eventhub.png";
 import "../../css/EventForm.css";
 import axios from "axios";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 
 const formatDateForBackend = (dateTimeString) => {
@@ -93,7 +94,7 @@ class EventForm extends React.Component {
             // Здесь можно добавить вызов API для сохранения мероприятия
             // this.props.onSubmit(eventData);
 
-            fetch('http://localhost:9500/api/v1/events', {
+            fetch(`${API_BASE_URL}/v1/events`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

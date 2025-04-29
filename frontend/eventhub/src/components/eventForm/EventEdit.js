@@ -5,6 +5,7 @@ import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import "../../css/EventEdit.css";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 export function withParams(Component) {
     return props => <Component {...props} params={useParams()}/>;
@@ -57,7 +58,7 @@ class EventEdit extends React.Component {
         console.log(eventId)
 
         if (eventId) {
-            fetch(`http://localhost:9500/api/v1/events/${eventId}`, {
+            fetch(`${API_BASE_URL}/v1/events/${eventId}`, {
                 credentials: 'include',
                 headers: {'Accept': 'application/json'}
             })
@@ -100,7 +101,7 @@ class EventEdit extends React.Component {
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
             try {
-                const response = await fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
+                const response = await fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -137,7 +138,7 @@ class EventEdit extends React.Component {
     handleRemoveTag = (tagToRemove) => {
         const {eventId} = this.props.params;
 
-        fetch(`http://localhost:9500/api/v1/events/${eventId}/tag`, {
+        fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
@@ -161,7 +162,7 @@ class EventEdit extends React.Component {
     handleRemoveFile = (fileToRemove) => {
         const {eventId} = this.props.params;
 
-        fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+        fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
@@ -220,8 +221,8 @@ class EventEdit extends React.Component {
 
             const method = this.state.isEditing ? 'PATCH' : 'POST';
             const url = this.state.isEditing
-                ? `http://localhost:9500/api/v1/events/${eventId}`
-                : 'http://localhost:9500/api/v1/events';
+                ? `${API_BASE_URL}/v1/events/${eventId}`
+                : `${API_BASE_URL}/v1/events`;
 
             fetch(url, {
                 method,
@@ -279,7 +280,7 @@ class EventEdit extends React.Component {
             };
 
             try {
-                const res = await fetch(`http://localhost:9500/api/v1/events/${eventId}/eventFiles`, {
+                const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
                     method: "POST",
                     credentials: "include",
                     headers: {

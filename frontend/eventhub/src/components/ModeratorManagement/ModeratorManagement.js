@@ -7,6 +7,7 @@ import DeleteIcon from "../../img/delete.png";
 import "../../css/Accreditation.css";
 import {useNavigate} from "react-router-dom";
 import UserContext from "../../UserContext";
+import API_BASE_URL from "../../config";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -54,7 +55,7 @@ class ModeratorsPage extends Component {
     }
 
     loadModerators = () => {
-        fetch("http://localhost:9500/api/v1/users/moderators", {
+        fetch(`${API_BASE_URL}/v1/users/moderators`, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
             credentials: "include",
@@ -86,7 +87,7 @@ class ModeratorsPage extends Component {
     };
 
     handleDelete = (moderatorId) => {
-        fetch(`http://localhost:9500/api/v1/users/${moderatorId}`, {
+        fetch(`${API_BASE_URL}/v1/users/${moderatorId}`, {
             method: "DELETE",
             credentials: "include",
         })

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import "../../css/ProfilePage.css";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import API_BASE_URL from "../../config";
 
 function ModeratorCreateWithNavigation(props) {
     const navigate = useNavigate();
@@ -51,7 +52,7 @@ class ModeratorCreate extends Component {
         const {user, setUser} = this.context;
         const {formData, userId} = this.state;
 
-        const commonEndpoint = `http://localhost:9500/api/v1/users`;
+        const commonEndpoint = `${API_BASE_URL}/v1/users`;
 
         const {
             role,
@@ -83,7 +84,7 @@ class ModeratorCreate extends Component {
             const userId = createdUser.id;
 
             // 2. Обновление ролевых данных
-            const roleEndpoint = `http://localhost:9500/api/v1/users/moderators/${userId}`;
+            const roleEndpoint = `${API_BASE_URL}/v1/users/moderators/${userId}`;
 
             await fetch(roleEndpoint, {
                 method: 'PUT',

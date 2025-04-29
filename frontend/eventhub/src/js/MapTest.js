@@ -1,12 +1,13 @@
-﻿
-    const map = L.map('map').setView([55.75, 37.61], 10);
+﻿import API_BASE_URL from "../config";
+
+const map = L.map('map').setView([55.75, 37.61], 10);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap',
         maxZoom: 18,
     }).addTo(map);
 
-    fetch('http://localhost:9500/api/v1/events')
+    fetch(`${API_BASE_URL}/v1/events`)
         .then(res => res.json())
         .then(data => {
             const bounds = [];

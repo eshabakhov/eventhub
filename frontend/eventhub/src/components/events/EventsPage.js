@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import { th } from "framer-motion/client";
+import API_BASE_URL from "../../config";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
@@ -95,7 +96,7 @@ class EventsPage extends Component {
     }
     // Загрузка тегов
     loadTags = () => {
-        fetch("http://localhost:9500/api/v1/tags", {
+        fetch(`${API_BASE_URL}/v1/tags`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -112,7 +113,7 @@ class EventsPage extends Component {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        fetch(`http://localhost:9500/api/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
+        fetch(`${API_BASE_URL}/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
             .then((res) => res.json())
             .then((data) => {
                 const loadedEvents = data.list.map((e) => ({
@@ -198,7 +199,7 @@ class EventsPage extends Component {
         // Если пользователь уже есть в контексте, пропускаем
         //if (user && user.id) return;
 
-        fetch("http://localhost:9500/api/auth/me", {
+        fetch(`${API_BASE_URL}/auth/me`, {
             method: 'GET',
             credentials: 'include',
         })
