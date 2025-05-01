@@ -13,46 +13,93 @@ const formatDateRange = (start, end) => {
     return `${startStr} - ${endStr}`;
 };
 
-function checkSubscription(id, user, setIsSubscribed) {
-    fetch(`${API_BASE_URL}/v1/events/${id}/members/${user.id}`, {
+async function checkSubscription(id, user) {
+    const res = await fetch(`${API_BASE_URL}/v1/events/${id}/members/${user.id}`, {
         method: "GET",
         credentials: "include",
-    })
-        .then((res) => res.json())
-        .then((data) => {
-            console.log(data);
-            if (data.eventId == id && data.userId == user.id)
-                setIsSubscribed(true);
-        })
+    });
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    return data.eventId === parseInt(id) && data.userId === user.id;
 }
+
+const checkAuth = (setUser) => {
+    fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        credentials: 'include',
+    })
+        .then((res) => {
+            if (!res.ok) throw new Error("Не авторизован");
+            return res.json();
+        })
+        .then((data) => {
+            setUser({
+                id: data.user.id,
+                role: data.user.role,
+                email: data.user.email,
+                username: data.user.username,
+                displayName: data.user.displayName,
+                loggedIn: true,
+                memberLastName: data.customUser.lastName,
+                memberFirstName: data.customUser.firstName,
+                memberPatronymic: data.customUser.patronymic,
+                memberBirthDate: data.customUser.birthDate,
+                memberBirthCity: data.customUser.birthCity,
+                mebmerPrivacy: data.customUser.privacy,
+                organizerName: data.customUser.name,
+                organizerDescription: data.customUser.description,
+                organizerIndustry: data.customUser.industry,
+                organizerAddress: data.customUser.address,
+                organizerAccredited: data.customUser.isAccredited,
+                moderatorIsAdmin: data.customUser.isAdmin
+                //token: data.token
+            }); // сохраняем в context + localStorage
+        })
+        .catch((err) => {
+            console.log("Ошибка авторизации:", err.message);
+        });
+};
 
 const EventDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/v1/events/${id}`, {
-            method: "GET",
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) => {
+        checkAuth(setUser);
+        const fetchEvent = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/v1/events/${id}`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                const data = await res.json();
                 setEvent(data);
                 setLoading(false);
-                // Проверим, подписан ли пользователь на мероприятие
-                checkSubscription(id, user, setIsSubscribed);
-            })
-            .catch((err) => {
+
+                if (user && user.id) {
+                    const subscribed = await checkSubscription(id, user);
+                    setIsSubscribed(subscribed);
+                } else {
+                    setIsSubscribed(false);
+                }
+            } catch (err) {
                 console.error("Ошибка загрузки мероприятия:", err);
                 setLoading(false);
-            });
-    }, [id, user.id]);
+            }
+        };
+        fetchEvent();
+    }, [id, user?.id]);
 
     const handleSubscription = () => {
+        if (!user || !user.id) {
+            navigate("/login", { state: { from: `/events/${id}` } });
+        }
         const method = isSubscribed ? "DELETE" : "POST";
         fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${id}`, {
             method: method,

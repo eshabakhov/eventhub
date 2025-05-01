@@ -4,6 +4,16 @@ import UserContext from "../../UserContext";
 import { Navigate } from "react-router";
 import { em, u } from "framer-motion/client";
 import API_BASE_URL from "../../config";
+import EventHubLogo from "../../img/eventhub.png";
+import { useNavigate, useLocation } from "react-router-dom";
+
+export const withNavigation = (WrappedComponent) => {
+  return (props) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    return <WrappedComponent {...props} navigate={navigate} location={location} />;
+  };
+};
 
 class Login extends React.Component {
   static contextType = UserContext;
@@ -35,7 +45,8 @@ class Login extends React.Component {
       birthCity: '',
       privacy: 'PRIVATE',
 
-      redirect: false
+      redirect: false,
+      from: props.location?.state?.from || null
     };
   }
 
@@ -244,9 +255,12 @@ class Login extends React.Component {
 
   renderLogin() {
     const { username, password } = this.state;
-  
+    const { navigate } = this.props;
     return (
       <>
+        <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
+          <img src={EventHubLogo} alt="Logo" className="logo" />
+        </div>
         <h2>Вход</h2>
         <form onSubmit={this.handleSubmit}>
           <input
@@ -387,7 +401,8 @@ class Login extends React.Component {
     const { isLogin, step, redirect } = this.state;
 
     if (redirect) {
-      return <Navigate to="/events" replace />;
+      const target = this.state.from || "/events";
+      return <Navigate to={target} replace />;
     }
   
     return (
@@ -403,4 +418,4 @@ class Login extends React.Component {
   
 }
 
-export default Login;
+export default withNavigation(Login);
