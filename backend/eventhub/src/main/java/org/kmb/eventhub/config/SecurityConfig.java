@@ -42,6 +42,7 @@ public class SecurityConfig {
     private static final String V1_USERS_ID = "/v1/users/{id}";
 
     private static final String V1_EVENTS = "/v1/events";
+    private static final String V1_EVENTS_ID = "/v1/events/{id}";
     private static final String V1_TAGS = "/v1/tags";
 
     private static final String V1_USERS_ORGANIZERS_ID = "/v1/users/organizers/{id}";
@@ -104,7 +105,8 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                V1_EVENTS_ID
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
@@ -129,6 +131,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
+                        .requestMatchers(HttpMethod.GET, V1_EVENTS_ID).permitAll()
 
                         .anyRequest().authenticated()
                 )
