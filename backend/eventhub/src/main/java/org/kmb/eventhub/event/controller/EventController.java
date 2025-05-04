@@ -58,7 +58,7 @@ public class EventController {
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "tags", required = false) String tags) {
-        return eventService.getList(page, pageSize, search, tags, null, null);
+        return eventService.getList(page, pageSize, search, tags);
     }
 
     @Operation(summary = "Получить информацию о мероприятии.",
@@ -144,5 +144,39 @@ public class EventController {
     public Long deleteFile(@PathVariable Long id,
                        @RequestBody @Valid EventFileDTO eventFileDTO) {
         return eventFileService.delete(id, eventFileDTO);
+    }
+
+    @Operation(summary = "Получить список мероприятий организатора.",
+            description = "Возвращает все мероприятия, которые создал организатор.")
+    @ApiResponse(responseCode = "200",
+            description = "Список всех мероприятий.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers/{id}/events")
+    public ResponseList<EventDTO> getOrganizerEvents(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) String tags) {
+
+        return eventService.getListByOrganizerId(page, pageSize, search, tags, id);
+    }
+
+    @Operation(summary = "Удалить мероприятие.",
+            description = "Удаляет мероприятие по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Мероприятие удалено.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/organizers/{id}/events")
+    public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
+        return eventService.delete(id, eventId);
     }
 }

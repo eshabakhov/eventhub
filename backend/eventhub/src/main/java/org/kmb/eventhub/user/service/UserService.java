@@ -20,7 +20,6 @@ import org.kmb.eventhub.tables.daos.ModeratorDao;
 import org.kmb.eventhub.tables.daos.OrganizerDao;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.tables.daos.UserDao;
-import org.kmb.eventhub.tag.dto.TagDTO;
 import org.kmb.eventhub.user.dto.MemberDTO;
 import org.kmb.eventhub.user.dto.ModeratorDTO;
 import org.kmb.eventhub.user.dto.OrganizerDTO;
@@ -31,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static org.kmb.eventhub.Tables.USER;
 import static org.jooq.impl.DSL.trueCondition;
@@ -42,8 +40,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final TagService tagService;
-
     private final UserDao userDao;
 
     private final OrganizerDao organizerDao;
@@ -53,8 +49,6 @@ public class UserService {
     private final ModeratorDao moderatorDao;
 
     private final UserMapper userMapper;
-
-    private final TagMapper tagMapper;
 
     private final AdminSecurityService adminSecurityService;
 
@@ -79,7 +73,7 @@ public class UserService {
         return responseList;
     }
 
-    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize,String search) {
+    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize, String search) {
         ResponseList<Organizer> responseList = new ResponseList<>();
         Condition condition = trueCondition();
         if (Objects.nonNull(search) && !search.trim().isEmpty()) {
@@ -290,29 +284,5 @@ public class UserService {
             throw new UnexpectedException("The user was not deleted due to an unexpected error.");
         }
         return id;
-    }
-
-    @Transactional
-    public List<Tag> addTagsToUser(Long userId, List<TagDTO> tagNamesDTO) {
-        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
-        userDao.findOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-
-        //1. Добавление новых тегов, получение id всех тегов из запроса
-        List<Tag> tagWithId = tagService.checkAllTags(tagNames);
-
-        //2. Получение списка использованных тегов для мероприятия
-        Set<Long> usedTagIds = tagService.getUsedTagIdsForUser(userId);
-
-        //3. Получение id неиспользованных тегов
-        List<Tag> newTags = tagWithId.stream()
-                .filter(tag -> !usedTagIds.contains(tag.getId()))
-                .toList();
-
-        //4. Добавление связи для новых тегов и мероприятия
-        if (!newTags.isEmpty()) {
-            tagService.assignTagsToUser(userId, newTags);
-        }
-
-        return newTags;
     }
 }

@@ -47,14 +47,11 @@ public class EventService {
 
     private final EventFileMapper eventFileMapper;
 
-    private final OrganizerDao organizerDao;
-
     private final SubscribeRepository subscribeRepository;
 
     private final EventSecurityService eventSecurityService;
 
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags, Long orgId, Long memberId) {
-        ResponseList<EventDTO> responseList = new ResponseList<>();
+    private Condition getCommonListCondition(String search, String tags) {
         Condition condition = trueCondition();
 
         if (Objects.nonNull(search) && !search.trim().isEmpty()) {
@@ -71,7 +68,7 @@ public class EventService {
             List<EventFormat> matchingFormats = formatRuMap.entrySet().stream()
                     .filter(entry -> entry.getValue().toLowerCase().contains(search.toLowerCase()))
                     .map(entry -> EventFormat.valueOf(entry.getKey()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (!matchingFormats.isEmpty()) {
                 condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.FORMAT.in(matchingFormats));
@@ -82,13 +79,11 @@ public class EventService {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(eventRepository.fetchEventIdsBySelectedTags(tags)));
         }
 
-        if (Objects.nonNull(orgId)) {
-            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ORGANIZER_ID.eq(orgId));
-        }
-        if (Objects.nonNull(memberId)) {
-            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
-        }
+        return condition;
+    }
 
+    private ResponseList<EventDTO> getCommonList(Condition condition, Integer page, Integer pageSize) {
+        ResponseList<EventDTO> responseList = new ResponseList<>();
         List<Event> eventList = eventRepository.fetch(condition, page, pageSize);
         List<EventDTO> eventDTOList = new ArrayList<>();
         eventList.forEach(event -> {
@@ -103,6 +98,28 @@ public class EventService {
         responseList.setPageSize(pageSize);
         return responseList;
     }
+
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags) {
+        Condition condition = getCommonListCondition(search, tags);
+        return getCommonList(condition, page, pageSize);
+    }
+
+    public ResponseList<EventDTO> getListByOrganizerId(Integer page, Integer pageSize, String search, String tags, Long orgId) {
+        Condition condition = getCommonListCondition(search, tags);
+        if (Objects.nonNull(orgId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ORGANIZER_ID.eq(orgId));
+        }
+        return getCommonList(condition, page, pageSize);
+    }
+
+    public ResponseList<EventDTO> getListByMemberId(Integer page, Integer pageSize, String search, String tags, Long memberId) {
+        Condition condition = getCommonListCondition(search, tags);
+        if (Objects.nonNull(memberId)) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
+        }
+        return getCommonList(condition, page, pageSize);
+    }
+
 
     @Transactional
     public Event create(EventDTO eventDTO) {
@@ -125,7 +142,6 @@ public class EventService {
             throw new MissingFieldException("organizerId");
         if (eventDTO.getStartDateTime().isAfter(eventDTO.getEndDateTime()))
             throw new IllegalArgumentException("startDateTime > endDateTime");
-        organizerDao.findOptionalById(eventDTO.getOrganizerId()).orElseThrow(() -> new UserNotFoundException(eventDTO.getOrganizerId()));
 
         if ((Objects.isNull(eventDTO.getLocation()) || eventDTO.getLocation().isEmpty())
                 && Objects.nonNull(eventDTO.getLatitude()) && Objects.nonNull(eventDTO.getLongitude()))
@@ -145,9 +161,7 @@ public class EventService {
         eventDao.insert(event);
 
         if (Objects.nonNull(eventDTO.getFiles())) {
-            eventDTO.getFiles().forEach(file -> {
-                file.setEventId(event.getId());
-            });
+            eventDTO.getFiles().forEach(file -> file.setEventId(event.getId()));
             eventFileDao.insert(eventDTO.getFiles().stream().map(eventFileMapper::toEntity).toList());
         }
         return event;
