@@ -73,7 +73,7 @@ public class UserService {
         return responseList;
     }
 
-    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize,String search) {
+    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize, String search) {
         ResponseList<Organizer> responseList = new ResponseList<>();
         Condition condition = trueCondition();
         if (Objects.nonNull(search) && !search.trim().isEmpty()) {
