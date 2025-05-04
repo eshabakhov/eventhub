@@ -12,8 +12,6 @@ import org.kmb.eventhub.user.enums.PrivacyEnum;
 import org.kmb.eventhub.enums.PrivacyType;
 import org.kmb.eventhub.user.enums.RoleEnum;
 import org.kmb.eventhub.enums.RoleType;
-import org.kmb.eventhub.tag.service.TagService;
-import org.kmb.eventhub.tag.mapper.TagMapper;
 import org.kmb.eventhub.user.mapper.UserMapper;
 import org.kmb.eventhub.user.repository.UserRepository;
 import org.kmb.eventhub.tables.daos.MemberDao;
