@@ -11,7 +11,6 @@ import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.subscribe.service.SubscribeService;
-import org.kmb.eventhub.tag.service.TagService;
 import org.kmb.eventhub.user.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.user.dto.MemberDTO;
@@ -20,8 +19,6 @@ import org.kmb.eventhub.user.dto.OrganizerDTO;
 import org.kmb.eventhub.user.dto.UserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -34,8 +31,6 @@ public class UserController {
     private final EventService eventService;
 
     private final SubscribeService subscribeService;
-
-    private final TagService tagService;
 
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
@@ -232,75 +227,5 @@ public class UserController {
     @DeleteMapping(value = "/{id}")
     public Long delete(@PathVariable Long id) {
         return userService.delete(id);
-    }
-
-    @Operation(summary = "Получить список мероприятий пользователя.",
-            description = "Возвращает все мероприятия, в которых участвует пользователь.")
-    @ApiResponse(responseCode = "200",
-            description = "Список всех мероприятий.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Event.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/members/{id}/events")
-    public ResponseList<EventDTO> getMemberEvents(
-            @PathVariable Long id,
-            @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) List<String> tags) {
-
-        return eventService.getListByMemberId(page, pageSize, search, tags, id);
-    }
-    @Operation(summary = "Отказаться от участия.",
-            description = "Удаляет участие пользователя в мероприятии.")
-    @ApiResponse(responseCode = "200",
-            description = "Участие удалено.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = User.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Участник не найден",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/members/{id}/events")
-    public void deleteParticipation(
-            @PathVariable Long id,
-            @RequestParam Long eventId) {
-        subscribeService.unsubscribeFromEvent(eventId, id);
-    }
-
-
-    @Operation(summary = "Получить список мероприятий организатора.",
-            description = "Возвращает все мероприятия, которые создал организатор.")
-    @ApiResponse(responseCode = "200",
-            description = "Список всех мероприятий.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Event.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/organizers/{id}/events")
-    public ResponseList<EventDTO> getOrganizerEvents(
-            @PathVariable Long id,
-            @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) List<String> tags) {
-
-        return eventService.getListByOrganizerId(page, pageSize, search, tags, id);
-    }
-
-    @Operation(summary = "Удалить мероприятие.",
-            description = "Удаляет мероприятие по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Мероприятие удалено.",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Event.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Мероприятие не найдено",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/organizers/{id}/events")
-    public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
-        return eventService.delete(id, eventId);
     }
 }
