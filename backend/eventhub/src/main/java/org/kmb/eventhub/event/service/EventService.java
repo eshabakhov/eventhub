@@ -19,8 +19,6 @@ import org.kmb.eventhub.subscribe.repository.SubscribeRepository;
 import org.kmb.eventhub.tag.repository.TagRepository;
 import org.kmb.eventhub.tables.daos.*;
 import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.Tag;
-import org.kmb.eventhub.tag.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +34,6 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final TagRepository tagRepository;
-
-    private final TagService tagService;
 
     private final EventDao eventDao;
 
@@ -212,29 +208,5 @@ public class EventService {
         }
 
         return eventId;
-    }
-
-    @Transactional
-    public List<Tag> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
-        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
-        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
-
-        //1. Добавление новых тегов, получение id всех тегов из запроса
-        List<Tag> tagWithId = tagService.checkAllTags(tagNames);
-
-        //2. Получение списка использованных тегов для мероприятия
-        Set<Long> usedTagIds = tagService.getUsedTagIdsForEvent(eventId);
-
-        //3. Получение id неиспользованных тегов
-        List<Tag> newTags = tagWithId.stream()
-                .filter(tag -> !usedTagIds.contains(tag.getId()))
-                .toList();
-
-        //4. Добавление связи для новых тегов и мероприятия
-        if (!newTags.isEmpty()) {
-            tagService.assignTagsToEvent(eventId, newTags);
-        }
-
-        return newTags;
     }
 }

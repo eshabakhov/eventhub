@@ -102,6 +102,30 @@ public class TagService {
         return result;
     }
 
+    @Transactional
+    public List<Tag> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
+        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
+        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+
+        //1. Добавление новых тегов, получение id всех тегов из запроса
+        List<Tag> tagWithId = checkAllTags(tagNames);
+
+        //2. Получение списка использованных тегов для мероприятия
+        Set<Long> usedTagIds = getUsedTagIdsForEvent(eventId);
+
+        //3. Получение id неиспользованных тегов
+        List<Tag> newTags = tagWithId.stream()
+                .filter(tag -> !usedTagIds.contains(tag.getId()))
+                .toList();
+
+        //4. Добавление связи для новых тегов и мероприятия
+        if (!newTags.isEmpty()) {
+            assignTagsToEvent(eventId, newTags);
+        }
+
+        return newTags;
+    }
+
     public Set<Long> getUsedTagIdsForEvent(Long eventId) {
         return tagRepository.getUsedTagIdsForEvent(eventId);
     }

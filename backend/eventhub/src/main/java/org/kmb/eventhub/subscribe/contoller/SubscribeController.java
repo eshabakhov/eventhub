@@ -6,7 +6,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.common.dto.ResponseDTO;
+import org.kmb.eventhub.common.dto.ResponseList;
+import org.kmb.eventhub.event.dto.EventMemberDTO;
 import org.kmb.eventhub.subscribe.service.SubscribeService;
+import org.kmb.eventhub.tables.pojos.Event;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +39,6 @@ public class SubscribeController {
         subscribeService.subscribeToEvent(eventId, memberId);
     }
 
-
     @Operation(summary = "Отказаться от участия в мероприятии.",
             description = "Отказаться от участия.")
     @ApiResponse(responseCode = "201",
@@ -51,5 +54,40 @@ public class SubscribeController {
             @PathVariable Long eventId,
             @RequestParam Long memberId) {
         subscribeService.unsubscribeFromEvent(eventId, memberId);
+    }
+
+    @Operation(summary = "Получить участников мероприятия.",
+            description = "Возвращает участников мероприятия по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Участники мероприятия.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members")
+    public ResponseList<Member> get(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @PathVariable Long id) {
+        return subscribeService.getMembersByEventId(id, page, pageSize);
+    }
+
+    @Operation(summary = "Получить мероприятие, если пользователь участвует.",
+            description = "Возвращаем id участника и мероприятия.")
+    @ApiResponse(responseCode = "200",
+            description = "Id участника и мероприятия.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members/{memberId}")
+    public EventMemberDTO getEventIfSubcribed(@PathVariable Long id, @PathVariable Long memberId) {
+        return subscribeService.checkSubscription(id, memberId);
     }
 }

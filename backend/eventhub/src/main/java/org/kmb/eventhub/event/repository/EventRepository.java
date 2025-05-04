@@ -40,8 +40,9 @@ public class EventRepository {
                 .where(condition)
                 .fetchOneInto(Long.class);
     }
+
+    // TODO: принимать не строку тэгов, а список тэгов
     public List<Long> fetchEventIdsBySelectedTags(String Tags) {
-        // Достаем только те события, которые содержат все выбранные теги
         return dslContext
                 .select(EVENT.ID)
                 .from(EVENT)
