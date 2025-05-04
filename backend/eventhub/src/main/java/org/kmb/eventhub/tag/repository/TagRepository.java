@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
+import org.jooq.Query;
 import org.kmb.eventhub.tables.pojos.Tag;
+import org.kmb.eventhub.tables.records.TagRecord;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.kmb.eventhub.Tables.*;
 
@@ -36,6 +40,12 @@ public class TagRepository {
                 .fetchInto(Tag.class);
     }
 
+    public List<Tag> fetch(List<String> tagNames) {
+        return dslContext.selectFrom(TAG)
+                .where(TAG.NAME.in(tagNames))
+                .fetchInto(Tag.class);
+    }
+
     public Long count(Condition condition) {
         return dslContext
                 .selectCount()
@@ -45,11 +55,6 @@ public class TagRepository {
     }
 
     public boolean tagIsUsed(Long id) {
-        /*return dslContext
-                .selectCount()
-                .from(EVENT_TAGS)
-                .where(EVENT_TAGS.TAG_ID.eq(id))
-                .fetchOneInto(Long.class) > 0;*/
         return dslContext.fetchExists(
                 dslContext.selectOne()
                         .from(EVENT_TAGS)
@@ -77,6 +82,14 @@ public class TagRepository {
                 .fetchOneInto(Tag.class);
     }
 
+    public void createTags(List<String> tagNames) {
+        List<TagRecord> records = tagNames.stream()
+                .map(name -> dslContext.newRecord(TAG).setName(name))
+                .toList();
+
+        dslContext.batchInsert(records).execute();
+    }
+
     public Set<Long> getUsedTagIdsForEvent(Long eventId) {
         return dslContext.select(EVENT_TAGS.TAG_ID)
                 .from(EVENT_TAGS)
@@ -102,15 +115,13 @@ public class TagRepository {
         batch.execute();
     }
 
-    public void assignNewUserTag(Long userId, List<Tag> tags) {
-        var batch = dslContext.batch(
-                tags.stream()
-                        .map(tag -> dslContext.insertInto(USER_TAGS)
-                                .set(USER_TAGS.USER_ID, userId)
-                                .set(USER_TAGS.TAG_ID, tag.getId()))
-                        .toArray(Insert[]::new)
-        );
-        batch.execute();
+
+
+    public void assignTagToUser(Long tagId, Long userId) {
+        dslContext.insertInto(USER_TAGS)
+                .set(USER_TAGS.USER_ID, userId)
+                .set(USER_TAGS.TAG_ID, tagId)
+                .execute();
     }
 
     public void deleteTagFromEvent(Long tagId, Long eventId) {

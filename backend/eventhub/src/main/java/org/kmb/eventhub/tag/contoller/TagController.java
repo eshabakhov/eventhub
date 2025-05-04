@@ -9,12 +9,9 @@ import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.kmb.eventhub.tag.dto.EventTagsDTO;
-import org.kmb.eventhub.tag.dto.UserTagsDTO;
 import org.kmb.eventhub.tag.service.TagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -37,8 +34,8 @@ public class TagController {
         return tagService.getList(page, pageSize);
     }
 
-    @Operation(summary = "Добавление новых тегов в избранное пользователя.",
-            description = "Добавляет новые теги в избранное пользователя мероприятию.")
+    @Operation(summary = "Добавление тега в избранное пользователя.",
+            description = "Добавляет тег в избранное пользователя.")
     @ApiResponse(responseCode = "201",
             description = "Теги успешно добавлены",
             content = @Content(mediaType = "application/json",
@@ -48,11 +45,11 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/users/{id}")
-    public List<Tag> addTagsToUser(
+    @PostMapping("/{id}/users/{userId}")
+    public void addTagsToUser(
             @PathVariable Long id,
-            @RequestBody UserTagsDTO userTagsDTO) {
-        return tagService.addTagsToUser(id, userTagsDTO.getTags());
+            @PathVariable Long userId) {
+        tagService.addTagsToUser(id, userId);
     }
 
     @Operation(summary = "Добавление новых тегов к мероприятию.",
@@ -67,10 +64,10 @@ public class TagController {
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/events/{id}")
-    public List<Tag> addTagsToEvent(
+    public void addTagsToEvent(
             @PathVariable Long id,
             @RequestBody EventTagsDTO eventTagsDTO) {
-        return tagService.addTagsToEvent(id, eventTagsDTO.getTags());
+        tagService.addTagsToEvent(id, eventTagsDTO);
     }
 
     @Operation(summary = "Удалить тег у мероприятия.",
