@@ -41,16 +41,15 @@ public class EventRepository {
                 .fetchOneInto(Long.class);
     }
 
-    // TODO: принимать не строку тэгов, а список тэгов
-    public List<Long> fetchEventIdsBySelectedTags(String Tags) {
+    public List<Long> fetchEventIdsBySelectedTags(List<String> tags) {
         return dslContext
                 .select(EVENT.ID)
                 .from(EVENT)
                 .join(EVENT_TAGS).on(EVENT.ID.eq(EVENT_TAGS.EVENT_ID))
                 .join(TAG).on(TAG.ID.eq(EVENT_TAGS.TAG_ID))
-                .where(TAG.NAME.in(Tags.split(",")))
+                .where(TAG.NAME.in(tags))
                 .groupBy(EVENT.ID)
-                .having(DSL.countDistinct(TAG.NAME).eq(Tags.split(",").length))
+                .having(DSL.countDistinct(TAG.NAME).eq(tags.size()))
                 .fetchInto(Long.class);
     }
 }

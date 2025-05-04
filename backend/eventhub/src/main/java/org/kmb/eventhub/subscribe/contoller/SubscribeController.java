@@ -86,8 +86,8 @@ public class SubscribeController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/{id}/members/{memberId}")
-    public EventMemberDTO getEventIfSubcribed(@PathVariable Long id, @PathVariable Long memberId) {
-        return subscribeService.checkSubscription(id, memberId);
+    @GetMapping(value = "/{eventId}")
+    public EventMemberDTO getEventIfSubscribed(@PathVariable Long eventId, @PathVariable Long memberId) {
+        return subscribeService.checkSubscription(eventId, memberId);
     }
 }

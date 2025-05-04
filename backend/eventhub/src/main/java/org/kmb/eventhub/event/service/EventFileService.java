@@ -33,15 +33,8 @@ public class EventFileService {
     public Long create(Long eventId, EventFileDTO eventFileDTO) {
         eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        // TODO: убрать else
-        if (Objects.nonNull(eventFileDTO.getEventId())) {
-            if (!eventFileDTO.getEventId().equals(eventId)) {
-                throw new EventIdMatchException("Event IDs do not match");
-            }
-        }
-        else {
-            eventFileDTO.setEventId(eventId);
-        }
+        eventFileDTO.setEventId(eventId);
+
         if (Objects.isNull(eventFileDTO.getFileName())) {
             throw new MissingFieldException("fileName");
         }
