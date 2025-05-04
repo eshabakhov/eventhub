@@ -267,7 +267,6 @@ class EventEdit extends React.Component {
             const fileContentBase64 = reader.result.split(',')[1];
 
             const eventFileDTO = {
-                eventId: parseInt(eventId),
                 fileName: selectedFile.name,
                 fileType: selectedFile.type,
                 fileSize: selectedFile.size,
