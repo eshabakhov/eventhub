@@ -14,7 +14,7 @@ const formatDateRange = (start, end) => {
 };
 
 async function checkSubscription(id, user) {
-    const res = await fetch(`${API_BASE_URL}/v1/events/${id}/members/${user.id}`, {
+    const res = await fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${id}`, {
         method: "GET",
         credentials: "include",
     });
