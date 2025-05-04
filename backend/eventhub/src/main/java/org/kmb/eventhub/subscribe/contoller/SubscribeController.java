@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/v1/members/{memberId}/subscribe")
+@RequestMapping(value = "/v1/members/{memberId}")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Участие в мероприятие", description = "Управление участием в мероприятии")
 public class SubscribeController {
 
@@ -40,7 +40,7 @@ public class SubscribeController {
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @PostMapping(value = "/{eventId}")
+    @PostMapping(value = "/subscribe/{eventId}")
     public void subscribeToEvent(
             @PathVariable Long eventId,
             @PathVariable Long memberId) {
@@ -57,30 +57,11 @@ public class SubscribeController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @DeleteMapping(value = "/{eventId}")
+    @DeleteMapping(value = "/subscribe/{eventId}")
     public void unsubscribeFromEvent(
             @PathVariable Long eventId,
-            @RequestParam Long memberId) {
+            @PathVariable Long memberId) {
         subscribeService.unsubscribeFromEvent(eventId, memberId);
-    }
-
-    @Operation(summary = "Получить участников мероприятия.",
-            description = "Возвращает участников мероприятия по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Участники мероприятия.",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Event.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Мероприятие не найдено",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/{id}/members")
-    public ResponseList<Member> get(
-            @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @PathVariable Long id) {
-        return subscribeService.getMembersByEventId(id, page, pageSize);
     }
 
     @Operation(summary = "Получить список мероприятий пользователя.",
@@ -90,32 +71,15 @@ public class SubscribeController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Event.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/members/{id}/events")
+    @GetMapping(value = "/events")
     public ResponseList<EventDTO> getMemberEvents(
-            @PathVariable Long id,
+            @PathVariable Long memberId,
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "tags", required = false) List<String> tags) {
 
-        return eventService.getListByMemberId(page, pageSize, search, tags, id);
-    }
-    @Operation(summary = "Отказаться от участия.",
-            description = "Удаляет участие пользователя в мероприятии.")
-    @ApiResponse(responseCode = "200",
-            description = "Участие удалено.",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = User.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Участник не найден",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/members/{id}/events")
-    public void deleteParticipation(
-            @PathVariable Long id,
-            @RequestParam Long eventId) {
-        subscribeService.unsubscribeFromEvent(eventId, id);
+        return eventService.getListByMemberId(page, pageSize, search, tags, memberId);
     }
 
     @Operation(summary = "Получить мероприятие, если пользователь участвует.",
@@ -129,7 +93,7 @@ public class SubscribeController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/{eventId}")
+    @GetMapping(value = "/subscribe/{eventId}")
     public EventMemberDTO getEventIfSubscribed(@PathVariable Long eventId, @PathVariable Long memberId) {
         return subscribeService.checkSubscription(eventId, memberId);
     }

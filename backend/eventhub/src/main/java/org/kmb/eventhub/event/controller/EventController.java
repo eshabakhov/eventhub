@@ -10,6 +10,8 @@ import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.dto.EventFileDTO;
+import org.kmb.eventhub.subscribe.service.SubscribeService;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tag.dto.EventTagsDTO;
 import org.kmb.eventhub.event.service.EventFileService;
 import org.kmb.eventhub.event.service.EventService;
@@ -27,6 +29,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+
+    private final SubscribeService subscribeService;
 
     private final EventFileService eventFileService;
 
@@ -153,7 +157,7 @@ public class EventController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Event.class)))
     @ResponseStatus(value = HttpStatus.OK)
-    @GetMapping(value = "/organizers/{id}/events")
+    @GetMapping(value = "/organizers/{id}")
     public ResponseList<EventDTO> getOrganizerEvents(
             @PathVariable Long id,
             @RequestParam(value = "page", defaultValue = "1") Integer page,
@@ -162,5 +166,23 @@ public class EventController {
             @RequestParam(value = "tags", required = false) List<String> tags) {
 
         return eventService.getListByOrganizerId(page, pageSize, search, tags, id);
+    }
+    @Operation(summary = "Получить участников мероприятия.",
+            description = "Возвращает участников мероприятия по ID.")
+    @ApiResponse(responseCode = "200",
+            description = "Участники мероприятия.",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Event.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Мероприятие не найдено",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/{id}/members")
+    public ResponseList<Member> get(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @PathVariable Long id) {
+        return subscribeService.getMembersByEventId(id, page, pageSize);
     }
 }
