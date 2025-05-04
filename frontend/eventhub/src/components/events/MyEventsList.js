@@ -242,7 +242,7 @@ class MyEventsList extends Component {
             this.refuceToParticipation(selectedEvent, user);
         }
         if (user.role === "ORGANIZER") {
-            this.deleteEvent(selectedEvent, user);
+            this.deleteEvent(selectedEvent);
         }
     };
     // Отмена участия
@@ -268,9 +268,8 @@ class MyEventsList extends Component {
     }
 
     // Удаление мероприятия
-    deleteEvent = (selectedEvent, user) => {
-        const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
-        fetch(`${API_BASE_URL}/v1/users/organizers/${user.id}/events?${eventParam}`, {
+    deleteEvent = (selectedEvent) => {
+        fetch(`${API_BASE_URL}/v1/events/${selectedEvent.id}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

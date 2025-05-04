@@ -71,7 +71,7 @@ public class MapService {
         if (Objects.isNull(response) || response.isEmpty()) {
             throw new AddressNotFound(isOnline? String.format("City %s", address) : String.format("Address %s", address));
         }
-        if (response != null && !response.isEmpty()) {
+        if (Objects.nonNull(response) && !response.isEmpty()) {
             LinkedHashMap<String, Object> result;
             result = (LinkedHashMap<String, Object>) response.get(0);
             BigDecimal lat = new BigDecimal(String.valueOf(result.get("lat")));
