@@ -9,12 +9,16 @@ import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.dto.EventMemberDTO;
+import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.subscribe.service.SubscribeService;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -23,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 public class SubscribeController {
 
     private final SubscribeService subscribeService;
+
+    private final EventService eventService;
 
     @Operation(summary = "Добавить участие в мероприятии.",
             description = "Участвовать в мероприятии.")
@@ -77,7 +83,6 @@ public class SubscribeController {
         return subscribeService.getMembersByEventId(id, page, pageSize);
     }
 
-    // TODO: переделать на subscribeService
     @Operation(summary = "Получить список мероприятий пользователя.",
             description = "Возвращает все мероприятия, в которых участвует пользователь.")
     @ApiResponse(responseCode = "200",
@@ -91,7 +96,7 @@ public class SubscribeController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) String tags) {
+            @RequestParam(value = "tags", required = false) List<String> tags) {
 
         return eventService.getListByMemberId(page, pageSize, search, tags, id);
     }

@@ -217,9 +217,8 @@ public class EventService {
         return event;
     }
     @Transactional
-    public Long delete(Long orgId, Long eventId) {
-        if (eventSecurityService.isUserOwnEvent(eventId, customUserDetailsService.getAuthenticatedUser()))
-        {
+    public Long delete(Long eventId) {
+        if (eventSecurityService.isUserOwnEvent(eventId, customUserDetailsService.getAuthenticatedUser())) {
             eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
             eventDao.deleteById(eventId);
         }
