@@ -7,6 +7,7 @@ import DeleteIcon from "../../img/delete.png";
 import CrossIcon from "../../img/x.png";
 import {motion} from "framer-motion";
 import {MapContainer, Marker, Popup, TileLayer, useMap} from "react-leaflet";
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import "../../css/MyEventsList.css";
 import leaflet from "leaflet";
 import onlineIconImg from "../../img/online-marker.png";
@@ -512,18 +513,35 @@ class MyEventsList extends Component {
                                     format={this.state.focusedEvent.format}
                                 />
                             )}
-                            {[...groupedEvents.entries()].map(([key, group]) => {
-                                const [lat, lng] = key.split(",").map(Number);
-                                const icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon
-                                const initialEventId = this.state.focusedEvent?.id;
-                                return (
-                                    <Marker key={key} position={[lat, lng]} icon={icon} ref={(ref) => (this.markerRefs.current[key] = ref)}>
-                                        <Popup>
-                                            <MultiEventPopup events={group} navigate={navigate} initialEventId={initialEventId}/>
-                                        </Popup>
-                                    </Marker>
-                                );
-                            })}
+                            <MarkerClusterGroup
+                                chunkedLoading
+                                spiderfyOnMaxZoom={true}
+                                showCoverageOnHover={false}
+                                zoomToBoundsOnClick={true}
+                                maxClusterRadius={60}
+                                spiderfyDistanceMultiplier={1.5} // Расстояние между маркерами при раскрытии
+                                iconCreateFunction={(cluster) => {
+                                    // Кастомная иконка для кластера
+                                    return leaflet.divIcon({
+                                        html: `<span>${cluster.getChildCount()}</span>`,
+                                        className: 'marker-cluster-custom',
+                                        iconSize: leaflet.point(30, 30, true)
+                                    });
+                                }}
+                            >
+                                {[...groupedEvents.entries()].map(([key, group]) => {
+                                    const [lat, lng] = key.split(",").map(Number);
+                                    const icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon
+                                    const initialEventId = this.state.focusedEvent?.id;
+                                    return (
+                                        <Marker key={key} position={[lat, lng]} icon={icon} ref={(ref) => (this.markerRefs.current[key] = ref)}>
+                                            <Popup>
+                                                <MultiEventPopup events={group} navigate={navigate} initialEventId={initialEventId}/>
+                                            </Popup>
+                                        </Marker>
+                                    );
+                                })}
+                            </MarkerClusterGroup>
                         </MapContainer>
                     </motion.div>
                 </div>
