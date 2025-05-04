@@ -159,7 +159,7 @@ public class EventController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) String tags) {
+            @RequestParam(value = "tags", required = false) List<String> tags) {
 
         return eventService.getListByOrganizerId(page, pageSize, search, tags, id);
     }

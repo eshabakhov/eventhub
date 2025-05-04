@@ -4,13 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.kmb.eventhub.tag.dto.EventTagsDTO;
-import org.kmb.eventhub.tag.dto.TagDTO;
 import org.kmb.eventhub.tag.dto.UserTagsDTO;
 import org.kmb.eventhub.tag.service.TagService;
 import org.springframework.http.HttpStatus;
@@ -50,7 +48,7 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/{id}/tag")
+    @PostMapping("/users/{id}")
     public List<Tag> addTagsToUser(
             @PathVariable Long id,
             @RequestBody UserTagsDTO userTagsDTO) {
@@ -68,7 +66,7 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/{id}/tag")
+    @PostMapping("/events/{id}")
     public List<Tag> addTagsToEvent(
             @PathVariable Long id,
             @RequestBody EventTagsDTO eventTagsDTO) {
@@ -86,11 +84,11 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}/tag")
-    public Long deleteTagFromEvent(
+    @DeleteMapping(value = "/{id}/events/{eventId}")
+    public void deleteTagFromEvent(
             @PathVariable Long id,
-            @RequestBody @Valid TagDTO tagDTO) {
-        return tagService.deleteTagFromEvent(id, tagDTO);
+            @PathVariable Long eventId) {
+        tagService.deleteTagFromEvent(id, eventId);
     }
 
     @Operation(summary = "Удалить тег из избранного пользователя.",
@@ -104,10 +102,10 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}/tag")
-    public Long deleteTagFromUser(
+    @DeleteMapping(value = "/{id}/users/{userId}")
+    public void deleteTagFromUser(
             @PathVariable Long id,
-            @RequestBody @Valid TagDTO tagDTO) {
-        return tagService.deleteTagFromUser(id, tagDTO);
+            @PathVariable Long userId) {
+        tagService.deleteTagFromUser(id, userId);
     }
 }
