@@ -14,16 +14,12 @@ import org.kmb.eventhub.subscribe.service.SubscribeService;
 import org.kmb.eventhub.tag.service.TagService;
 import org.kmb.eventhub.user.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
-import org.kmb.eventhub.tag.dto.TagDTO;
-import org.kmb.eventhub.tag.dto.UserTagsDTO;
 import org.kmb.eventhub.user.dto.MemberDTO;
 import org.kmb.eventhub.user.dto.ModeratorDTO;
 import org.kmb.eventhub.user.dto.OrganizerDTO;
 import org.kmb.eventhub.user.dto.UserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -251,7 +247,7 @@ public class UserController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "tags", required = false) String tags) {
 
-        return eventService.getList(page, pageSize, search, tags, null, id);
+        return eventService.getListByMemberId(page, pageSize, search, tags, id);
     }
     @Operation(summary = "Отказаться от участия.",
             description = "Удаляет участие пользователя в мероприятии.")
@@ -287,7 +283,7 @@ public class UserController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "tags", required = false) String tags) {
 
-        return eventService.getList(page, pageSize, search, tags, id, null);
+        return eventService.getListByOrganizerId(page, pageSize, search, tags, id);
     }
 
     @Operation(summary = "Удалить мероприятие.",
@@ -304,41 +300,5 @@ public class UserController {
     @DeleteMapping(value = "/organizers/{id}/events")
     public Long deleteOrganizerEvent(@PathVariable Long id, @RequestParam Long eventId) {
         return eventService.delete(id, eventId);
-    }
-
-    @Operation(summary = "Добавление новых тегов в избранное пользователя.",
-            description = "Добавляет новые теги в избранное пользователя мероприятию.")
-    @ApiResponse(responseCode = "201",
-            description = "Теги успешно добавлены",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Tag.class)))
-    @ApiResponse(responseCode = "400",
-            description = "Ошибка валидации",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/{id}/tag")
-    public List<Tag> addTagsToUser(
-            @PathVariable Long id,
-            @RequestBody UserTagsDTO userTagsDTO) {
-        return userService.addTagsToUser(id, userTagsDTO.getTags());
-    }
-
-    @Operation(summary = "Удалить тег из избранного пользователя.",
-            description = "Удаляет тег по ID.")
-    @ApiResponse(responseCode = "200",
-            description = "Тег удален.",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = Tag.class)))
-    @ApiResponse(responseCode = "404",
-            description = "Тег не найден",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ResponseDTO.class)))
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping(value = "/{id}/tag")
-    public Long deleteTagFromUser(
-            @PathVariable Long id,
-            @RequestBody @Valid TagDTO tagDTO) {
-        return tagService.deleteTagFromUser(id, tagDTO);
     }
 }

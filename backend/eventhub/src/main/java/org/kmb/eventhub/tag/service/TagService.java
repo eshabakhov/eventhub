@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
+import org.kmb.eventhub.tables.daos.UserDao;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.tag.exception.TagNotFoundException;
 import org.kmb.eventhub.tag.mapper.TagMapper;
@@ -29,6 +30,8 @@ public class TagService {
     private final TagRepository tagRepository;
 
     private final TagDao tagDao;
+
+    private final UserDao userDao;
 
     private final EventDao eventDao;
 
@@ -100,6 +103,30 @@ public class TagService {
             }
         });
         return result;
+    }
+
+    @Transactional
+    public List<Tag> addTagsToUser(Long userId, List<TagDTO> tagNamesDTO) {
+        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
+        userDao.findOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
+        //1. Добавление новых тегов, получение id всех тегов из запроса
+        List<Tag> tagWithId = checkAllTags(tagNames);
+
+        //2. Получение списка использованных тегов для мероприятия
+        Set<Long> usedTagIds = getUsedTagIdsForUser(userId);
+
+        //3. Получение id неиспользованных тегов
+        List<Tag> newTags = tagWithId.stream()
+                .filter(tag -> !usedTagIds.contains(tag.getId()))
+                .toList();
+
+        //4. Добавление связи для новых тегов и мероприятия
+        if (!newTags.isEmpty()) {
+            assignTagsToUser(userId, newTags);
+        }
+
+        return newTags;
     }
 
     @Transactional
