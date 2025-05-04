@@ -297,6 +297,7 @@
     display: flex;
     height: 90vh;
   }
+
   .pagination-controls {
     display: flex;
     justify-content: left;
@@ -305,7 +306,7 @@
     margin-bottom: 20px;
   }
 
-  .pagination-controls button {
+  .page-button {
     background-color: transparent;
     color: black;
     border: transparent 1px solid;
@@ -313,13 +314,33 @@
     border-radius: 8px;
     font-weight: bold;
     transition: background-color 0.2s ease;
-
   }
-  .pagination-controls button:hover {
+
+  .back-forward {
+    background-color: transparent;
+    color: black;
+    border: transparent 1px solid;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  .back-forward:hover {
+    background-color: lightgray;
+    cursor: pointer;
+  }
+  .back-forward:disabled {
+    cursor: auto;
+    border: #007bff 0px solid;
+    color: lightgray;
+    background-color: transparent;
+  }
+
+  .page-button:hover {
     border: #007bff 1px solid;
     cursor: pointer;
   }
-  .pagination-controls button:disabled {
+  .page-button:disabled {
     background-color: #007bff;
     cursor: not-allowed;
     color: white;

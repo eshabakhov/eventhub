@@ -46,7 +46,7 @@ const checkAuth = (setUser) => {
                 memberPatronymic: data.customUser.patronymic,
                 memberBirthDate: data.customUser.birthDate,
                 memberBirthCity: data.customUser.birthCity,
-                mebmerPrivacy: data.customUser.privacy,
+                memberPrivacy: data.customUser.privacy,
                 organizerName: data.customUser.name,
                 organizerDescription: data.customUser.description,
                 organizerIndustry: data.customUser.industry,

@@ -73,6 +73,81 @@ const formatDateRange = (start, end) => {
     return `${startStr} - ${endStr}`;
 };
 
+const Pagination = ({totalPages, currentPage, handlePageClick}) => {
+    return(
+        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
+            <button
+                className="back-forward"
+                onClick={() => handlePageClick(currentPage - 1)}
+                disabled={currentPage === 1}
+            >
+                &lt;
+            </button>
+
+            {/* Первая страница */}
+            <button
+                className="page-button"
+                onClick={() => handlePageClick(1)}
+                disabled={currentPage === 1}
+            >
+                1
+            </button>
+
+            {/* Многоточие после первой страницы */}
+            {currentPage > 3 && <span className="pagination-ellipsis">...</span>}
+
+            {/* Текущая - 1 */}
+            {currentPage > 2 && (
+                <button
+                    className="page-button"
+                    onClick={() => handlePageClick(currentPage - 1)}
+                >
+                    {currentPage - 1}
+                </button>
+            )}
+
+            {/* Текущая страница */}
+            {currentPage !== 1 && currentPage !== totalPages && (
+                <button className="page-button active" disabled>
+                    {currentPage}
+                </button>
+            )}
+
+            {/* Текущая + 1 */}
+            {currentPage < totalPages - 1 && (
+                <button
+                    className="page-button"
+                    onClick={() => handlePageClick(currentPage + 1)}
+                >
+                    {currentPage + 1}
+                </button>
+            )}
+
+            {/* Многоточие перед последней страницей */}
+            {currentPage < totalPages - 2 && <span className="pagination-ellipsis">...</span>}
+
+            {/* Последняя страница */}
+            {totalPages > 1 && (
+                <button
+                    className="page-button"
+                    onClick={() => handlePageClick(totalPages)}
+                    disabled={currentPage === totalPages}
+                >
+                    {totalPages}
+                </button>
+            )}
+
+            <button
+                className="back-forward"
+                onClick={() => handlePageClick(currentPage + 1)}
+                disabled={currentPage === totalPages}
+            >
+                &gt;
+            </button>
+        </div>
+    );
+}
+
 class EventsPage extends Component {
     static contextType = UserContext;
 
@@ -85,7 +160,7 @@ class EventsPage extends Component {
             search: "",
             focusedEvent: null,
             currentPage: 1,
-            eventsPerPage: 10,
+            eventsPerPage: 1,
             totalEvents: 0,
             tags: [],
             selectedTags: [],
@@ -116,7 +191,7 @@ class EventsPage extends Component {
         const { eventsPerPage } = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        fetch(`${API_BASE_URL}/v1/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`)
+        fetch(`${API_BASE_URL}/v1/events?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`)
             .then((res) => res.json())
             .then((data) => {
                 const loadedEvents = data.list.map((e) => ({
@@ -253,11 +328,6 @@ class EventsPage extends Component {
                     <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
                         <img src={EventHubLogo} alt="Logo" className="logo" />
                     </div>
-                    {/*<div className="create-button-container">*/}
-                    {/*    <button onClick={() => navigate("/events/create")} className="create-button">*/}
-                    {/*        Создать мероприятие*/}
-                    {/*    </button>*/}
-                    {/*</div>*/}
                     <div className="login-button-container">
                         <ProfileDropdown navigate={navigate} />
                     </div>
@@ -300,13 +370,8 @@ class EventsPage extends Component {
                             })}
                         </div>
                         {/* Верхняя пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                        </div>
+                        <Pagination totalPages={totalPages} currentPage={currentPage} handlePageClick={this.handlePageClick} />
+
                         {/* Карточки событий */}
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
@@ -341,13 +406,7 @@ class EventsPage extends Component {
                             </motion.div>
                         ))}
                         {/* Нижняя пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                        </div>
+                        <Pagination totalPages={totalPages} currentPage={currentPage} handlePageClick={this.handlePageClick} />
                     </motion.div>
                     {/* Карта */}
                     <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
