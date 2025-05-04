@@ -1,6 +1,7 @@
 package org.kmb.eventhub.subscribe.service;
 
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.auth.service.CustomUserDetailsService;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.dto.EventMemberDTO;
@@ -33,6 +34,8 @@ public class SubscribeService {
 
     private final UserSecurityService userSecurityService;
 
+    private final CustomUserDetailsService customUserDetailsService;
+
     private final UserService userService;
 
     private final UserMapper userMapper;
@@ -63,7 +66,7 @@ public class SubscribeService {
 
     }
     public void unsubscribeFromEvent(Long eventId, Long memberId) {
-        if (userSecurityService.isUserOwnData(memberId)) {
+        if (userSecurityService.isUserOwnData(memberId, customUserDetailsService.getAuthenticatedUser())) {
             EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
             eventMembersDao.delete(eventMembers);
         }

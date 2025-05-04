@@ -18,11 +18,7 @@ public class EventSecurityService {
     private UserRepository userRepository;
     private EventRepository eventRepository;
 
-    // TODO: лучше в отдельном методе получать текущего пользователя и передавать его на вход в параметрах метода
-    public boolean isUserOwnEvent(Long eventId) {
-        String authenticatedUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        User authenticatedUser = userRepository.fetchByUsername(authenticatedUsername);
-
+    public boolean isUserOwnEvent(Long eventId, User authenticatedUser) {
         Event event = eventRepository.fetchById(eventId);
 
         if (Objects.isNull(event))

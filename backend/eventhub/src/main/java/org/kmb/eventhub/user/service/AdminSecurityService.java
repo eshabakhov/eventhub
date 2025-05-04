@@ -19,11 +19,7 @@ public class AdminSecurityService {
     private ModeratorRepository moderatorRepository;
     private UserRepository userRepository;
 
-    public boolean isAdmin() {
-        String authenticatedUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User authenticatedUser = userRepository.fetchByUsername(authenticatedUsername);
-
+    public boolean isAdmin(User authenticatedUser) {
         long id = authenticatedUser.getId();
         Moderator moderator = moderatorRepository.findById(id);
 

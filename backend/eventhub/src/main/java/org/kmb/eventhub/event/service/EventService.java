@@ -2,6 +2,7 @@ package org.kmb.eventhub.event.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.auth.service.CustomUserDetailsService;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.tag.dto.TagDTO;
@@ -51,7 +52,9 @@ public class EventService {
 
     private final EventSecurityService eventSecurityService;
 
-    private Condition getCommonListCondition(String search, String tags) {
+    private final CustomUserDetailsService customUserDetailsService;
+
+    private Condition getCommonListCondition(String search, List<String> tags) {
         Condition condition = trueCondition();
 
         if (Objects.nonNull(search) && !search.trim().isEmpty()) {
@@ -75,7 +78,7 @@ public class EventService {
             }
 
         }
-        if (Objects.nonNull(tags) && !tags.trim().isEmpty()) {
+        if (Objects.nonNull(tags) && !tags.isEmpty()) {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(eventRepository.fetchEventIdsBySelectedTags(tags)));
         }
 
@@ -99,12 +102,12 @@ public class EventService {
         return responseList;
     }
 
-    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, String tags) {
+    public ResponseList<EventDTO> getList(Integer page, Integer pageSize, String search, List<String> tags) {
         Condition condition = getCommonListCondition(search, tags);
         return getCommonList(condition, page, pageSize);
     }
 
-    public ResponseList<EventDTO> getListByOrganizerId(Integer page, Integer pageSize, String search, String tags, Long orgId) {
+    public ResponseList<EventDTO> getListByOrganizerId(Integer page, Integer pageSize, String search, List<String> tags, Long orgId) {
         Condition condition = getCommonListCondition(search, tags);
         if (Objects.nonNull(orgId)) {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ORGANIZER_ID.eq(orgId));
@@ -112,7 +115,7 @@ public class EventService {
         return getCommonList(condition, page, pageSize);
     }
 
-    public ResponseList<EventDTO> getListByMemberId(Integer page, Integer pageSize, String search, String tags, Long memberId) {
+    public ResponseList<EventDTO> getListByMemberId(Integer page, Integer pageSize, String search, List<String> tags, Long memberId) {
         Condition condition = getCommonListCondition(search, tags);
         if (Objects.nonNull(memberId)) {
             condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
@@ -215,7 +218,7 @@ public class EventService {
     }
     @Transactional
     public Long delete(Long orgId, Long eventId) {
-        if (eventSecurityService.isUserOwnEvent(eventId))
+        if (eventSecurityService.isUserOwnEvent(eventId, customUserDetailsService.getAuthenticatedUser()))
         {
             eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
             eventDao.deleteById(eventId);

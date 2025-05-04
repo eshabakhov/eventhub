@@ -2,6 +2,7 @@ package org.kmb.eventhub.user.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
+import org.kmb.eventhub.auth.service.CustomUserDetailsService;
 import org.kmb.eventhub.common.exception.AlreadyExistsException;
 import org.kmb.eventhub.common.exception.MissingFieldException;
 import org.kmb.eventhub.common.exception.UnexpectedException;
@@ -36,7 +37,7 @@ import static org.jooq.impl.DSL.trueCondition;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class  UserService {
 
     private final UserRepository userRepository;
 
@@ -51,6 +52,8 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final AdminSecurityService adminSecurityService;
+
+    private final CustomUserDetailsService customUserDetailsService;
 
     public ResponseList<User> getList(Integer page, Integer pageSize, String search) {
 
@@ -96,7 +99,7 @@ public class UserService {
 
         ResponseList<User> responseList = new ResponseList<>();
 
-        if (adminSecurityService.isAdmin()) {
+        if (adminSecurityService.isAdmin(customUserDetailsService.getAuthenticatedUser())) {
              responseList = new ResponseList<>();
 
             List<User> list = userRepository.fetchModerators(search, page, pageSize);

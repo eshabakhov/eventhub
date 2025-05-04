@@ -16,6 +16,7 @@ import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString()))
         );
+    }
+    
+    public User getAuthenticatedUser() {
+        String authenticatedUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.fetchByUsername(authenticatedUsername);
     }
 
     public AuthResponse createAuthResponse(UserDetails userDetails) {

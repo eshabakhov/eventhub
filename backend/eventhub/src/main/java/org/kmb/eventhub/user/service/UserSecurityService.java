@@ -15,10 +15,7 @@ import java.util.Objects;
 public class UserSecurityService {
     private UserRepository userRepository;
 
-    public boolean isUserOwnData(Long userId) {
-        String authenticatedUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        User authenticatedUser = userRepository.fetchByUsername(authenticatedUsername);
-
+    public boolean isUserOwnData(Long userId, User authenticatedUser) {
         if (Objects.isNull(authenticatedUser))
             throw new UserNotFoundException(userId);
 
