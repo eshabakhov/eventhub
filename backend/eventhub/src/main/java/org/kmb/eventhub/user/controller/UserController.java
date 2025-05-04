@@ -27,10 +27,6 @@ public class UserController {
 
     private final UserService userService;
 
-    private final EventService eventService;
-
-    private final SubscribeService subscribeService;
-
     @Operation(summary = "Добавление нового пользователя.",
                     description = "Добавляет нового пользователя в систему.")
     @ApiResponse(responseCode = "201",

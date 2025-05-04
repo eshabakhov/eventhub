@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import org.kmb.eventhub.user.enums.RoleEnum;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.user.repository.ModeratorRepository;
-import org.kmb.eventhub.user.repository.UserRepository;
 import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.User;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -17,7 +15,6 @@ import java.util.Objects;
 public class AdminSecurityService {
 
     private ModeratorRepository moderatorRepository;
-    private UserRepository userRepository;
 
     public boolean isAdmin(User authenticatedUser) {
         long id = authenticatedUser.getId();

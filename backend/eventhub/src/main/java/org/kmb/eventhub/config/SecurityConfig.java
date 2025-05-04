@@ -53,7 +53,9 @@ public class SecurityConfig {
 
     private static final String V1_USERS_MEMBERS_ALL = "/v1/users/members/**";
 
-    private static final String V1_USERS_MEMBER_ID_EVENTS = "/v1/users/members/{id}/events";
+    private static final String V1_MEMBERS_ID_EVENTS = "/v1/members/{memberId}/events";
+
+    private static final String V1_MEMBERS_ID_SUBSCRIBE = "/v1/members/{memberId}/subscribe/{eventId}";
 
     private JwtRequestFilter jwtRequestFilter;
 
@@ -126,8 +128,10 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.DELETE, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
-                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBER_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
-                        .requestMatchers(HttpMethod.DELETE, V1_USERS_MEMBER_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.DELETE, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.POST, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
 
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
