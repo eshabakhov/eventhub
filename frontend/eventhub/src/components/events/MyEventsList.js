@@ -170,10 +170,10 @@ class MyEventsList extends Component {
         const currentUser = this.context.user
         let url;
         if (currentUser && currentUser.role === "ORGANIZER") {
-            url = `${API_BASE_URL}/v1/users/organizers/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/v1/events/organizers/${currentUser.id}?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         else if (currentUser && currentUser.role === "MEMBER") {
-            url = `${API_BASE_URL}/v1/users/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/v1/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         fetch(url, {
             method: "GET",
@@ -247,8 +247,7 @@ class MyEventsList extends Component {
     };
     // Отмена участия
     refuceToParticipation = (selectedEvent, user) => {
-        const eventParam = selectedEvent ? `&eventId=${selectedEvent.id}` : "";
-        fetch(`${API_BASE_URL}/v1/users/members/${user.id}/events?${eventParam}`, {
+        fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${selectedEvent.id}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
