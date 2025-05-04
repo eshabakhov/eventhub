@@ -5,6 +5,7 @@ import org.jooq.Condition;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
 import org.kmb.eventhub.tables.daos.UserDao;
+import org.kmb.eventhub.tag.dto.EventTagsDTO;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.tag.exception.TagNotFoundException;
 import org.kmb.eventhub.tag.mapper.TagMapper;
@@ -16,10 +17,8 @@ import org.kmb.eventhub.tag.dto.TagDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -50,15 +49,29 @@ public class TagService {
         return responseList;
     }
 
-    @Transactional
-    public Tag create(TagDTO tagDTO) {
-        Tag tag = tagMapper.toEntity(tagDTO);
-        tagDao.insert(tag);
-        return tag;
-    }
-
     public Tag get(Long id) {
         return tagDao.fetchOptionalById(id).orElseThrow(() -> new TagNotFoundException(id));
+    }
+
+    @Transactional
+    public void addTagsToUser(Long tagId, Long userId) {
+        userDao.findOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        tagDao.findOptionalById(tagId).orElseThrow(() -> new TagNotFoundException(tagId));
+
+        assignTagsToUser(userId, tagId);
+    }
+
+    @Transactional
+    public void addTagsToEvent(Long eventId, EventTagsDTO eventTagsDTO) {
+
+        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+
+        List<String> tagNames = eventTagsDTO.getTags().stream().map(TagDTO::getName).toList();
+
+        List<String> newTagNames = createNewTags(tagNames);
+        List<Tag> newTags = tagRepository.fetch(newTagNames);
+
+        assignTagsToEvent(eventId, newTags);
     }
 
     @Transactional
@@ -87,66 +100,17 @@ public class TagService {
         }
     }
 
-    public List<Tag> checkAllTags(List<Tag> tagList) {
-        List<Tag> result = new ArrayList<>();
-        tagList.forEach(tag-> {
-            Tag existingTag = tagRepository.findTagByName(tag.getName());
-            if (Objects.isNull(existingTag)) {
-                result.add(tagRepository.createTag(tag.getName()));
-            }
-            else {
-                result.add(existingTag);
-            }
-        });
-        return result;
-    }
+    public List<String> createNewTags(List<String> tags) {
+        List<String> existingTagNames = tagRepository.fetch(tags).stream().map(Tag::getName).toList();
 
-    @Transactional
-    public List<Tag> addTagsToUser(Long userId, List<TagDTO> tagNamesDTO) {
-        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
-        userDao.findOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-
-        //1. Добавление новых тегов, получение id всех тегов из запроса
-        List<Tag> tagWithId = checkAllTags(tagNames);
-
-        //2. Получение списка использованных тегов для мероприятия
-        Set<Long> usedTagIds = getUsedTagIdsForUser(userId);
-
-        //3. Получение id неиспользованных тегов
-        List<Tag> newTags = tagWithId.stream()
-                .filter(tag -> !usedTagIds.contains(tag.getId()))
+        List<String> newTagNames = tags.stream()
+                .filter(tag -> !existingTagNames.contains(tag))
+                .distinct()
                 .toList();
 
-        //4. Добавление связи для новых тегов и мероприятия
-        if (!newTags.isEmpty()) {
-            assignTagsToUser(userId, newTags);
-        }
+        tagRepository.createTags(newTagNames);
 
-        return newTags;
-    }
-
-    @Transactional
-    public List<Tag> addTagsToEvent(Long eventId, List<TagDTO> tagNamesDTO) {
-        List<Tag> tagNames = tagNamesDTO.stream().map(tagMapper::toEntity).toList();
-        eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
-
-        //1. Добавление новых тегов, получение id всех тегов из запроса
-        List<Tag> tagWithId = checkAllTags(tagNames);
-
-        //2. Получение списка использованных тегов для мероприятия
-        Set<Long> usedTagIds = getUsedTagIdsForEvent(eventId);
-
-        //3. Получение id неиспользованных тегов
-        List<Tag> newTags = tagWithId.stream()
-                .filter(tag -> !usedTagIds.contains(tag.getId()))
-                .toList();
-
-        //4. Добавление связи для новых тегов и мероприятия
-        if (!newTags.isEmpty()) {
-            assignTagsToEvent(eventId, newTags);
-        }
-
-        return newTags;
+        return newTagNames;
     }
 
     public Set<Long> getUsedTagIdsForEvent(Long eventId) {
@@ -154,14 +118,14 @@ public class TagService {
     }
 
     public void assignTagsToEvent(Long eventId, List<Tag> tags) {
-         tagRepository.assignNewEventTag(eventId,tags);
+         tagRepository.assignNewEventTag(eventId, tags);
     }
 
     public Set<Long> getUsedTagIdsForUser(Long userId) {
         return tagRepository.getUsedTagIdsForUser(userId);
     }
 
-    public void assignTagsToUser(Long userId, List<Tag> tags) {
-        tagRepository.assignNewUserTag(userId,tags);
+    public void assignTagsToUser(Long userId, Long tagId) {
+        tagRepository.assignTagToUser(tagId, userId);
     }
 }
