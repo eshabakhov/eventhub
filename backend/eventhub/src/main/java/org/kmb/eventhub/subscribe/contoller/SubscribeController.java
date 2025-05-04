@@ -18,6 +18,8 @@ import org.kmb.eventhub.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/members/{memberId}/subscribe")
@@ -94,7 +96,7 @@ public class SubscribeController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "tags", required = false) String tags) {
+            @RequestParam(value = "tags", required = false) List<String> tags) {
 
         return eventService.getListByMemberId(page, pageSize, search, tags, id);
     }
