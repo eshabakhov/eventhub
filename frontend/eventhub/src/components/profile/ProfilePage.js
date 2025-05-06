@@ -83,19 +83,19 @@ class ProfilePage extends Component {
     e.preventDefault();
     const { user, setUser } = this.context;
     const { formData } = this.state;
-  
+
     const rolePathMap = {
       ORGANIZER: 'organizers',
       MEMBER: 'members',
       MODERATOR: 'moderators'
     };
-  
+
     const rolePath = rolePathMap[user.role];
     const commonEndpoint = `${API_BASE_URL}/v1/users/${user.id}`;
     const roleEndpoint = rolePath
       ? `${API_BASE_URL}/v1/users/${rolePath}/${user.id}`
       : null;
-  
+
     const {
       role,
       email,
@@ -104,7 +104,7 @@ class ProfilePage extends Component {
       password,
       ...restFields
     } = formData;
-  
+
     const commonFields = {
       role,
       email,
@@ -112,7 +112,7 @@ class ProfilePage extends Component {
       displayName,
       password
     };
-  
+
     try {
       // 1. Обновление общих данных
       const commonResponse = await fetch(commonEndpoint, {
@@ -121,11 +121,11 @@ class ProfilePage extends Component {
         credentials: 'include',
         body: JSON.stringify(commonFields)
       });
-  
+
       if (!commonResponse.ok) {
         throw new Error(`Ошибка при обновлении общих данных: ${commonResponse.status}`);
       }
-  
+
       // 2. Обновление ролевых данных
       if (roleEndpoint) {
         const roleResponse = await fetch(roleEndpoint, {
@@ -134,12 +134,12 @@ class ProfilePage extends Component {
           credentials: 'include',
           body: JSON.stringify(restFields)
         });
-  
+
         if (!roleResponse.ok) {
           throw new Error(`Ошибка при обновлении ролевых данных: ${roleResponse.status}`);
         }
       }
-  
+
       // 3. Загрузка обновлённых данных
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
@@ -148,13 +148,13 @@ class ProfilePage extends Component {
           'Content-Type': 'application/json'
         }
       });
-  
+
       if (!meResponse.ok) {
         throw new Error(`Ошибка при получении данных пользователя: ${meResponse.status}`);
       }
-  
+
       const data = await meResponse.json();
-  
+
       const updatedFormData = {
         role: data.user.role || '',
         email: data.user.email || '',
@@ -176,20 +176,24 @@ class ProfilePage extends Component {
           isAdmin: !!data.customUser.isAdmin
         })
       };
-  
+
       // 4. Обновление состояния и контекста
       this.setState({
         formData: updatedFormData,
         successMessage: 'Профиль успешно обновлён'
       });
-  
+
       setUser(data.user);
-  
+
       setTimeout(() => this.setState({ successMessage: '' }), 3000);
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
     }
-  };  
+  };
+
+  handleBack = () => {
+    this.props.navigate('/events');
+  };
 
   getRoleDisplayName = (role) => {
     switch (role) {
@@ -204,10 +208,6 @@ class ProfilePage extends Component {
     }
   };
 
-  handleBack = () => {
-    this.props.navigate('/events');
-  };
-
   render() {
     const { navigate } = this.props;
     const { user } = this.context;
@@ -218,18 +218,42 @@ class ProfilePage extends Component {
     return (
       <div>
         <div className="header-bar">
-                <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
-                    <img src={EventHubLogo} alt="Logo" className="logo" />
-                </div>
-                <h1 className="friends-title">Мои профиль</h1>
-                <div className="login-button-container">
-                    <ProfileDropdown navigate={navigate} />
-                </div>
-        </div>
-        <div className="profile-container">
-          <div className="back-area" onClick={this.handleBack}>
-            <button className="back-button">←</button>
+          <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
+            <img src={EventHubLogo} alt="Logo" className="logo" />
           </div>
+          <h1 className="friends-title">Мой профиль</h1>
+          <div className="login-button-container">
+            <ProfileDropdown navigate={navigate} />
+          </div>
+        </div>
+
+        <div className="profile-container">
+          {/* Боковая панель меню */}
+          <div className="profile-sidebar">
+            <ul>
+              <li onClick={() => navigate("/profile")}>Профиль</li>
+              <li onClick={() => navigate("/events")}>Мероприятия</li>
+              {user.role === 'MEMBER' && (
+                <>
+                  <li onClick={() => navigate("/friends")}>Мои друзья</li>
+                  <li onClick={() => navigate("/my-events")}>Мои мероприятия</li>
+                  <li onClick={() => navigate("/favorites")}>Избранное</li>
+                </>
+              )}
+              {user.role === 'ORGANIZER' && (
+                <li onClick={() => navigate("/my-events")}>Мои мероприятия</li>
+              )}
+              {user.role === 'MODERATOR' && (
+                <>
+                  <li onClick={() => navigate("/event-accreditation")}>Аккредитация мероприятий</li>
+                  <li onClick={() => navigate("/moderator-management")}>Управление модераторами</li>
+                </>
+              )}
+              <li onClick={() => navigate("/logout")}>Выход</li>
+            </ul>
+          </div>
+
+          {/* Контент профиля */}
           <div className="profile-card">
             <form onSubmit={this.handleSubmit}>
               {user.role === 'ORGANIZER' && (
@@ -309,20 +333,12 @@ class ProfilePage extends Component {
                     Город рождения:
                     <input className="profile-input" type="text" name="birthCity" value={formData.birthCity} onChange={this.handleChange} />
                   </label>
-                  <label className="profile-label">
-                    Приватность:
-                    <select className="profile-input" name="privacy" value={formData.privacy} onChange={this.handleChange}>
-                      <option value="public">Публично</option>
-                      <option value="private">Приватно</option>
-                    </select>
-                  </label>
                 </>
               )}
 
-              <div className="card-buttons mt-4">
-                <button type="submit" className="profile-button">Сохранить изменения</button>
-              </div>
-              {successMessage && <p className="success-message">{successMessage}</p>}
+              <button type="submit" className="profile-button">Сохранить</button>
+
+              {successMessage && <div className="success-message">{successMessage}</div>}
             </form>
           </div>
         </div>

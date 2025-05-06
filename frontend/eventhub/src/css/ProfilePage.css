@@ -1,15 +1,14 @@
 .profile-container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: start;
+  grid-template-columns: 250px 1fr; /* Фиксированная ширина для боковой панели */
+  gap: 20px;
+  align-items: start; /* Элементы выравниваются по верхнему краю */
   width: 100%;
   box-sizing: border-box;
-  position: relative;
-  place-items: center;
+  position: absolute;
 }
 
 .profile-card {
-  margin-top: 20px;
   background-color: #ffffff;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
@@ -19,6 +18,8 @@
   max-width: 600px;
   box-sizing: border-box;
   overflow: hidden;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .profile-title {
@@ -93,7 +94,6 @@ textarea.profile-input {
   color: #ef4444; /* красный */
 }
 
-
 @media (max-width: 640px) {
   .profile-card {
     padding: 1rem;
@@ -102,33 +102,54 @@ textarea.profile-input {
   .profile-input {
     font-size: 0.875rem;
   }
-}
 
-.back-area {
+  .profile-container {
+    grid-template-columns: 1fr; /* На маленьких экранах боковая панель исчезает */
+    gap: 20px;
+  }
+
+  .profile-sidebar {
+    display: none; /* скрываем боковую панель на маленьких экранах */
+  }
+} 
+
+.profile-sidebar {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   height: 100%;
-  width: 100%;
-  cursor: pointer;
+  border-right: 2px solid #ddd;
   position: relative;
+  overflow: hidden;
 }
 
-.back-area:hover .back-button {
-  background-color: #f0f0f0;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+.profile-sidebar ul {
+  list-style: none;
+  padding: 0;
 }
 
-.back-button {
-  position: absolute;
-  top: 12px;
-  right: 20px; /* ближе к карточке */
-  font-size: 24px;
-  font-weight: bold;
-  border: 1px solid #ccc;
-  background: white;
-  color: #333;
-  border: none; /* убираем рамку */
-  border-radius: 5px;
-  padding: 6px 12px;
+.profile-sidebar li {
+  padding: 12px 16px;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-  z-index: 2;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.profile-sidebar li:hover {
+  background-color: #e5e7eb;
+}
+
+.profile-sidebar li.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.profile-sidebar li + li {
+  margin-top: 10px; /* Добавляем отступы между элементами */
+}
+
+.profile-sidebar li:first-child {
+  margin-top: 0; /* Убираем верхний отступ у первого элемента */
 }
