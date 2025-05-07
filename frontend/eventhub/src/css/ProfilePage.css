@@ -1,11 +1,18 @@
+#root {
+  height: 100%;
+}
+.profile-page {
+  height: 100vh;
+}
+
 .profile-container {
   display: grid;
   grid-template-columns: 250px 1fr; /* Фиксированная ширина для боковой панели */
   gap: 20px;
   align-items: start; /* Элементы выравниваются по верхнему краю */
   width: 100%;
+  height: 92%;
   box-sizing: border-box;
-  position: absolute;
 }
 
 .profile-card {
@@ -115,13 +122,16 @@ textarea.profile-input {
 
 .profile-sidebar {
   background-color: #ffffff;
-  padding: 1.5rem;
+  padding-top: 1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   height: 100%;
   border-right: 2px solid #ddd;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .profile-sidebar ul {
