@@ -104,6 +104,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
+                                "/login", "/login/oauth2/**", "/oauth2/**",
                                 "/auth/login",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -138,6 +139,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, V1_EVENTS_ID).permitAll()
 
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login/oauth2/google") // Указывает, что путь /login будет использовать OAuth2 с Google
+                        .defaultSuccessUrl("/auth/oauth2/success", true) // Успешный редирект после авторизации
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
