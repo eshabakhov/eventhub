@@ -9,6 +9,38 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog.xml
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: YOUR_GOOGLE_CLIENT_ID
+            client-secret: YOUR_GOOGLE_CLIENT_SECRET
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - email
+              - profile
+            client-name: Google
+          vk:
+            client-id: YOUR_VK_CLIENT_ID
+            client-secret: YOUR_VK_CLIENT_SECRET
+            redirect-uri: "{baseUrl}/oauth2/callback/vk"
+            authorization-grant-type: authorization_code
+            client-authentication-method: post
+            scope: email
+            client-name: VK
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+          vk:
+            authorization-uri: https://oauth.vk.com/authorize
+            token-uri: https://oauth.vk.com/access_token
+            user-info-uri: https://api.vk.com/method/users.get
+            user-name-attribute: response
+
 
 springdoc:
   api-docs:
@@ -27,3 +59,7 @@ jwt:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
