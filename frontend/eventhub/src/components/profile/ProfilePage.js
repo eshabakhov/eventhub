@@ -216,7 +216,7 @@ class ProfilePage extends Component {
     if (loading) return <div className="profile-loading">Загрузка...</div>;
 
     return (
-      <div>
+      <div className="profile-page">
         <div className="header-bar">
           <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
             <img src={EventHubLogo} alt="Logo" className="logo" />

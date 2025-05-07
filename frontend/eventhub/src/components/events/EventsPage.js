@@ -160,7 +160,7 @@ class EventsPage extends Component {
             search: "",
             focusedEvent: null,
             currentPage: 1,
-            eventsPerPage: 1,
+            eventsPerPage: 10,
             totalEvents: 0,
             tags: [],
             selectedTags: [],
