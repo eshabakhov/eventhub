@@ -70,6 +70,14 @@ public class UserRepository {
                 .fetchOneInto(User.class);
     }
 
+    public User fetchByEmail(String email) {
+        return dslContext
+                .selectFrom(USER)
+                .where(USER.USERNAME.eq(email))
+                .and(USER.IS_ACTIVE.eq(true))
+                .fetchOneInto(User.class);
+    }
+
     public User fetchActive(Long id) {
         return dslContext
                 .selectFrom(USER)

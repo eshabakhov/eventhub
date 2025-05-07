@@ -80,6 +80,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         return path.startsWith("/auth/login")
+                || path.startsWith("/auth/oauth2")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/swagger-ui.html")
                 || path.startsWith("/api-docs");

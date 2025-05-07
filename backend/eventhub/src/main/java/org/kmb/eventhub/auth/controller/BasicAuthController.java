@@ -19,7 +19,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
-public class AuthController {
+public class BasicAuthController {
 
     private AuthenticationManager authenticationManager;
 

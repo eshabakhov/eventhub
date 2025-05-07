@@ -5,10 +5,8 @@ services:
     image: postgres:14-alpine
     container_name: eventhub_postgres
     hostname: eventhub_postgres
-    expose:
-      - 5432
     ports:
-      - 5432:5432
+      - 5435:5432
     environment:
       - POSTGRES_DB=${DB_URL:-jdbc:postgresql://localhost:5432/postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}

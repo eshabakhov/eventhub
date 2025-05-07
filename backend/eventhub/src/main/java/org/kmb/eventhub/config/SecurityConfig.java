@@ -3,6 +3,8 @@ package org.kmb.eventhub.config;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.auth.service.CustomOAuth2UserService;
+import org.kmb.eventhub.auth.util.OAuth2LoginSuccessHandler;
 import org.kmb.eventhub.config.jwt.JwtAuthenticationEntryPoint;
 import org.kmb.eventhub.config.jwt.JwtRequestFilter;
 import org.kmb.eventhub.user.enums.RoleEnum;
@@ -63,6 +65,10 @@ public class SecurityConfig {
 
     private CustomUserDetailsService userDetailsService;
 
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
@@ -105,6 +111,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/login", "/login/oauth2/**", "/oauth2/**",
+                                "/auth/oauth2/**",
                                 "/auth/login",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -141,10 +148,12 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login/oauth2/google") // Указывает, что путь /login будет использовать OAuth2 с Google
-                        .defaultSuccessUrl("/auth/oauth2/success", true) // Успешный редирект после авторизации
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(e -> e.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
