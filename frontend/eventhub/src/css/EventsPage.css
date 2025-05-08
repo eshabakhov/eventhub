@@ -482,3 +482,19 @@
   width: 30px;
   font-weight: bold;
 }
+
+.event-files {
+  margin-bottom: 24px; /* увеличен отступ между тегами и кнопкой */
+}
+
+.file-tag {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: #eee;
+  border-radius: 0.25rem;
+  margin-bottom: 6px;
+}
+
+.file-tag:hover {
+  background-color: #7a7f80;
+}

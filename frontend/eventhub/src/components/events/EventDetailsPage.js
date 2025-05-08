@@ -113,6 +113,32 @@ const EventDetailsPage = () => {
             });
     };
 
+    const handleFileDownload = async (fileId, fileName) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/v1/events/file/download1/${fileId}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error('Не удалось скачать файл');
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.setAttribute('download', fileName); // Указываем имя файла
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl); // Освобождаем память
+        } catch (error) {
+            console.error('Ошибка при скачивании файла:', error);
+            alert('Произошла ошибка при скачивании файла');
+        }
+    };
+
     if (loading) return <div className="styles.event-details-container">Загрузка...</div>;
     if (!event) return <div className="styles.event-details-container">Мероприятие не найдено</div>;
 
@@ -147,13 +173,20 @@ const EventDetailsPage = () => {
                     {event.files?.length > 0 && (
                         <div className="event-files">
                             <strong>Файлы:</strong>
-                            <ul>
+                            <div className="file-tags-container">
                                 {event.files.map((file, idx) => (
-                                    <li key={idx}>
-                                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
-                                    </li>
+                                    <div
+                                        key={idx}
+                                        className="file-tag"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleFileDownload(file.fileId, file.fileName);
+                                        }}
+                                    >
+                                        {file.fileName}
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     )}
 
