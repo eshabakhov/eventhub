@@ -12,6 +12,10 @@ import org.kmb.eventhub.event.repository.EventFileRepository;
 import org.kmb.eventhub.tables.daos.EventDao;
 import org.kmb.eventhub.tables.daos.EventFileDao;
 import org.kmb.eventhub.tables.pojos.EventFile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,5 +67,22 @@ public class EventFileService {
         }
         eventFileDao.deleteById(fileId);
         return fileId;
+    }
+
+    public ResponseEntity<byte[]> getFileById(Long fileId) {
+        EventFile eventFile = eventFileRepository.fetchById(fileId);
+
+        if (eventFile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        EventFileDTO fileDTO = eventFileMapper.toDto(eventFile);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(fileDTO.getFileType()));
+        headers.setContentDispositionFormData("attachment", fileDTO.getFileName());
+        headers.setContentLength(fileDTO.getFileSize());
+
+        return new ResponseEntity<>(fileDTO.getFileContent(), headers, HttpStatus.OK);
     }
 }

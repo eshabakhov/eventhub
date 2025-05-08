@@ -19,6 +19,7 @@ import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.EventFile;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -185,4 +186,10 @@ public class EventController {
             @PathVariable Long id) {
         return subscribeService.getMembersByEventId(id, page, pageSize);
     }
+
+    @GetMapping("/file/download/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
+        return eventFileService.getFileById(fileId);
+    }
+
 }

@@ -2,6 +2,7 @@ package org.kmb.eventhub.event.repository;
 
 import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
+import org.kmb.eventhub.tables.pojos.EventFile;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -25,5 +26,12 @@ public class EventFileRepository {
         ).orElse(0L);
 
         return count > 0L;
+    }
+
+    public EventFile fetchById(Long id) {
+        return dslContext
+                .selectFrom(EVENT_FILE)
+                .where(EVENT_FILE.FILE_ID.eq(id))
+                .fetchOneInto(EventFile.class);
     }
 }
