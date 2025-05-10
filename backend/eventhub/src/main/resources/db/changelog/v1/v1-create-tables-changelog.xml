@@ -11,12 +11,12 @@
             <![CDATA[
             CREATE TABLE public.user(
                 id bigserial primary key,
-                role role_type,
+                role role_type NOT NULL,
                 email varchar NOT NULL UNIQUE,
-                username varchar UNIQUE,
-                display_name varchar,
-                password varchar,
-                is_active boolean
+                username varchar NOT NULL UNIQUE,
+                display_name varchar NOT NULL,
+                password varchar NOT NULL,
+                is_active boolean NOT NULL
             );
             ]]>
         </sql>

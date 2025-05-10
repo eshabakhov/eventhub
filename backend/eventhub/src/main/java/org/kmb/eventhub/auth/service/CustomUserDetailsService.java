@@ -2,6 +2,8 @@ package org.kmb.eventhub.auth.service;
 
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.auth.dto.AuthResponse;
+import org.kmb.eventhub.auth.util.CustomUserDetails;
+import org.kmb.eventhub.config.jwt.JwtProperties;
 import org.kmb.eventhub.config.jwt.JwtUtil;
 import org.kmb.eventhub.enums.RoleType;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
@@ -21,7 +23,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,6 +40,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private JwtUtil jwtUtil;
 
+    private JwtProperties jwtProperties;
+
     @Override
     public UserDetails loadUserByUsername(String username)  {
 
@@ -47,9 +50,29 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (Objects.isNull(user))
                 throw new UserNotFoundException(-1L);
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
+                user.getId(),
                 user.getUsername(),
+                user.getEmail(),
                 user.getPassword(),
+                user.getRole(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString()))
+        );
+    }
+
+    public UserDetails loadUserByEmail(String email)  {
+
+        User user = userRepository.fetchByEmail(email);
+
+        if (Objects.isNull(user))
+            throw new UserNotFoundException(-1L);
+
+        return new CustomUserDetails(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole(),
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString()))
         );
     }
@@ -92,7 +115,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .secure(false)
                 .sameSite("Strict")
                 .path("/")
-                .maxAge(Duration.ofHours(12))
+                .maxAge((int) (jwtProperties.getExpirationMs() / 1000))
                 .build();
     }
 }

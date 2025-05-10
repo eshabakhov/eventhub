@@ -230,6 +230,12 @@ public class  UserService {
                 .orElseThrow(() -> new UserNotFoundException(-1L));
     }
 
+    public User getByEmail(String email) {
+        return userDao.fetchOptionalByEmail(email).
+                filter(User::getIsActive)
+                .orElseThrow(() -> new UserNotFoundException(-1L));
+    }
+
     public Member getMember(Long id) {
         return memberDao.fetchOptionalById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

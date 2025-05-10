@@ -8,8 +8,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
-import org.kmb.eventhub.event.service.EventService;
-import org.kmb.eventhub.subscribe.service.SubscribeService;
 import org.kmb.eventhub.user.service.UserService;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.user.dto.MemberDTO;

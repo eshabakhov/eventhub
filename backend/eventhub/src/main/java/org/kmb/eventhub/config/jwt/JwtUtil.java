@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.kmb.eventhub.auth.util.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +29,17 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+
+        claims.put("id", customUserDetails.getId());
+        claims.put("username", customUserDetails.getUsername());
+        claims.put("email", customUserDetails.getEmail());
+        claims.put("role", customUserDetails.getRole().toString());
+        claims.put("authorities", customUserDetails.getAuthorities().toString()); // или используйте другой формат для authorities, если необходимо
+
         return createToken(claims, userDetails.getUsername());
     }
 
-    public String generateTokenFromEmail(String email) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email);
-    }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -49,10 +54,6 @@ public class JwtUtil {
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    public String getEmailFromToken(String token) {
-        return extractUsername(token);
     }
 
     public String extractUsername(String token) {
