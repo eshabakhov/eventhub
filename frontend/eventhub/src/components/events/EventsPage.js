@@ -14,8 +14,6 @@ import ProfileDropdown from "../profile/ProfileDropdown";
 import { th } from "framer-motion/client";
 import API_BASE_URL from "../../config";
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
