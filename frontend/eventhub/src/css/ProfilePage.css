@@ -8,16 +8,6 @@
   flex-direction: column;
 }
 
-.header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
 .main-content-wrapper {
   display: flex;
   flex: 1;
@@ -43,51 +33,6 @@
   visibility: visible;
 }
 
-.burger-button {
-  position: fixed;
-  top: 1.2rem;
-  left: 1rem;
-  z-index: 1001;
-  cursor: pointer;
-  background: white;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: block;
-  border: 1px solid #ddd;
-  margin-right: 50px;
-}
-.top-logo {
-  margin-left: 50px;
-}
-
-.profile-sidebar {
-  position: fixed;
-  top: 0;
-  left: -250px;
-  width: 250px;
-  height: 100%;
-  background-color: #ffffff;
-  padding-top: 4rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  transition: transform 0.3s ease;
-  overflow-y: auto;
-}
-.profile-sidebar.closed {
-  display: none;
-}
-
-.profile-content {
-  flex: 1;
-  padding: 1rem;
-  margin-top: 1rem;
-  transition: margin-left 0.3s ease;
-  z-index: 1;
-}
-
 .profile-card {
   background-color: #ffffff;
   border: 1px solid #ddd;
@@ -97,6 +42,14 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.profile-content {
+  flex: 1;
+  padding: 1rem;
+  margin-top: 1rem;
+  transition: margin-left 0.3s ease;
+  z-index: 1;
 }
 
 .profile-title {
@@ -163,39 +116,4 @@ textarea.profile-input {
 
 .not-accredited {
   color: #ef4444;
-}
-
-.profile-sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.profile-sidebar li {
-  padding: 12px 16px;
-  cursor: pointer;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.profile-sidebar li:hover {
-  background-color: #e5e7eb;
-}
-
-.profile-sidebar li + li {
-  margin-top: 0.5rem;
-}
-
-@media (min-width: 992px) {
-  .profile-sidebar {
-    left: 0;
-    transform: none;
-  }
-
-  .profile-content {
-    margin-left: 250px;
-  }
 }

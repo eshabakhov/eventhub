@@ -1,22 +1,18 @@
 ﻿import {useNavigate} from "react-router-dom";
 import React, {Component} from "react";
-import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
 import {motion} from "framer-motion";
-import AcceptIcon from "../../img/accept.png";
-import DeclineIcon from "../../img/decline.png";
-import CrossIcon from "../../img/x.png";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import "../../css/Accreditation.css";
 import UserContext from "../../UserContext";
 import API_BASE_URL from "../../config";
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
 
 export const withNavigation = (WrappedComponent) => {
-    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+    return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
 
 // Модальное окно для подтверждения аккредитации
-const ConfirmModal = ({ isOpen, onClose, onConfirm, org, user }) => {
+const ConfirmModal = ({isOpen, onClose, onConfirm, org, user}) => {
     if (!isOpen) return null;
     return (
 
@@ -25,9 +21,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, org, user }) => {
             <div className="modal-overlay">
                 <motion.div
                     className="modal-content"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
+                    initial={{scale: 0.9, opacity: 0}}
+                    animate={{scale: 1, opacity: 1}}
+                    exit={{scale: 0.9, opacity: 0}}
                 >
                     <h3>Подтверждение</h3>
                     <p>Аккредитовать организацию "{org.name}"?</p>
@@ -47,9 +43,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, org, user }) => {
             <div className="modal-overlay">
                 <motion.div
                     className="modal-content"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
+                    initial={{scale: 0.9, opacity: 0}}
+                    animate={{scale: 1, opacity: 1}}
+                    exit={{scale: 0.9, opacity: 0}}
                 >
                     <h3>Подтверждение</h3>
                     <p>Отменить аккредитацию организации "{org.name}"?</p>
@@ -87,19 +83,41 @@ class AccreditationPage extends Component {
             selectedOrg: null,
         };
     }
+
+    sidebarRef = React.createRef();
+
     componentDidMount() {
         this.loadOrgs(1, this.state.search);
+        document.addEventListener("mousedown", this.handleClickOutside);
     }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
 
     // Загрузка организаций
     loadOrgs = (page, search = "") => {
-        const { orgsPerPage } = this.state;
+        const {orgsPerPage} = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const currentUser = this.context.user
-        let url=`${API_BASE_URL}/v1/users/organizers?${searchParam}&page=${page}&pageSize=${orgsPerPage}`;
+        let url = `${API_BASE_URL}/v1/users/organizers?${searchParam}&page=${page}&pageSize=${orgsPerPage}`;
         fetch(url, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => res.json())
@@ -124,7 +142,7 @@ class AccreditationPage extends Component {
     // Обработка изменения поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
-        this.setState({ search: newSearch });
+        this.setState({search: newSearch});
     };
 
     // Закрытие модального окна
@@ -137,8 +155,8 @@ class AccreditationPage extends Component {
 
     // Подтверждение
     handleConfirm = () => {
-        const { selectedOrg } = this.state;
-        const { user } = this.context;
+        const {selectedOrg} = this.state;
+        const {user} = this.context;
         if (!selectedOrg || !user) {
             this.handleCloseModal();
             return;
@@ -156,7 +174,7 @@ class AccreditationPage extends Component {
         const updatedData = {"isAccredited": "false"};
         fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify(updatedData)
         })
@@ -177,7 +195,7 @@ class AccreditationPage extends Component {
         const updatedData = {"isAccredited": "true"};
         fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify(updatedData)
         })
@@ -211,9 +229,9 @@ class AccreditationPage extends Component {
     };
 
     render() {
-        const { navigate } = this.props;
-        const { orgs, search, currentPage, orgsPerPage, totalOrgs, showConfirmModal, selectedOrg } = this.state;
-        const totalPages = Math.ceil(totalOrgs/ orgsPerPage);
+        const {navigate} = this.props;
+        const {orgs, search, currentPage, orgsPerPage, totalOrgs, showConfirmModal, selectedOrg} = this.state;
+        const totalPages = Math.ceil(totalOrgs / orgsPerPage);
 
         return (
             <div className="orgs-container">
@@ -225,17 +243,19 @@ class AccreditationPage extends Component {
                     org={selectedOrg}
                     user={this.context.user}
                 />
-                <div className="header">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
-                        <img src={EventHubLogo} alt="Logo" className="logo" />
-                    </div>
-                    <h1 className="panel-title">Аккредитация организаций</h1>
-                    <div className="login-button-container">
-                        <ProfileDropdown navigate={navigate} />
-                    </div>
-                </div>
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Аккредитация организаций"
+                    user={this.context.user}
+                    navigate={navigate}
+                />
+                <div className={`sidebar-overlay ${this.state.sidebarOpen ? 'active' : ''}`}></div>
+
+                <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
+
                 <div className="content-panel">
-                    <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+                    <motion.div initial={{opacity: 0, x: -50}} animate={{opacity: 1, x: 0}}
+                                transition={{duration: 0.5}}>
                         {/* Поиск */}
                         <div className="search-wrapper">
                             <input
@@ -248,16 +268,20 @@ class AccreditationPage extends Component {
                                     if (e.key === "Enter") this.loadOrgs(1, this.state.search);
                                 }}
                             />
-                            <button className="search-button-inside" onClick={() => this.loadOrgs(1, this.state.search)} aria-label="Поиск">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                            <button className="search-button-inside" onClick={() => this.loadOrgs(1, this.state.search)}
+                                    aria-label="Поиск">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
                                 </svg>
                             </button>
                         </div>
                         {/* Верхняя пагинация */}
                         <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
+                            {Array.from({length: totalPages}, (_, i) => (
+                                <button key={i} className="pagination-button" disabled={currentPage === i + 1}
+                                        onClick={() => this.handlePageClick(i + 1)}>
                                     {i + 1}
                                 </button>
                             ))}
@@ -265,22 +289,22 @@ class AccreditationPage extends Component {
 
                         {/* Карточки событий */}
                         {orgs.map((org) => (
-                            <motion.div key={org.id} className="event-card" whileHover={{ scale: 1.02 }}>
+                            <motion.div key={org.id} className="event-card" whileHover={{scale: 1.02}}>
 
-                                    <div className="buttons">
-                                        <h3 className="org-title">{org.name}</h3>
-                                        {org.isAccredited && (
-                                            <button className="accept-button accr" title='Отменить акредитацию'
-                                                    onClick={() => this.handleChangeAccrClick(org)}
-                                            >
-                                            </button>
-                                        )}
-                                        {!org.isAccredited && (
-                                            <button className='accept-button not-accr' title='Акредитовать организацию'
-                                                    onClick={() => this.handleChangeAccrClick(org)}>
-                                            </button>
-                                        )}
-                                    </div>
+                                <div className="buttons">
+                                    <h3 className="org-title">{org.name}</h3>
+                                    {org.isAccredited && (
+                                        <button className="accept-button accr" title='Отменить акредитацию'
+                                                onClick={() => this.handleChangeAccrClick(org)}
+                                        >
+                                        </button>
+                                    )}
+                                    {!org.isAccredited && (
+                                        <button className='accept-button not-accr' title='Акредитовать организацию'
+                                                onClick={() => this.handleChangeAccrClick(org)}>
+                                        </button>
+                                    )}
+                                </div>
 
 
                                 <span className="field">
@@ -299,22 +323,6 @@ class AccreditationPage extends Component {
                                 </span>
 
                                 <div className="card-buttons">
-                                    {/*<div className="button-group">*/}
-                                    {/*    <button onClick={() => navigate(`/event/${org.id}`)} className="event-button details">*/}
-                                    {/*        Подробнее*/}
-                                    {/*    </button>*/}
-                                    {/*    <button*/}
-                                    {/*        // onClick={() =>*/}
-                                    {/*        //     this.setState({*/}
-                                    {/*        //         focusedEvent: event,*/}
-                                    {/*        //         focusedMarkerId: this.getMarkerIdForEvent(event),*/}
-                                    {/*        //     })*/}
-                                    {/*        // }*/}
-                                    {/*        className="event-button map"*/}
-                                    {/*    >*/}
-                                    {/*        Показать на карте*/}
-                                    {/*    </button>*/}
-                                    {/*</div>*/}
                                     <div className={`org-status ${org.isAccredited}`}>
                                         {org.isAccredited ? "Организация акредитована" : "Организация не аккредитована"}</div>
                                 </div>
@@ -322,8 +330,9 @@ class AccreditationPage extends Component {
                         ))}
                         {/* Нижняя пагинация */}
                         <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1} onClick={() => this.handlePageClick(i + 1)}>
+                            {Array.from({length: totalPages}, (_, i) => (
+                                <button key={i} className="pagination-button" disabled={currentPage === i + 1}
+                                        onClick={() => this.handlePageClick(i + 1)}>
                                     {i + 1}
                                 </button>
                             ))}
@@ -331,8 +340,8 @@ class AccreditationPage extends Component {
                     </motion.div>
                 </div>
             </div>
-
         );
     }
 }
+
 export default withNavigation(AccreditationPage);

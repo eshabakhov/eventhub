@@ -1,13 +1,13 @@
 ﻿import React, {Component} from "react";
 import {motion} from "framer-motion";
-import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
 import EditIcon from "../../img/edit.png";
 import DeleteIcon from "../../img/delete.png";
 import "../../css/Accreditation.css";
 import {useNavigate} from "react-router-dom";
 import UserContext from "../../UserContext";
 import API_BASE_URL from "../../config";
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -50,9 +50,30 @@ class ModeratorsPage extends Component {
         };
     }
 
+    sidebarRef = React.createRef();
+
     componentDidMount() {
         this.loadModerators();
+        document.addEventListener("mousedown", this.handleClickOutside);
     }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
 
     loadModerators = () => {
         fetch(`${API_BASE_URL}/v1/users/moderators`, {
@@ -96,7 +117,7 @@ class ModeratorsPage extends Component {
                 else alert("Ошибка удаления модератора");
             })
             .catch(err => console.error("Ошибка удаления модератора:", err))
-            .finally(()=>{
+            .finally(() => {
                 this.handleCloseModal();
             });
     };
@@ -107,8 +128,8 @@ class ModeratorsPage extends Component {
 
     // Подтверждение
     handleConfirm = () => {
-        const { selectedModer } = this.state;
-        const { user } = this.context;
+        const {selectedModer} = this.state;
+        const {user} = this.context;
         if (!selectedModer || !user) {
             this.handleCloseModal();
             return;
@@ -138,15 +159,16 @@ class ModeratorsPage extends Component {
                     mod={selectedModer}
                     user={this.context.user}
                 />
-                <div className="header">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
-                        <img src={EventHubLogo} alt="Logo" className="logo"/>
-                    </div>
-                    <h1 className="panel-title">Управление модераторами</h1>
-                    <div className="login-button-container">
-                        <ProfileDropdown navigate={navigate}/>
-                    </div>
-                </div>
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Управление модераторами"
+                    user={this.context.user}
+                    navigate={navigate}
+                />
+
+                <div className={`sidebar-overlay ${this.state.sidebarOpen ? 'active' : ''}`}></div>
+
+                <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
 
                 <div className="content-panel">
                     <motion.div initial={{opacity: 0, x: -50}} animate={{opacity: 1, x: 0}}
