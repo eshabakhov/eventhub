@@ -19,11 +19,15 @@ class ProfilePage extends Component {
     state = {
         formData: {},
         loading: true,
-        successMessage: ''
+        successMessage: '',
+        sidebarOpen: false
     };
+
+    sidebarRef = React.createRef();
 
     componentDidMount() {
         const {user} = this.context;
+        document.addEventListener("mousedown", this.handleClickOutside);
 
         if (user && user.id) {
             fetch(`${API_BASE_URL}/auth/me`, {
@@ -69,6 +73,24 @@ class ProfilePage extends Component {
                 });
         }
     }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
 
     handleChange = (e) => {
         const {name, type, checked, value} = e.target;
@@ -212,34 +234,39 @@ class ProfilePage extends Component {
     render() {
         const {navigate} = this.props;
         const {user} = this.context;
-        const {formData, loading, successMessage} = this.state;
+        const {formData, loading, successMessage, sidebarOpen} = this.state;
 
         if (loading) return <div className="profile-loading">Загрузка...</div>;
 
         return (
             <div className="profile-page">
                 <div className="header-bar">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
+                    <div className="burger-button" onClick={this.toggleSidebar}>
+                        <i className="bi bi-list" style={{fontSize: '24px'}}></i>
+                    </div>
+                    <div className="top-logo" onClick={() => navigate("/events")}>
                         <img src={EventHubLogo} alt="Logo" className="logo"/>
                     </div>
                     <h1 className="friends-title">Мой профиль</h1>
-                    <div className="login-button-container">
-                        <ProfileDropdown navigate={navigate}/>
-                    </div>
+                    <ProfileDropdown navigate={navigate}/>
                 </div>
 
-                <div className="profile-container">
-                    {/* Боковая панель меню */}
-                    <div className="profile-sidebar">
+                <div className="main-content-wrapper">
+                    <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+                         onClick={this.toggleSidebar}></div>
+
+                    <div className={`profile-sidebar ${sidebarOpen ? 'open': 'closed'}`} ref={this.sidebarRef}>
                         <ul>
-                            <li onClick={() => navigate("/profile")}>
+                            <li onClick={() => {
+                                navigate("/profile");
+                                this.setState({sidebarOpen: false});
+                            }}>
                                 <i className="bi bi-person-fill"></i> Профиль
                             </li>
 
                             <li onClick={() => navigate("/events")}>
                                 <i className="bi bi-calendar-event-fill"></i> Мероприятия
                             </li>
-
 
                             {user.role === 'MEMBER' && (
                                 <>
@@ -260,8 +287,6 @@ class ProfilePage extends Component {
                                 <li onClick={() => navigate("/my-events")}>
                                     <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
                                 </li>
-
-
                             )}
                             {user.role === 'MODERATOR' && (
                                 <>
@@ -284,108 +309,109 @@ class ProfilePage extends Component {
                         </ul>
                     </div>
 
-                    {/* Контент профиля */}
-                    <div className="profile-card">
-                        <form onSubmit={this.handleSubmit}>
-                            {user.role === 'ORGANIZER' && (
-                                <div className="profile-label">
-                                    {formData.accreditation ? (
-                                        <span
-                                            className="accreditation-status accredited">Организация аккредитована</span>
-                                    ) : (
-                                        <span className="accreditation-status not-accredited">Организация не аккредитована</span>
-                                    )}
-                                </div>
-                            )}
+                    <div className="profile-content">
+                        <div className="profile-card">
+                            <form onSubmit={this.handleSubmit}>
+                                {user.role === 'ORGANIZER' && (
+                                    <div className="profile-label">
+                                        {formData.accreditation ? (
+                                            <span
+                                                className="accreditation-status accredited">Организация аккредитована</span>
+                                        ) : (
+                                            <span className="accreditation-status not-accredited">Организация не аккредитована</span>
+                                        )}
+                                    </div>
+                                )}
 
-                            {/* Общие поля */}
-                            <label className="profile-label">
-                                Роль:
-                                <input className="profile-input" type="text" name="role"
-                                       value={this.getRoleDisplayName(formData.role)} disabled/>
-                            </label>
-                            <label className="profile-label">
-                                Почта:
-                                <input className="profile-input" type="email" name="email" value={formData.email || ''}
-                                       onChange={this.handleChange} disabled/>
-                            </label>
-                            <label className="profile-label">
-                                Логин:
-                                <input className="profile-input" type="text" name="username" value={formData.username}
-                                       onChange={this.handleChange}/>
-                            </label>
-                            <label className="profile-label">
-                                Отображаемое имя:
-                                <input className="profile-input" type="text" name="displayName"
-                                       value={formData.displayName} onChange={this.handleChange}/>
-                            </label>
-                            <label className="profile-label">
-                                Пароль:
-                                <input className="profile-input" type="password" name="password"
-                                       value={formData.password} onChange={this.handleChange}/>
-                            </label>
+                                {/* Общие поля */}
+                                <label className="profile-label">
+                                    Роль:
+                                    <input className="profile-input" type="text" name="role"
+                                           value={this.getRoleDisplayName(formData.role)} disabled/>
+                                </label>
+                                <label className="profile-label">
+                                    Почта:
+                                    <input className="profile-input" type="email" name="email" value={formData.email || ''}
+                                           onChange={this.handleChange} disabled/>
+                                </label>
+                                <label className="profile-label">
+                                    Логин:
+                                    <input className="profile-input" type="text" name="username" value={formData.username}
+                                           onChange={this.handleChange}/>
+                                </label>
+                                <label className="profile-label">
+                                    Отображаемое имя:
+                                    <input className="profile-input" type="text" name="displayName"
+                                           value={formData.displayName} onChange={this.handleChange}/>
+                                </label>
+                                <label className="profile-label">
+                                    Пароль:
+                                    <input className="profile-input" type="password" name="password"
+                                           value={formData.password} onChange={this.handleChange}/>
+                                </label>
 
-                            {/* Организатор */}
-                            {user.role === 'ORGANIZER' && (
-                                <>
-                                    <label className="profile-label">
-                                        Название:
-                                        <input className="profile-input" type="text" name="organizationName"
-                                               value={formData.organizationName} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Описание:
-                                        <textarea className="profile-input" name="description"
-                                                  value={formData.description} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Сфера деятельности:
-                                        <input className="profile-input" type="text" name="industry"
-                                               value={formData.industry} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Адрес:
-                                        <input className="profile-input" type="text" name="address"
-                                               value={formData.address} onChange={this.handleChange}/>
-                                    </label>
-                                </>
-                            )}
+                                {/* Организатор */}
+                                {user.role === 'ORGANIZER' && (
+                                    <>
+                                        <label className="profile-label">
+                                            Название:
+                                            <input className="profile-input" type="text" name="organizationName"
+                                                   value={formData.organizationName} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Описание:
+                                            <textarea className="profile-input" name="description"
+                                                      value={formData.description} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Сфера деятельности:
+                                            <input className="profile-input" type="text" name="industry"
+                                                   value={formData.industry} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Адрес:
+                                            <input className="profile-input" type="text" name="address"
+                                                   value={formData.address} onChange={this.handleChange}/>
+                                        </label>
+                                    </>
+                                )}
 
-                            {/* Участник */}
-                            {user.role === 'MEMBER' && (
-                                <>
-                                    <label className="profile-label">
-                                        Фамилия:
-                                        <input className="profile-input" type="text" name="lastName"
-                                               value={formData.lastName} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Имя:
-                                        <input className="profile-input" type="text" name="firstName"
-                                               value={formData.firstName} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Отчество:
-                                        <input className="profile-input" type="text" name="patronymic"
-                                               value={formData.patronymic} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Дата рождения:
-                                        <input className="profile-input" type="date" name="birthDate"
-                                               value={formData.birthDate} onChange={this.handleChange}/>
-                                    </label>
-                                    <label className="profile-label">
-                                        Город рождения:
-                                        <input className="profile-input" type="text" name="birthCity"
-                                               value={formData.birthCity} onChange={this.handleChange}/>
-                                    </label>
-                                </>
-                            )}
+                                {/* Участник */}
+                                {user.role === 'MEMBER' && (
+                                    <>
+                                        <label className="profile-label">
+                                            Фамилия:
+                                            <input className="profile-input" type="text" name="lastName"
+                                                   value={formData.lastName} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Имя:
+                                            <input className="profile-input" type="text" name="firstName"
+                                                   value={formData.firstName} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Отчество:
+                                            <input className="profile-input" type="text" name="patronymic"
+                                                   value={formData.patronymic} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Дата рождения:
+                                            <input className="profile-input" type="date" name="birthDate"
+                                                   value={formData.birthDate} onChange={this.handleChange}/>
+                                        </label>
+                                        <label className="profile-label">
+                                            Город рождения:
+                                            <input className="profile-input" type="text" name="birthCity"
+                                                   value={formData.birthCity} onChange={this.handleChange}/>
+                                        </label>
+                                    </>
+                                )}
 
-                            <button type="submit" className="profile-button">Сохранить</button>
+                                <button type="submit" className="profile-button">Сохранить</button>
 
-                            {successMessage && <div className="success-message">{successMessage}</div>}
-                        </form>
+                                {successMessage && <div className="success-message">{successMessage}</div>}
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
