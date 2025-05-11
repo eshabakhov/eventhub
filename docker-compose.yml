@@ -48,6 +48,7 @@ services:
     container_name: eventhub_haproxy
     ports:
       - "443:443"
+      - "8080:8080"
       - "8404:8404"
     depends_on:
       - backend
