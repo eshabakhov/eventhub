@@ -39,3 +39,7 @@
     background-color: #ff4d4f;
     color: white;
 }
+.modal-button.ok {
+    background-color: #0077ff;
+    color: white;
+}
