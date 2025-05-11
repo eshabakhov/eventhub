@@ -42,6 +42,19 @@ services:
     networks:
       eventhub_network:
 
+  haproxy:
+    build:
+      context: ./haproxy
+    container_name: eventhub_haproxy
+    ports:
+      - "443:443"
+      - "8404:8404"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      eventhub_network:
+
 networks:
   eventhub_network:
     name: 'eventhub_network'
