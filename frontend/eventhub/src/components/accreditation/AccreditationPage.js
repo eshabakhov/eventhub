@@ -6,62 +6,11 @@ import UserContext from "../../UserContext";
 import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
-
-// Модальное окно для подтверждения аккредитации
-const ConfirmModal = ({isOpen, onClose, onConfirm, org, user}) => {
-    if (!isOpen) return null;
-    return (
-
-        // Если не аккредитована, нужно аккредитовать
-        !org.isAccredited && (
-            <div className="modal-overlay">
-                <motion.div
-                    className="modal-content"
-                    initial={{scale: 0.9, opacity: 0}}
-                    animate={{scale: 1, opacity: 1}}
-                    exit={{scale: 0.9, opacity: 0}}
-                >
-                    <h3>Подтверждение</h3>
-                    <p>Аккредитовать организацию "{org.name}"?</p>
-                    <div className="modal-buttons">
-                        <button className="modal-button cancel" onClick={onClose}>
-                            Отмена
-                        </button>
-                        <button className="modal-button confirm" onClick={onConfirm}>
-                            Подтвердить
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-        ) ||
-        // Если аккредитована, снимаем аккредитацию
-        org.isAccredited && (
-            <div className="modal-overlay">
-                <motion.div
-                    className="modal-content"
-                    initial={{scale: 0.9, opacity: 0}}
-                    animate={{scale: 1, opacity: 1}}
-                    exit={{scale: 0.9, opacity: 0}}
-                >
-                    <h3>Подтверждение</h3>
-                    <p>Отменить аккредитацию организации "{org.name}"?</p>
-                    <div className="modal-buttons">
-                        <button className="modal-button cancel" onClick={onClose}>
-                            Отмена
-                        </button>
-                        <button className="modal-button confirm" onClick={onConfirm}>
-                            Подтверждение
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-        )
-    );
-};
 
 class AccreditationPage extends Component {
     static contextType = UserContext;
@@ -237,11 +186,13 @@ class AccreditationPage extends Component {
             <div className="orgs-container">
                 {/* Модальное окно подтверждения */}
                 <ConfirmModal
+                    headerText="Подтверждение"
+                    mainText={selectedOrg && (selectedOrg.isAccredited ? `Отменить аккредитацию организации "${selectedOrg.name}"?` : `Аккредитовать организацию "${selectedOrg.name}"?`)}
+                    cancelText="Отмена"
+                    confirmText="Подтвердить"
                     isOpen={showConfirmModal}
                     onClose={this.handleCloseModal}
                     onConfirm={this.handleConfirm}
-                    org={selectedOrg}
-                    user={this.context.user}
                 />
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}
@@ -294,13 +245,13 @@ class AccreditationPage extends Component {
                                 <div className="buttons">
                                     <h3 className="org-title">{org.name}</h3>
                                     {org.isAccredited && (
-                                        <button className="accept-button accr" title='Отменить акредитацию'
+                                        <button className="accept-button accr" title='Отменить аккредитацию'
                                                 onClick={() => this.handleChangeAccrClick(org)}
                                         >
                                         </button>
                                     )}
                                     {!org.isAccredited && (
-                                        <button className='accept-button not-accr' title='Акредитовать организацию'
+                                        <button className='accept-button not-accr' title='Аккредитовать организацию'
                                                 onClick={() => this.handleChangeAccrClick(org)}>
                                         </button>
                                     )}
@@ -324,7 +275,7 @@ class AccreditationPage extends Component {
 
                                 <div className="card-buttons">
                                     <div className={`org-status ${org.isAccredited}`}>
-                                        {org.isAccredited ? "Организация акредитована" : "Организация не аккредитована"}</div>
+                                        {org.isAccredited ? "Организация аккредитована" : "Организация не аккредитована"}</div>
                                 </div>
                             </motion.div>
                         ))}
