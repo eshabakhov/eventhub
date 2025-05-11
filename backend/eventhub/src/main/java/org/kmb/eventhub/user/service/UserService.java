@@ -7,6 +7,7 @@ import org.kmb.eventhub.common.exception.AlreadyExistsException;
 import org.kmb.eventhub.common.exception.MissingFieldException;
 import org.kmb.eventhub.common.exception.UnexpectedException;
 import org.kmb.eventhub.common.dto.ResponseList;
+import org.kmb.eventhub.user.dto.*;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.user.enums.PrivacyEnum;
 import org.kmb.eventhub.enums.PrivacyType;
@@ -19,10 +20,7 @@ import org.kmb.eventhub.tables.daos.ModeratorDao;
 import org.kmb.eventhub.tables.daos.OrganizerDao;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.tables.daos.UserDao;
-import org.kmb.eventhub.user.dto.MemberDTO;
-import org.kmb.eventhub.user.dto.ModeratorDTO;
-import org.kmb.eventhub.user.dto.OrganizerDTO;
-import org.kmb.eventhub.user.dto.UserDTO;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,9 +51,11 @@ public class  UserService {
 
     private final CustomUserDetailsService customUserDetailsService;
 
-    public ResponseList<User> getList(Integer page, Integer pageSize, String search) {
+    private final UserSecurityService userSecurityService;
 
-        ResponseList<User> responseList = new ResponseList<>();
+    public ResponseList<UserResponseDTO> getList(Integer page, Integer pageSize, String search) {
+
+        ResponseList<UserResponseDTO> responseList = new ResponseList<>();
 
         Condition condition = trueCondition();
 
@@ -65,7 +65,7 @@ public class  UserService {
                     .and(USER.ROLE.eq(RoleType.MEMBER));
         }
 
-        List<User> list =  userRepository.fetch(condition, page, pageSize);
+        List<UserResponseDTO> list =  userRepository.fetch(condition, page, pageSize);
 
         responseList.setList(list);
         responseList.setTotal(userRepository.count(condition));
@@ -112,7 +112,7 @@ public class  UserService {
     }
 
     @Transactional
-    public User create(UserDTO userDTO) {
+    public void create(UserDTO userDTO) {
 
         if (Objects.isNull(userDTO.getUsername()))
             throw new MissingFieldException("username");
@@ -144,7 +144,6 @@ public class  UserService {
         if (RoleEnum.MODERATOR.equals(userDTO.getRole())) {
             moderatorDao.insert(userMapper.toModerator(user));
         }
-        return user;
     }
 
     @Transactional
@@ -246,6 +245,11 @@ public class  UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    public Moderator getModerator(Long id) {
+        return moderatorDao.fetchOptionalById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
     @Transactional
     public User update(Long id, UserDTO userDTO) {
 
@@ -253,10 +257,10 @@ public class  UserService {
                 .filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
+        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
+
         if (Objects.nonNull(userDTO.getRole())) {
-            /*if (!RoleType.MODERATOR.getLiteral().equals(userDTO.getRole().name())) {
-                throw new ImmutableFieldException("role");
-            }*/
             if (RoleEnum.MEMBER.equals(userDTO.getRole()))
                 user.setRole(RoleType.MEMBER);
             if (RoleEnum.ORGANIZER.equals(userDTO.getRole()))

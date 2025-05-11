@@ -7,6 +7,7 @@ import org.kmb.eventhub.common.dto.ResponseDTO;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,6 +25,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         log.warn(ex.getMessage(), ex);
         return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(value = { AccessDeniedException.class })
+    protected ResponseEntity<Object> handleAccessDeniedException(RuntimeException ex,
+                                                    WebRequest request) {
+        log.warn(ex.getMessage(), ex);
+        return handleExceptionInternal(ex, ResponseDTO.getResponse(ex.getMessage()),
+                new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler(value = { UnexpectedException.class })

@@ -6,6 +6,7 @@ import org.jooq.DSLContext;
 import org.kmb.eventhub.enums.RoleType;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.user.dto.UserResponseDTO;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,14 +19,14 @@ public class UserRepository {
 
     private final DSLContext dslContext;
 
-    public List<User> fetch(Condition condition, Integer page, Integer pageSize) {
+    public List<UserResponseDTO> fetch(Condition condition, Integer page, Integer pageSize) {
         return dslContext
                 .selectFrom(USER)
                 .where(condition)
                 .and(USER.IS_ACTIVE.eq(true))
                 .limit(pageSize)
                 .offset((page - 1) * pageSize)
-                .fetchInto(User.class);
+                .fetchInto(UserResponseDTO.class);
     }
 
 

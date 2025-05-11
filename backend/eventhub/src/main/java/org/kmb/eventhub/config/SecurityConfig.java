@@ -8,7 +8,6 @@ import org.kmb.eventhub.auth.util.OAuth2LoginSuccessHandler;
 import org.kmb.eventhub.config.jwt.JwtAuthenticationEntryPoint;
 import org.kmb.eventhub.config.jwt.JwtRequestFilter;
 import org.kmb.eventhub.user.enums.RoleEnum;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,12 +47,12 @@ public class SecurityConfig {
     private static final String V1_TAGS = "/v1/tags";
 
     private static final String V1_USERS_ORGANIZERS_ID = "/v1/users/organizers/{id}";
+    private static final String V1_USERS_MODERATORS_ID = "/v1/users/moderators/{id}";
+    private static final String V1_USERS_MEMBERS_ID = "/v1/users/members/{id}";
 
     private static final String V1_USERS_ORGANIZERS_ID_EVENTS = "/v1/users/organizers/{id}/events";
 
-    private static final String V1_USERS_MODERATORS_ID = "/v1/users/moderators/{id}";
-
-    private static final String V1_USERS_MEMBERS_ALL = "/v1/users/members/**";
+    private static final String V1_FRIENDS_ALL = "/v1/friends/**";
 
     private static final String V1_MEMBERS_ID_EVENTS = "/v1/members/{memberId}/events";
 
@@ -62,8 +61,6 @@ public class SecurityConfig {
     private JwtRequestFilter jwtRequestFilter;
 
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
-    private CustomUserDetailsService userDetailsService;
 
     private final CustomOAuth2UserService customOAuth2UserService;
 
@@ -93,47 +90,26 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
-                        .logoutUrl("/v1/auth/logout")
-                        .addLogoutHandler(jwtCookieLogoutHandler())
-                        .deleteCookies("JSESSIONID")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpServletResponse.SC_OK)))
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Access Denied\"}");
-                        })
-                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(
-                                "/login", "/login/oauth2/**", "/oauth2/**",
-                                "/auth/oauth2/**",
-                                "/auth/login",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/api-docs/**",
-                                V1_EVENTS_ID
-                        ).permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").hasRole(RoleEnum.MODERATOR.name())
 
                         .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
                         .requestMatchers(HttpMethod.POST, V1_USERS).permitAll()
-                        .requestMatchers(HttpMethod.GET, V1_USERS).hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(V1_USERS_ID).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_ID).permitAll()
                         .requestMatchers(HttpMethod.PUT, V1_USERS_ID).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, V1_USERS_ID).hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
-                        .requestMatchers(HttpMethod.PUT, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.ORGANIZER.name(), RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.PUT, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
-                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS_ALL).hasRole(RoleEnum.MEMBER.name())
-                        .requestMatchers(HttpMethod.PUT, V1_USERS_MEMBERS_ALL).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_MEMBERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
 
+                        .requestMatchers(V1_FRIENDS_ALL).hasRole(RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.DELETE, V1_USERS_ORGANIZERS_ID_EVENTS).hasRole(RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
@@ -154,6 +130,20 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .sessionManagement(e -> e.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
+                        .logoutUrl("/v1/auth/logout")
+                        .addLogoutHandler(jwtCookieLogoutHandler())
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_OK)))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Access Denied\"}");
+                        })
+                )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

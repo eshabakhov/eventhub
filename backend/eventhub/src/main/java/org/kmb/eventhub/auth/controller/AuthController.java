@@ -19,6 +19,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Авторизация", description = "Аутентфикация и авторизация пользователей")
 public class AuthController {
 
     private AuthenticationManager authenticationManager;
@@ -26,7 +27,7 @@ public class AuthController {
     private CustomUserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request, HttpServletResponse response) {
+    public void login(@RequestBody AuthRequest request, HttpServletResponse response) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -35,11 +36,8 @@ public class AuthController {
             throw new InvalidCredentialsException("Invalid credentials");
         }
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        AuthResponse authResponse = userDetailsService.createAuthResponse(userDetails);
 
         response.addHeader(HttpHeaders.SET_COOKIE, userDetailsService.getCookieWithJwtToken(userDetails).toString());
-
-        return authResponse;
     }
 
     @GetMapping("/me")

@@ -1,9 +1,6 @@
 package org.kmb.eventhub.user.mapper;
 
-import org.kmb.eventhub.user.dto.MemberDTO;
-import org.kmb.eventhub.user.dto.ModeratorDTO;
-import org.kmb.eventhub.user.dto.OrganizerDTO;
-import org.kmb.eventhub.user.dto.UserDTO;
+import org.kmb.eventhub.user.dto.*;
 import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
@@ -17,6 +14,8 @@ public interface UserMapper {
     UserDTO toDto(User user);
 
     User toEntity(UserDTO userDTO);
+
+    UserResponseDTO toResponse(User user);
 
     @Mapping(target = "name", ignore = true)
     @Mapping(target = "description", ignore = true)
