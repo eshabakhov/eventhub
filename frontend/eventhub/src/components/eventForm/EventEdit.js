@@ -360,9 +360,10 @@ class EventEdit extends React.Component {
                     </div>
                 </div>
                 <div className="event-edit-container">
-                    <div className="back-area" onClick={this.handleBack}>
-                        <button className="back-button">←</button>
+                    <div className="event-edit-header" onClick={this.handleBack}>
+                        <button className="back-button">← Назад</button>
                     </div>
+
                     <div className="event-edit-card">
                         <form onSubmit={this.handleSubmit}>
 
