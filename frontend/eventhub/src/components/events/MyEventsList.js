@@ -1,4 +1,4 @@
-﻿import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import React, {Component, useState} from "react";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png"
@@ -17,6 +17,7 @@ import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -73,58 +74,6 @@ function FitToAllMarkers({events}) {
     }, [events, map]);
     return null;
 }
-
-// Модальное окно для подтверждения отказа от участия или удаления мероприятия
-const ConfirmModal = ({isOpen, onClose, onConfirm, eventTitle, user}) => {
-    if (!isOpen) return null;
-    return (
-        // Если участник, удаляем участие
-        user.role === "MEMBER" && (
-            <div className="modal-overlay">
-                <motion.div
-                    className="modal-content"
-                    initial={{scale: 0.9, opacity: 0}}
-                    animate={{scale: 1, opacity: 1}}
-                    exit={{scale: 0.9, opacity: 0}}
-                >
-                    <h3>Подтверждение</h3>
-                    <p>Вы уверены, что хотите отказаться от участия в мероприятии "{eventTitle}"?</p>
-                    <div className="modal-buttons">
-                        <button className="modal-button cancel" onClick={onClose}>
-                            Отмена
-                        </button>
-                        <button className="modal-button confirm" onClick={onConfirm}>
-                            Подтвердить
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-        ) ||
-        // Если организатор, удаляем мероприятие
-        user.role === "ORGANIZER" && (
-            <div className="modal-overlay">
-                <motion.div
-                    className="modal-content"
-                    initial={{scale: 0.9, opacity: 0}}
-                    animate={{scale: 1, opacity: 1}}
-                    exit={{scale: 0.9, opacity: 0}}
-                >
-                    <h3>Внимание!</h3>
-                    <p>Вы уверены, что хотите навсегда удалить мероприятие "{eventTitle}"? Действие невозможно будет
-                        отменить!</p>
-                    <div className="modal-buttons">
-                        <button className="modal-button cancel" onClick={onClose}>
-                            Отмена
-                        </button>
-                        <button className="modal-button confirm" onClick={onConfirm}>
-                            Удалить
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-        )
-    );
-};
 
 const Pagination = ({totalPages, currentPage, handlePageClick}) => {
     return (
@@ -481,10 +430,30 @@ class MyEventsList extends Component {
                 {/* Модальное окно подтверждения */}
                 <ConfirmModal
                     isOpen={showConfirmModal}
+                    headerText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? "Подтверждение"
+                                : "Внимание!"
+                            : ""
+                    }
+                    mainText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? `Вы уверены, что хотите отказаться от участия в мероприятии "${selectedEvent.title}"?`
+                                : `Вы уверены, что хотите навсегда удалить мероприятие "${selectedEvent.title}"? Действие невозможно будет отменить!`
+                            : ""
+                    }
+                    cancelText="Отмена"
+                    confirmText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? "Подтвердить"
+                                : "Удалить"
+                            : ""
+                    }
                     onClose={this.handleCloseModal}
                     onConfirm={this.handleConfirmDecline}
-                    eventTitle={selectedEvent?.title || ""}
-                    user={this.context.user}
                 />
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}

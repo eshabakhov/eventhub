@@ -1,4 +1,4 @@
-﻿import React, {Component} from "react";
+import React, {Component} from "react";
 import {motion} from "framer-motion";
 import EditIcon from "../../img/edit.png";
 import DeleteIcon from "../../img/delete.png";
@@ -8,35 +8,11 @@ import UserContext from "../../UserContext";
 import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
-
-const ConfirmModal = ({isOpen, onClose, onConfirm, mod}) => {
-    if (!isOpen) return null;
-    return (
-        <div className="modal-overlay">
-            <motion.div
-                className="modal-content"
-                initial={{scale: 0.9, opacity: 0}}
-                animate={{scale: 1, opacity: 1}}
-                exit={{scale: 0.9, opacity: 0}}
-            >
-                <h3>Подтверждение</h3>
-                <p>Удалить модератора "{mod.displayName}"?</p>
-                <div className="modal-buttons">
-                    <button className="modal-button cancel" onClick={onClose}>
-                        Отмена
-                    </button>
-                    <button className="modal-button confirm" onClick={onConfirm}>
-                        Удалить
-                    </button>
-                </div>
-            </motion.div>
-        </div>
-    );
-};
 
 class ModeratorsPage extends Component {
     static contextType = UserContext;
@@ -154,10 +130,12 @@ class ModeratorsPage extends Component {
             <div className="orgs-container">
                 <ConfirmModal
                     isOpen={showConfirmModal}
+                    headerText="Подтверждение"
+                    mainText={`Удалить модератора "${selectedModer && selectedModer.displayName}"?`}
+                    confirmText="Удалить"
+                    cancelText="Отмена"
                     onClose={this.handleCloseModal}
                     onConfirm={this.handleConfirm}
-                    mod={selectedModer}
-                    user={this.context.user}
                 />
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}

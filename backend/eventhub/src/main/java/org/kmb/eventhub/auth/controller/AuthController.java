@@ -19,7 +19,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Авторизация", description = "Аутентфикация и авторизация пользователей")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Авторизация", description = "Аутентификация и авторизация пользователей")
 public class AuthController {
 
     private AuthenticationManager authenticationManager;

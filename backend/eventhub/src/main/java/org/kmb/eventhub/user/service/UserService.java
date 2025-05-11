@@ -112,7 +112,7 @@ public class  UserService {
     }
 
     @Transactional
-    public void create(UserDTO userDTO) {
+    public UserResponseDTO create(UserDTO userDTO) {
 
         if (Objects.isNull(userDTO.getUsername()))
             throw new MissingFieldException("username");
@@ -144,6 +144,7 @@ public class  UserService {
         if (RoleEnum.MODERATOR.equals(userDTO.getRole())) {
             moderatorDao.insert(userMapper.toModerator(user));
         }
+        return userMapper.toResponse(user);
     }
 
     @Transactional

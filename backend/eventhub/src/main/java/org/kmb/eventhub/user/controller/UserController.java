@@ -22,8 +22,8 @@ public class UserController {
                     description = "Добавляет нового пользователя в систему.")
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping
-    public void create(@RequestBody @Valid UserDTO userDTO) {
-        userService.create(userDTO);
+    public UserResponseDTO create(@RequestBody @Valid UserDTO userDTO) {
+        return userService.create(userDTO);
     }
 
     @Operation(summary = "Получить список всех пользователей.",
