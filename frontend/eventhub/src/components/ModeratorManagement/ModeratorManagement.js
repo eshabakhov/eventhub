@@ -136,7 +136,6 @@ class ModeratorsPage extends Component {
                     cancelText="Отмена"
                     onClose={this.handleCloseModal}
                     onConfirm={this.handleConfirm}
-                    user={this.context.user}
                 />
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}
