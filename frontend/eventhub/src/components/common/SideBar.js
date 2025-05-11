@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React, {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import "../../css/SideBar.css";
 
@@ -7,44 +7,50 @@ const SideBar = ({sidebarOpen, sidebarRef, user}) => {
     return (
         <div className={`profile-sidebar ${sidebarOpen ? 'open' : 'closed'}`} ref={sidebarRef}>
             <ul>
-                <li onClick={() => {
-                    navigate("/profile");
-                    sidebarOpen = false;
-                }}>
+                <li
+                    onClick={() => navigate("/profile")}
+                    className={window.location.pathname === "/profile" ? "disabled" : ""}>
                     <i className="bi bi-person-fill"></i> Профиль
                 </li>
 
-                <li onClick={() => navigate("/events")}>
+                <li onClick={() => navigate("/events")}
+                    className={window.location.pathname === "/events" ? "disabled" : ""}>
                     <i className="bi bi-calendar-event-fill"></i> Мероприятия
                 </li>
 
-                {user.role === 'MEMBER' && (
+                {user && user.role === 'MEMBER' && (
                     <>
-                        <li onClick={() => navigate("/friends")}>
+                        <li onClick={() => navigate("/friends")}
+                            className={window.location.pathname === "/friends" ? "disabled" : ""}>
                             <i className="bi bi-people-fill"></i> Мои друзья
                         </li>
 
-                        <li onClick={() => navigate("/my-events")}>
+                        <li onClick={() => navigate("/my-events")}
+                            className={window.location.pathname === "/my-events" ? "disabled" : ""}>
                             <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
                         </li>
 
-                        <li onClick={() => navigate("/favorites")}>
+                        <li onClick={() => navigate("/favorites")}
+                            className={window.location.pathname === "/favorites" ? "disabled" : ""}>
                             <i className="bi bi-star-fill"></i> Избранное
                         </li>
                     </>
                 )}
-                {user.role === 'ORGANIZER' && (
-                    <li onClick={() => navigate("/my-events")}>
+                {user && user.role === 'ORGANIZER' && (
+                    <li onClick={() => navigate("/my-events")}
+                        className={window.location.pathname === "/my-events" ? "disabled" : ""}>
                         <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
                     </li>
                 )}
-                {user.role === 'MODERATOR' && (
+                {user && user.role === 'MODERATOR' && (
                     <>
-                        <li onClick={() => navigate("/accreditation")}>
+                        <li onClick={() => navigate("/accreditation")}
+                            className={window.location.pathname === "/accreditation" ? "disabled" : ""}>
                             <i className="bi bi-clipboard-check-fill"></i> Аккредитация организаций
                         </li>
 
-                        <li onClick={() => navigate("/moderator-management")}>
+                        <li onClick={() => navigate("/moderator-management")}
+                            className={window.location.pathname === "/moderator-management" ? "disabled" : ""}>
                             <i className="bi bi-shield-lock-fill"></i> Управление модераторами
                         </li>
                     </>

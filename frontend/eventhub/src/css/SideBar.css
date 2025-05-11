@@ -33,6 +33,10 @@
 .profile-sidebar li:hover {
     background-color: #e5e7eb;
 }
+.profile-sidebar li.disabled {
+    cursor: not-allowed;
+    background-color: #e5e7eb;
+}
 
 .profile-sidebar li + li {
     margin-top: 0.5rem;
