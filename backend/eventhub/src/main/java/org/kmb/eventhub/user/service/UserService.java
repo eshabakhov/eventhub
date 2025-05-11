@@ -150,6 +150,9 @@ public class  UserService {
     @Transactional
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
 
+        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
+
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.ORGANIZER.name().equals(e.getRole().toString()))
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -173,6 +176,9 @@ public class  UserService {
 
     @Transactional
     public Member updateMember(Long id, MemberDTO memberDTO) {
+
+        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         userDao.findOptionalById(id)
                 .filter(e -> e.getIsActive() && RoleEnum.MEMBER.name().equals(e.getRole().toString()))
@@ -205,6 +211,9 @@ public class  UserService {
 
     @Transactional
     public Moderator updateModerator(Long id, ModeratorDTO moderatorDTO) {
+
+        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         if (Objects.isNull(moderatorDTO.getIsAdmin()))
             throw new MissingFieldException("isAdmin");
@@ -254,12 +263,12 @@ public class  UserService {
     @Transactional
     public User update(Long id, UserDTO userDTO) {
 
+        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
+
         User user = userDao.findOptionalById(id)
                 .filter(User::getIsActive)
                 .orElseThrow(() -> new UserNotFoundException(id));
-
-        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
-            throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         if (Objects.nonNull(userDTO.getRole())) {
             if (RoleEnum.MEMBER.equals(userDTO.getRole()))
