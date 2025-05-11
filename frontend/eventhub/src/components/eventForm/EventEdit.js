@@ -6,6 +6,7 @@ import EventHubLogo from "../../img/eventhub.png";
 import "../../css/EventEdit.css";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
+import ConfirmModal from "../common/ConfirmModal";
 
 export function withParams(Component) {
     return props => <Component {...props} params={useParams()}/>;
@@ -258,7 +259,10 @@ class EventEdit extends React.Component {
         const {eventId} = this.props.params;
 
         if (!selectedFile) {
-            alert("Сначала выберите файл");
+            this.setState({
+                showConfirmModal: true,
+                mainText: "Сначала выберите файл"
+            });
             return;
         }
 
@@ -301,12 +305,18 @@ class EventEdit extends React.Component {
                     files: [...prevState.files, addedFile],
                     selectedFile: null
                 }));
-
-                alert("Файл успешно загружен!");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Файл успешно загружен!"
+                });
                 this.setState({selectedFile: null});
             } catch (err) {
                 console.error("Ошибка при загрузке файла:", err);
-                alert("Не удалось загрузить файл.");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Не удалось загрузить файл."
+                });
+
             }
         };
 
@@ -317,12 +327,26 @@ class EventEdit extends React.Component {
         this.props.navigate('/my-events');
     };
 
+    handleCloseModal = () => {
+        this.setState({
+            showConfirmModal: false,
+            mainText: ""
+        });
+    };
+
     render() {
-        const {title, description, shortDescription, location, errors, isEditing, tags, newTag, files} = this.state;
+        const {title, description, shortDescription, location, errors, isEditing,
+            tags, newTag, files, showConfirmModal, mainText} = this.state;
         const {navigate} = this.props;
 
         return (
             <div>
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    mainText={mainText}
+                    okText="Ок"
+                    onClose={this.handleCloseModal}
+                />
                 <div className="header-bar">
                     <div className="top-logo">
                         <img src={EventHubLogo} alt="Logo" className="logo"/>

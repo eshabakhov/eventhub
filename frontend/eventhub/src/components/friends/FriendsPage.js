@@ -5,6 +5,7 @@ import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import UserContext from "../../UserContext";
+import ConfirmModal from "../common/ConfirmModal";
 
 
 export const withNavigation = (WrappedComponent) => {
@@ -117,6 +118,13 @@ class FriendsPage extends Component {
         this.setState({searchQuery: e.target.value});
     };
 
+    handleCloseModal = () => {
+        this.setState({
+            showConfirmModal: false,
+            mainText: ""
+        });
+    };
+
     handleAddFriend = (recipientId) => {
         const {userId, searchResults} = this.state;
 
@@ -132,7 +140,11 @@ class FriendsPage extends Component {
                         sentRequests: [...prevState.sentRequests, recipient],
                     }));
                 }
-                alert('Запрос отправлен');
+
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Запрос отправлен"
+                });
             })
             .catch(console.error);
     };
@@ -168,13 +180,22 @@ class FriendsPage extends Component {
             searchPerformed,
             incomingRequests,
             sentRequests,
-            sidebarOpen
+            sidebarOpen,
+            showConfirmModal,
+            mainText
         } = this.state;
         console.log(this.context.user);
 
         return (
 
             <div className="events-container">
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    mainText={mainText}
+                    okText="Ок"
+                    onClose={this.handleCloseModal}
+                />
+
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}
                     title="Мои друзья"
