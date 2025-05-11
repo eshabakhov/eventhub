@@ -2,10 +2,10 @@ import React from "react"
 import "../../css/AuthPage.css";
 import UserContext from "../../UserContext";
 import {Navigate} from "react-router";
-import {em, u} from "framer-motion/client";
 import API_BASE_URL from "../../config";
 import EventHubLogo from "../../img/eventhub.png";
 import {useNavigate, useLocation} from "react-router-dom";
+import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => {
@@ -70,7 +70,10 @@ class Login extends React.Component {
         e.preventDefault();
         const {username, email, password, confirmPassword, role} = this.state;
         if (!username || !email || !password || password !== confirmPassword || !role) {
-            alert("Пожалуйста, заполните все поля корректно");
+            this.setState({
+                showConfirmModal: true,
+                mainText: "Пожалуйста, заполните все поля корректно"
+            });
             return;
         }
         this.setState({step: 2});
@@ -104,7 +107,10 @@ class Login extends React.Component {
         if (isLogin) {
             // Обработка входа
             if (!username || !password) {
-                alert("Введите имя пользователя и пароль");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Введите имя пользователя и пароль"
+                });
                 return;
             }
 
@@ -122,7 +128,10 @@ class Login extends React.Component {
                 })
                 .catch(err => {
                     console.error(err);
-                    alert("Ошибка при входе");
+                    this.setState({
+                        showConfirmModal: true,
+                        mainText: "Ошибка при входе"
+                    });
                 });
 
         } else if (step === 2) {
@@ -136,7 +145,10 @@ class Login extends React.Component {
             }
 
             if (!roleValid) {
-                alert("Пожалуйста, заполните все поля на втором шаге");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Пожалуйста, заполните все поля на втором шаге"
+                });
                 return;
             }
 
@@ -212,7 +224,10 @@ class Login extends React.Component {
                 })
                 .catch(err => {
                     console.error(err);
-                    alert("Ошибка при регистрации");
+                    this.setState({
+                        showConfirmModal: true,
+                        mainText: "Ошибка регистрации"
+                    });
                 });
         }
     };
@@ -243,20 +258,32 @@ class Login extends React.Component {
         })
             .then(res => res.json())
             .then(data => {
-                alert("Регистрация успешна!");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Регистрация успешна!"
+                });
                 this.setState({isLogin: true, step: 1}); // Возврат к логину
             })
             .catch(err => {
                 console.error(err);
-                alert("Ошибка регистрации");
+                this.setState({
+                    showConfirmModal: true,
+                    mainText: "Ошибка регистрации"
+                });
             });
     };
 
     renderLogin() {
-        const {username, password} = this.state;
+        const {username, password, showConfirmModal, mainText} = this.state;
         const {navigate} = this.props;
         return (
             <>
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    mainText={mainText}
+                    okText="Ок"
+                    onClose={this.handleCloseModal}
+                />
                 <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
                     <img src={EventHubLogo} alt="Logo" className="logo"/>
                 </div>
@@ -278,7 +305,7 @@ class Login extends React.Component {
                         onChange={this.handleChange}
                         required
                     />
-                    <button type="submit">Войти</button>
+                    <button className="auth-button" type="submit">Войти</button>
                 </form>
                 <p onClick={this.handleToggle} className="toggle-link">
                     Нет аккаунта? Зарегистрироваться
@@ -289,21 +316,38 @@ class Login extends React.Component {
 
     handleNext = (e) => {
         e.preventDefault();
-        const {username, email, password, confirmPassword, role, displayName} = this.state;
-
+        const {username, email, password, confirmPassword, role, displayName, showConfirmModal} = this.state;
+        console.log(username, email, password, confirmPassword, role, displayName);
         if (!username || !email || !password || password !== confirmPassword || !role || !displayName) {
-            alert("Пожалуйста, заполните все поля корректно");
+            this.setState({
+                showConfirmModal: true,
+                mainText: "Пожалуйста, заполните все поля корректно"
+            });
             return;
         }
 
         this.setState({step: 2});
     };
 
+    handleCloseModal = () => {
+        this.setState({
+            showConfirmModal: false,
+            mainText: ""
+        });
+    };
+
     renderStep1() {
-        const {username, password, confirmPassword, email, role, displayName} = this.state;
+        const {username, password, confirmPassword, email, role, displayName, showConfirmModal, mainText} = this.state;
 
         return (
             <>
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    mainText={mainText}
+                    okText="Ок"
+                    onClose={this.handleCloseModal}
+                />
+
                 <h2>Регистрация</h2>
                 <form onSubmit={this.handleNext}>
                     <select name="role" value={role} onChange={this.handleChange} required>
@@ -351,7 +395,7 @@ class Login extends React.Component {
                         onChange={this.handleChange}
                         required
                     />
-                    <button type="submit">Далее</button>
+                    <button className="auth-button" type="submit">Далее</button>
                 </form>
                 <p onClick={this.handleToggle} className="toggle-link">
                     Уже есть аккаунт? Войти
@@ -362,30 +406,33 @@ class Login extends React.Component {
 
 
     renderStep2() {
-        const {role} = this.state;
+        const {role, showConfirmModal, mainText} = this.state;
         return (
             <>
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    mainText={mainText}
+                    okText="Ок"
+                    onClose={this.handleCloseModal}
+                />
+
                 <h2>Регистрация</h2>
                 <form onSubmit={this.handleSubmit}>
                     {role === 'ORGANIZER' ? (
                         <>
-                            <input name="orgName" placeholder="Название организации" onChange={this.handleChange}
-                                   required/>
-                            <input name="shortDesc" placeholder="Краткое описание" onChange={this.handleChange}
-                                   required/>
-                            <textarea name="fullDesc" placeholder="Полное описание" onChange={this.handleChange}
-                                      required/>
-                            <input name="industry" placeholder="Сфера деятельности" onChange={this.handleChange}
-                                   required/>
+                            <input name="orgName" placeholder="Название организации" onChange={this.handleChange} required />
+                            <input name="shortDesc" placeholder="Краткое описание" onChange={this.handleChange} required />
+                            <textarea name="fullDesc" placeholder="Полное описание" onChange={this.handleChange} required />
+                            <input name="industry" placeholder="Сфера деятельности" onChange={this.handleChange} required />
                             <input name="address" placeholder="Адрес" onChange={this.handleChange} required/>
                         </>
                     ) : (
                         <>
-                            <input name="lastName" placeholder="Фамилия" onChange={this.handleChange} required/>
-                            <input name="firstName" placeholder="Имя" onChange={this.handleChange} required/>
-                            <input name="middleName" placeholder="Отчество" onChange={this.handleChange} required/>
-                            <input type="date" name="birthDate" onChange={this.handleChange} required/>
-                            <input name="birthCity" placeholder="Город рождения" onChange={this.handleChange} required/>
+                            <input name="lastName" placeholder="Фамилия" onChange={this.handleChange} required />
+                            <input name="firstName" placeholder="Имя" onChange={this.handleChange} required />
+                            <input name="middleName" placeholder="Отчество" onChange={this.handleChange} required />
+                            <input type="date" name="birthDate" onChange={this.handleChange} required />
+                            <input name="birthCity" placeholder="Город рождения" onChange={this.handleChange} required />
                             <select name="privacy" onChange={this.handleChange}>
                                 <option value="PRIVATE">Приватный</option>
                                 <option value="PUBLIC">Публичный</option>
@@ -393,7 +440,7 @@ class Login extends React.Component {
                             </select>
                         </>
                     )}
-                    <button type="submit">Зарегистрироваться</button>
+                    <button className="auth-button" type="submit">Зарегистрироваться</button>
                 </form>
             </>
         );
