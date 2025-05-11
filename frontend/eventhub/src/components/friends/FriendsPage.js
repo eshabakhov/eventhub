@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
 import '../../css/FriendsPage.css';
-import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
 import {useNavigate} from "react-router-dom";
 import API_BASE_URL from "../../config";
 import Header from "../common/Header";

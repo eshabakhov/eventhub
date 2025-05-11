@@ -35,7 +35,7 @@
   min-height: 80px;
 }
 
-.auth-container button {
+.auth-container .auth-button {
   padding: 10px;
   background-color: #0077ff;
   color: white;
@@ -47,7 +47,7 @@
   transition: background-color 0.3s ease;
 }
 
-.auth-container button:hover {
+.auth-container .auth-button:hover {
   background-color: #005ec2;
 }
 

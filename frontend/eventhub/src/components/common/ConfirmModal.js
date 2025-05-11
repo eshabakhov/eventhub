@@ -2,7 +2,7 @@
 import React from "react";
 import "../../css/ModalWindow.css";
 
-const ConfirmModal = ({headerText, mainText, cancelText = "Отмена", confirmText, isOpen, onClose, onConfirm}) => {
+const ConfirmModal = ({headerText, mainText, cancelText, confirmText, isOpen, onClose, onConfirm, okText}) => {
     if (!isOpen) return null;
     return (
         <div className="modal-overlay">
@@ -15,12 +15,21 @@ const ConfirmModal = ({headerText, mainText, cancelText = "Отмена", confir
                 <h3>{headerText}</h3>
                 <p>{mainText}</p>
                 <div className="modal-buttons">
-                    <button className="modal-button cancel" onClick={onClose}>
-                        {cancelText}
-                    </button>
-                    <button className="modal-button confirm" onClick={onConfirm}>
-                        {confirmText}
-                    </button>
+                    {cancelText && (
+                        <button className="modal-button cancel" onClick={onClose}>
+                            {cancelText}
+                        </button>
+                    )}
+                    {confirmText && (
+                        <button className="modal-button confirm" onClick={onConfirm}>
+                            {confirmText}
+                        </button>
+                    )}
+                    {okText && (
+                        <button className="modal-button ok" onClick={onClose}>
+                            {okText}
+                        </button>
+                    )}
                 </div>
             </motion.div>
         </div>
