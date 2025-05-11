@@ -3,10 +3,10 @@ import React, {Component} from 'react';
 import UserContext from '../../UserContext';
 import {useNavigate} from 'react-router-dom';
 import "../../css/ProfilePage.css";
-import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
 
 function ProfilePageWithNavigation(props) {
     const navigate = useNavigate();
@@ -240,74 +240,16 @@ class ProfilePage extends Component {
 
         return (
             <div className="profile-page">
-                <div className="header-bar">
-                    <div className="burger-button" onClick={this.toggleSidebar}>
-                        <i className="bi bi-list" style={{fontSize: '24px'}}></i>
-                    </div>
-                    <div className="top-logo" onClick={() => navigate("/events")}>
-                        <img src={EventHubLogo} alt="Logo" className="logo"/>
-                    </div>
-                    <h1 className="friends-title">Мой профиль</h1>
-                    <ProfileDropdown navigate={navigate}/>
-                </div>
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Мой профиль"
+                    user={user}
+                    navigate={navigate}/>
 
                 <div className="main-content-wrapper">
-                    <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
-                         onClick={this.toggleSidebar}></div>
+                    <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}></div>
 
-                    <div className={`profile-sidebar ${sidebarOpen ? 'open': 'closed'}`} ref={this.sidebarRef}>
-                        <ul>
-                            <li onClick={() => {
-                                navigate("/profile");
-                                this.setState({sidebarOpen: false});
-                            }}>
-                                <i className="bi bi-person-fill"></i> Профиль
-                            </li>
-
-                            <li onClick={() => navigate("/events")}>
-                                <i className="bi bi-calendar-event-fill"></i> Мероприятия
-                            </li>
-
-                            {user.role === 'MEMBER' && (
-                                <>
-                                    <li onClick={() => navigate("/friends")}>
-                                        <i className="bi bi-people-fill"></i> Мои друзья
-                                    </li>
-
-                                    <li onClick={() => navigate("/my-events")}>
-                                        <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
-                                    </li>
-
-                                    <li onClick={() => navigate("/favorites")}>
-                                        <i className="bi bi-star-fill"></i> Избранное
-                                    </li>
-                                </>
-                            )}
-                            {user.role === 'ORGANIZER' && (
-                                <li onClick={() => navigate("/my-events")}>
-                                    <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
-                                </li>
-                            )}
-                            {user.role === 'MODERATOR' && (
-                                <>
-                                    <li onClick={() => navigate("/accreditation")}>
-                                        <i className="bi bi-clipboard-check-fill"></i> Аккредитация мероприятий
-                                    </li>
-
-                                    <li onClick={() => navigate("/moderator-management")}>
-                                        <i className="bi bi-shield-lock-fill"></i> Управление модераторами
-                                    </li>
-                                </>
-                            )}
-                            <li onClick={() => navigate("/logout")}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512">
-                                    <path
-                                        d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"/>
-                                </svg>
-                                <text> Выход</text>
-                            </li>
-                        </ul>
-                    </div>
+                    <SideBar sidebarOpen={sidebarOpen} sidebarRef={this.sidebarRef} user={user}/>
 
                     <div className="profile-content">
                         <div className="profile-card">
@@ -331,12 +273,14 @@ class ProfilePage extends Component {
                                 </label>
                                 <label className="profile-label">
                                     Почта:
-                                    <input className="profile-input" type="email" name="email" value={formData.email || ''}
+                                    <input className="profile-input" type="email" name="email"
+                                           value={formData.email || ''}
                                            onChange={this.handleChange} disabled/>
                                 </label>
                                 <label className="profile-label">
                                     Логин:
-                                    <input className="profile-input" type="text" name="username" value={formData.username}
+                                    <input className="profile-input" type="text" name="username"
+                                           value={formData.username}
                                            onChange={this.handleChange}/>
                                 </label>
                                 <label className="profile-label">

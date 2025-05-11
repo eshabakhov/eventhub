@@ -15,14 +15,16 @@ import offlineIconImg from "../../img/offline-marker.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
 
 export const withNavigation = (WrappedComponent) => {
-    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+    return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
 
 // Форматирование даты
 const formatDateRange = (start, end) => {
-    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+    const options = {day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"};
     const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     return `${startStr} - ${endStr}`;
@@ -43,12 +45,12 @@ const offlineIcon = new leaflet.Icon({
 });
 
 // Перемещение карты к маркеру
-function FlyToLocation({ position, markerId, markerRefs, format }) {
+function FlyToLocation({position, markerId, markerRefs, format}) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
             const zoom = format === "OFFLINE" ? 18 : 10;
-            map.flyTo(position, zoom, { duration: 1.5 });
+            map.flyTo(position, zoom, {duration: 1.5});
             const marker = markerRefs.current[markerId];
             if (marker) {
                 setTimeout(() => {
@@ -61,70 +63,71 @@ function FlyToLocation({ position, markerId, markerRefs, format }) {
 }
 
 // Подгонка карты под маркеры
-function FitToAllMarkers({ events }) {
+function FitToAllMarkers({events}) {
     const map = useMap();
     React.useEffect(() => {
         if (events.length > 0) {
             const bounds = leaflet.latLngBounds(events.map((e) => e.position));
-            map.fitBounds(bounds, { padding: [30, 30] });
+            map.fitBounds(bounds, {padding: [30, 30]});
         }
     }, [events, map]);
     return null;
 }
 
 // Модальное окно для подтверждения отказа от участия или удаления мероприятия
-const ConfirmModal = ({ isOpen, onClose, onConfirm, eventTitle, user }) => {
+const ConfirmModal = ({isOpen, onClose, onConfirm, eventTitle, user}) => {
     if (!isOpen) return null;
     return (
         // Если участник, удаляем участие
-       user.role === "MEMBER" && (
-           <div className="modal-overlay">
-               <motion.div
-                   className="modal-content"
-                   initial={{ scale: 0.9, opacity: 0 }}
-                   animate={{ scale: 1, opacity: 1 }}
-                   exit={{ scale: 0.9, opacity: 0 }}
-               >
-                   <h3>Подтверждение</h3>
-                   <p>Вы уверены, что хотите отказаться от участия в мероприятии "{eventTitle}"?</p>
-                   <div className="modal-buttons">
-                       <button className="modal-button cancel" onClick={onClose}>
-                           Отмена
-                       </button>
-                       <button className="modal-button confirm" onClick={onConfirm}>
-                           Подтвердить
-                       </button>
-                   </div>
-               </motion.div>
-           </div>
-       ) ||
-           // Если организатор, удаляем мероприятие
-       user.role === "ORGANIZER" && (
-           <div className="modal-overlay">
-               <motion.div
-                   className="modal-content"
-                   initial={{ scale: 0.9, opacity: 0 }}
-                   animate={{ scale: 1, opacity: 1 }}
-                   exit={{ scale: 0.9, opacity: 0 }}
-               >
-                   <h3>Внимание!</h3>
-                   <p>Вы уверены, что хотите навсегда удалить мероприятие "{eventTitle}"? Действие невозможно будет отменить!</p>
-                   <div className="modal-buttons">
-                       <button className="modal-button cancel" onClick={onClose}>
-                           Отмена
-                       </button>
-                       <button className="modal-button confirm" onClick={onConfirm}>
-                           Удалить
-                       </button>
-                   </div>
-               </motion.div>
-           </div>
+        user.role === "MEMBER" && (
+            <div className="modal-overlay">
+                <motion.div
+                    className="modal-content"
+                    initial={{scale: 0.9, opacity: 0}}
+                    animate={{scale: 1, opacity: 1}}
+                    exit={{scale: 0.9, opacity: 0}}
+                >
+                    <h3>Подтверждение</h3>
+                    <p>Вы уверены, что хотите отказаться от участия в мероприятии "{eventTitle}"?</p>
+                    <div className="modal-buttons">
+                        <button className="modal-button cancel" onClick={onClose}>
+                            Отмена
+                        </button>
+                        <button className="modal-button confirm" onClick={onConfirm}>
+                            Подтвердить
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        ) ||
+        // Если организатор, удаляем мероприятие
+        user.role === "ORGANIZER" && (
+            <div className="modal-overlay">
+                <motion.div
+                    className="modal-content"
+                    initial={{scale: 0.9, opacity: 0}}
+                    animate={{scale: 1, opacity: 1}}
+                    exit={{scale: 0.9, opacity: 0}}
+                >
+                    <h3>Внимание!</h3>
+                    <p>Вы уверены, что хотите навсегда удалить мероприятие "{eventTitle}"? Действие невозможно будет
+                        отменить!</p>
+                    <div className="modal-buttons">
+                        <button className="modal-button cancel" onClick={onClose}>
+                            Отмена
+                        </button>
+                        <button className="modal-button confirm" onClick={onConfirm}>
+                            Удалить
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
         )
     );
 };
 
 const Pagination = ({totalPages, currentPage, handlePageClick}) => {
-    return(
+    return (
         <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
             <button
                 className="back-forward"
@@ -216,44 +219,65 @@ class MyEventsList extends Component {
             selectedTags: [],
             showConfirmModal: false,
             selectedEvent: null,
+            sidebarOpen: false
         };
     }
+
+    sidebarRef = React.createRef();
 
     componentDidMount() {
         this.loadEvents(1, this.state.search);
         this.loadTags();
+        document.addEventListener("mousedown", this.handleClickOutside);
     }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
 
     // Загрузка тегов
     loadTags = () => {
         fetch(`${API_BASE_URL}/v1/tags`, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {
-                this.setState({ tags: data.list });
+                this.setState({tags: data.list});
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
     };
 
     // Загрузка мероприятий
     loadEvents = (page, search = "", searchTags = []) => {
-        const { eventsPerPage } = this.state;
+        const {eventsPerPage} = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
         const currentUser = this.context.user
         let url;
         if (currentUser && currentUser.role === "ORGANIZER") {
             url = `${API_BASE_URL}/v1/events/organizers/${currentUser.id}?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
-        }
-        else if (currentUser && currentUser.role === "MEMBER") {
+        } else if (currentUser && currentUser.role === "MEMBER") {
             url = `${API_BASE_URL}/v1/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         fetch(url, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => res.json())
@@ -308,8 +332,8 @@ class MyEventsList extends Component {
 
     // Подтверждение
     handleConfirmDecline = () => {
-        const { selectedEvent } = this.state;
-        const { user } = this.context;
+        const {selectedEvent} = this.state;
+        const {user} = this.context;
         if (!selectedEvent || !user) {
             this.handleCloseModal();
             return;
@@ -325,7 +349,7 @@ class MyEventsList extends Component {
     refuceToParticipation = (selectedEvent, user) => {
         fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${selectedEvent.id}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => {
@@ -346,7 +370,7 @@ class MyEventsList extends Component {
     deleteEvent = (selectedEvent) => {
         fetch(`${API_BASE_URL}/v1/events/${selectedEvent.id}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => {
@@ -366,7 +390,7 @@ class MyEventsList extends Component {
     // Обработка изменения поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
-        this.setState({ search: newSearch });
+        this.setState({search: newSearch});
     };
 
     // Обработка перехода на другую страницу
@@ -408,23 +432,14 @@ class MyEventsList extends Component {
         return null;
     }
 
-    handleOutsideClick = (e) => {
-        if (this.dropdownRef && !this.dropdownRef.contains(e.target)) {
-            this.setState({ showDropdown: false });
-        }
-    };
-
-    toggleDropdown = () => {
-        this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
-    };
 
     handleMenuClick = (path) => {
-        this.setState({ showDropdown: false });
+        this.setState({showDropdown: false});
         this.props.navigate(path);
     };
 
     checkAuth = () => {
-        const { user, setUser } = this.context;
+        const {user, setUser} = this.context;
 
         // Если пользователь уже есть в контексте, пропускаем
         if (user && user.id) return;
@@ -446,8 +461,18 @@ class MyEventsList extends Component {
     };
 
     render() {
-        const { navigate } = this.props;
-        const { events, tags, search, currentPage, eventsPerPage, totalEvents, showConfirmModal, selectedEvent } = this.state;
+        const {navigate} = this.props;
+        const {
+            events,
+            tags,
+            search,
+            currentPage,
+            eventsPerPage,
+            totalEvents,
+            showConfirmModal,
+            selectedEvent,
+            sidebarOpen
+        } = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
         const groupedEvents = this.groupEventsByLocation(events);
 
@@ -461,25 +486,19 @@ class MyEventsList extends Component {
                     eventTitle={selectedEvent?.title || ""}
                     user={this.context.user}
                 />
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Мои мероприятия"
+                    user={this.context.user}
+                    navigate={navigate}/>
 
-                <div className="header-bar">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
-                        <img src={EventHubLogo} alt="Logo" className="logo" />
-                    </div>
-                    <h1 className="friends-title">Мои мероприятия</h1>
-                    {/* Кнопка создания мероприятия */}
-                    <div className="login-button-container">
-                        {this.context.user && this.context.user.role === "ORGANIZER" && this.context.user.organizerAccredited && (
-                            <button className="create-button" onClick={() => navigate("/create-event")}>
-                                <span> + </span>
-                                Создать мероприятие
-                            </button>
-                        )}
-                        <ProfileDropdown navigate={navigate} />
-                    </div>
-                </div>
+                <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}></div>
+
+                <SideBar sidebarOpen={sidebarOpen} sidebarRef={this.sidebarRef} user={this.context.user}/>
+
                 <div className="content-panels">
-                    <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+                    <motion.div className="left-panel" initial={{opacity: 0, x: -50}} animate={{opacity: 1, x: 0}}
+                                transition={{duration: 0.5}}>
                         {/* Поиск */}
                         <div className="search-wrapper">
                             <input
@@ -492,18 +511,22 @@ class MyEventsList extends Component {
                                     if (e.key === "Enter") this.loadEvents(1, this.state.search);
                                 }}
                             />
-                            <button className="search-button-inside" onClick={() => this.loadEvents(1, this.state.search)} aria-label="Поиск">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                            <button className="search-button-inside"
+                                    onClick={() => this.loadEvents(1, this.state.search)} aria-label="Поиск">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
                                 </svg>
                             </button>
                         </div>
                         {/* Верхняя пагинация */}
-                        <Pagination totalPages={totalPages} currentPage={currentPage} handlePageClick={this.handlePageClick} />
+                        <Pagination totalPages={totalPages} currentPage={currentPage}
+                                    handlePageClick={this.handlePageClick}/>
 
                         {/* Карточки событий */}
                         {events.map((event) => (
-                            <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
+                            <motion.div key={event.id} className="event-card" whileHover={{scale: 1.02}}>
                                 {/*Кнопки в карточке в зависимости от роли*/}
                                 {this.context.user && this.context.user.role === "ORGANIZER" && (
                                     <div className="params-buttons">
@@ -541,7 +564,8 @@ class MyEventsList extends Component {
                                 </div>
                                 <div className="card-buttons">
                                     <div className="button-group">
-                                        <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
+                                        <button onClick={() => navigate(`/events/${event.id}`)}
+                                                className="event-button details">
                                             Подробнее
                                         </button>
                                         <button
@@ -556,19 +580,24 @@ class MyEventsList extends Component {
                                             Показать на карте
                                         </button>
                                     </div>
-                                    <div className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                    <div
+                                        className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
                                 </div>
                             </motion.div>
                         ))}
                         {/* Нижняя пагинация */}
-                        <Pagination totalPages={totalPages} currentPage={currentPage} handlePageClick={this.handlePageClick} />
+                        <Pagination totalPages={totalPages} currentPage={currentPage}
+                                    handlePageClick={this.handlePageClick}/>
 
                     </motion.div>
                     {/*Карта*/}
-                    <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{ height: "100%" }} maxBounds={[[-90, -180],[90, 180]]}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={18} />
-                            {events.length > 0 && <FitToAllMarkers events={events} />}
+                    <motion.div className="right-panel" initial={{opacity: 0, x: 50}} animate={{opacity: 1, x: 0}}
+                                transition={{duration: 0.5}}>
+                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{height: "100%"}}
+                                      maxBounds={[[-90, -180], [90, 180]]}>
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                       attribution="&copy; OpenStreetMap contributors" maxZoom={18}/>
+                            {events.length > 0 && <FitToAllMarkers events={events}/>}
                             {this.state.focusedEvent && this.state.focusedMarkerId && (
                                 <FlyToLocation
                                     position={this.state.focusedEvent.position}
@@ -598,9 +627,11 @@ class MyEventsList extends Component {
                                     const icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon
                                     const initialEventId = this.state.focusedEvent?.id;
                                     return (
-                                        <Marker key={key} position={[lat, lng]} icon={icon} ref={(ref) => (this.markerRefs.current[key] = ref)}>
+                                        <Marker key={key} position={[lat, lng]} icon={icon}
+                                                ref={(ref) => (this.markerRefs.current[key] = ref)}>
                                             <Popup>
-                                                <MultiEventPopup events={group} navigate={navigate} initialEventId={initialEventId}/>
+                                                <MultiEventPopup events={group} navigate={navigate}
+                                                                 initialEventId={initialEventId}/>
                                             </Popup>
                                         </Marker>
                                     );
@@ -614,8 +645,10 @@ class MyEventsList extends Component {
     }
 }
 
-{/* PopUp для сгрупированных событий */}
-function MultiEventPopup({ events, navigate, initialEventId }) {
+{/* PopUp для сгрупированных событий */
+}
+
+function MultiEventPopup({events, navigate, initialEventId}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
     const [page, setPage] = React.useState(Math.max(0, initialIndex));
     const total = events.length;
@@ -636,7 +669,8 @@ function MultiEventPopup({ events, navigate, initialEventId }) {
             </button>
             {total > 1 && (
                 <div className="popup-pagination">
-                    <button className="popup-page-button" onClick={() => setPage((p) => (p === 0 ? total - 1 : p - 1))}>{"<"}</button>
+                    <button className="popup-page-button"
+                            onClick={() => setPage((p) => (p === 0 ? total - 1 : p - 1))}>{"<"}</button>
                     <span>
                             {page + 1} / {total}
                         </span>
