@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/v1/users/members/{id}/friends")
+@RequestMapping(value = "/v1/friends/{id}/")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Друзья", description = "Управление друзьями участников")
 public class FriendController {
 
     private final FriendService friendService;
