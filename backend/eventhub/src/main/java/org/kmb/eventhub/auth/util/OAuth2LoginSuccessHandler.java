@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -20,7 +22,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        Authentication authentication) {
+                                        Authentication authentication) throws IOException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
@@ -28,5 +30,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
 
         response.addHeader(HttpHeaders.SET_COOKIE, customUserDetailsService.getCookieWithJwtToken(userDetails).toString());
+
+        response.sendRedirect("http://localhost:3000/");
     }
 }
