@@ -273,6 +273,24 @@ class Login extends React.Component {
             });
     };
 
+    handleGoogleLogin = () => {
+        fetch(`${API_BASE_URL}/oauth2/authorization/google`, {
+            method: 'GET',
+            credentials: 'include',
+        })
+        .then((response) => {
+            if (response.ok) {
+                // Перенаправление на страницу Google OAuth
+                window.location.href = response.url;
+            } else {
+                throw new Error('Ошибка при запросе Google OAuth');
+            }
+        })
+        .catch((error) => {
+            console.error('Ошибка:', error);
+        });
+    };
+
     renderLogin() {
         const {username, password, showConfirmModal, mainText} = this.state;
         const {navigate} = this.props;
@@ -307,7 +325,7 @@ class Login extends React.Component {
                     />
                     <button className="auth-button" type="submit">Войти</button>
                     <div className="custom-auth">
-                        <button type="button" class="login-with-google-btn" >
+                        <button type="submit-google" class="login-with-google-btn" onClick={this.handleGoogleLogin} >
                             Войти через Google
                         </button>
                         <button id="VKIDSDKAuthButton" class="VkIdWebSdk__button VkIdWebSdk__button_reset">
