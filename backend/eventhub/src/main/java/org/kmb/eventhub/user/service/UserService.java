@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+import static org.kmb.eventhub.Tables.MEMBER;
 import static org.kmb.eventhub.Tables.USER;
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -74,7 +75,25 @@ public class  UserService {
         return responseList;
     }
 
-    public ResponseList<Organizer> getOrgList(Integer page, Integer pageSize, String search) {
+    public ResponseList<Member> getMembersList(Integer page, Integer pageSize, String search) {
+        ResponseList<Member> responseList = new ResponseList<>();
+        Condition condition = trueCondition();
+        if (Objects.nonNull(search) && !search.trim().isEmpty()) {
+            condition = condition.and(MEMBER.LAST_NAME.containsIgnoreCase(search));
+            condition = condition.or(MEMBER.FIRST_NAME.containsIgnoreCase(search));
+            condition = condition.or(MEMBER.PATRONYMIC.containsIgnoreCase(search));
+        }
+
+        List<Member> list =  userRepository.fetchMembers(condition, page, pageSize);
+
+        responseList.setList(list);
+        responseList.setTotal(userRepository.countOrgs(condition));
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
+    }
+
+    public ResponseList<Organizer> getOrganizersList(Integer page, Integer pageSize, String search) {
         ResponseList<Organizer> responseList = new ResponseList<>();
         Condition condition = trueCondition();
         if (Objects.nonNull(search) && !search.trim().isEmpty()) {
@@ -93,7 +112,7 @@ public class  UserService {
         return responseList;
     }
 
-    public ResponseList<User> getModerList(Integer page, Integer pageSize,String search) {
+    public ResponseList<User> getModeratorsList(Integer page, Integer pageSize,String search) {
 
         ResponseList<User> responseList = new ResponseList<>();
 

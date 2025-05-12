@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.kmb.eventhub.enums.RoleType;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.user.dto.UserResponseDTO;
@@ -29,6 +30,17 @@ public class UserRepository {
                 .fetchInto(UserResponseDTO.class);
     }
 
+    public List<Member> fetchMembers (Condition condition, Integer page, Integer pageSize) {
+        return dslContext
+                .select(MEMBER.fields())
+                .from(MEMBER)
+                .join(USER).on(MEMBER.ID.eq(USER.ID))
+                .where(condition)
+                .and(USER.IS_ACTIVE.eq(true))
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchInto(Member.class);
+    }
 
     public List<Organizer> fetchOrganizers (Condition condition, Integer page, Integer pageSize) {
         return dslContext

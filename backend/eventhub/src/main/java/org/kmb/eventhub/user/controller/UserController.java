@@ -109,6 +109,17 @@ public class UserController {
         return userService.getModerator(id);
     }
 
+    @Operation(summary = "Получить список всех участников.",
+            description = "Возвращает всех участников.")
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/members")
+    public ResponseList<Member> getAllMembers(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search) {
+        return userService.getMembersList(page, pageSize, search);
+    }
+
     @Operation(summary = "Получить список всех организаторов.",
             description = "Возвращает всех организаторов.")
     @ResponseStatus(value = HttpStatus.OK)
@@ -117,7 +128,7 @@ public class UserController {
                      @RequestParam(value = "page", defaultValue = "1") Integer page,
                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                      @RequestParam(value = "search", required = false) String search) {
-        return userService.getOrgList(page, pageSize, search);
+        return userService.getOrganizersList(page, pageSize, search);
     }
 
     @Operation(summary = "Получить список всех модераторов.",
@@ -128,7 +139,7 @@ public class UserController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "search", required = false) String search) {
-        return userService.getModerList(page, pageSize, search);
+        return userService.getModeratorsList(page, pageSize, search);
     }
 
     @Operation(summary = "Удалить пользователя.",

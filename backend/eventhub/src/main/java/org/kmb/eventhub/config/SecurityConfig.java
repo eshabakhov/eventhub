@@ -40,14 +40,17 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final String V1_USERS = "/v1/users";
-    private static final String V1_USERS_ID = "/v1/users/{id}";
+    private static final String V1_USERS_ID =  "/v1/users/{id}";
 
     private static final String V1_EVENTS = "/v1/events";
     private static final String V1_EVENTS_ID = "/v1/events/{id}";
     private static final String V1_TAGS = "/v1/tags";
 
+    private static final String V1_USERS_ORGANIZERS = "/v1/users/organizers";
     private static final String V1_USERS_ORGANIZERS_ID = "/v1/users/organizers/{id}";
+    private static final String V1_USERS_MODERATORS = "/v1/users/moderators";
     private static final String V1_USERS_MODERATORS_ID = "/v1/users/moderators/{id}";
+    private static final String V1_USERS_MEMBERS = "/v1/users/members";
     private static final String V1_USERS_MEMBERS_ID = "/v1/users/members/{id}";
 
     private static final String V1_USERS_ORGANIZERS_ID_EVENTS = "/v1/users/organizers/{id}/events";
@@ -91,21 +94,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**").hasRole(RoleEnum.MODERATOR.name())
 
-                        .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
-                        .requestMatchers(HttpMethod.POST, V1_USERS).permitAll()
-
-                        .requestMatchers(HttpMethod.GET, V1_USERS_ID).permitAll()
-                        .requestMatchers(HttpMethod.PUT, V1_USERS_ID).permitAll()
                         .requestMatchers(HttpMethod.DELETE, V1_USERS_ID).hasRole(RoleEnum.MODERATOR.name())
 
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.PUT, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.PUT, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.PUT, V1_USERS_MEMBERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
 
@@ -117,10 +116,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
 
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers("/auth/login").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
+                        .requestMatchers(HttpMethod.POST, V1_USERS).permitAll()
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ID).permitAll()
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_ID).permitAll()
+
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_EVENTS_ID).permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
