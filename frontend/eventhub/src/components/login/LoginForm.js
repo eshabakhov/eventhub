@@ -356,7 +356,7 @@ class Login extends React.Component {
                                 </div>
                             </div>
                         </button> */}
-                        <a class="yandex-oauth-btn" onClick={this.handleGoogleLogin}>
+                        <a class="yandex-oauth-btn" onClick={this.handleYandexLogin}>
                         <span class="yandex-icon"></span>
                             Войти с Яндекс ID
                         </a>
