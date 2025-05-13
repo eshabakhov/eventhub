@@ -12,10 +12,16 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.Objects;
+
 
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=<>?";
 
     private final UserService userService;
 
@@ -23,20 +29,46 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User user = super.loadUser(request);
 
-        String email = user.getAttribute("email");
-
-        try {
-            userService.getByEmail(email);
-        } catch (UserNotFoundException e) {
-            UserDTO newUserDTO = new UserDTO();
-            newUserDTO.setUsername(email);
-            newUserDTO.setEmail(email);
-            newUserDTO.setDisplayName(user.getAttribute("name"));
-            newUserDTO.setRole(RoleEnum.MEMBER);
-            newUserDTO.setPassword(new BCryptPasswordEncoder().encode("Pa55w0rd"));
-            userService.create(newUserDTO);
+        String email = "";
+        if (Objects.nonNull(user.getAttribute("email"))) {
+            email = user.getAttribute("email").toString();
+            try {
+                userService.getByEmail(email);
+            } catch (UserNotFoundException e) {
+                UserDTO newUserDTO = new UserDTO();
+                newUserDTO.setUsername(email);
+                newUserDTO.setEmail(email);
+                newUserDTO.setDisplayName(user.getAttribute("name"));
+                newUserDTO.setRole(RoleEnum.MEMBER);
+                newUserDTO.setPassword(new BCryptPasswordEncoder().encode(generateRandomPassword(12)));
+                userService.create(newUserDTO);
+            }
         }
-
+        if (Objects.nonNull(user.getAttribute("emails"))) {
+            List<String> emailList = user.getAttribute("emails");
+            email = emailList.get(0);
+            try {
+                userService.getByEmail(email);
+            } catch (UserNotFoundException e) {
+                UserDTO newUserDTO = new UserDTO();
+                newUserDTO.setUsername(email);
+                newUserDTO.setEmail(email);
+                newUserDTO.setDisplayName(user.getAttribute("real_name"));
+                newUserDTO.setRole(RoleEnum.MEMBER);
+                newUserDTO.setPassword(new BCryptPasswordEncoder().encode(generateRandomPassword(12)));
+                userService.create(newUserDTO);
+            }
+        }
         return user;
+    }
+
+    private static String generateRandomPassword(int length) {
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            password.append(CHARACTERS.charAt(index));
+        }
+        return password.toString();
     }
 }

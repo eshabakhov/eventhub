@@ -12,6 +12,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -25,12 +27,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
 
-        UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
-
-        response.addHeader(HttpHeaders.SET_COOKIE, customUserDetailsService.getCookieWithJwtToken(userDetails).toString());
-
-        response.sendRedirect("http://localhost:3000/");
+        if (Objects.nonNull(oAuth2User.getAttribute("email"))) {
+            String email = oAuth2User.getAttribute("email");
+            UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
+            response.addHeader(HttpHeaders.SET_COOKIE, customUserDetailsService.getCookieWithJwtToken(userDetails).toString());
+            response.sendRedirect("http://localhost:3000/");
+        }
+        if (Objects.nonNull(oAuth2User.getAttribute("emails"))) {
+            List<String> emailList = oAuth2User.getAttribute("emails");
+            String email = emailList.get(0);
+            UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
+            response.addHeader(HttpHeaders.SET_COOKIE, customUserDetailsService.getCookieWithJwtToken(userDetails).toString());
+            response.sendRedirect("http://localhost:3000/");
+        }
     }
 }

@@ -277,6 +277,10 @@ class Login extends React.Component {
         window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
 
+    handleYandexLogin = () => {
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/yandex`;
+    };
+
     renderLogin() {
         const {username, password, showConfirmModal, mainText} = this.state;
         const {navigate} = this.props;
@@ -288,10 +292,30 @@ class Login extends React.Component {
                     okText="Ок"
                     onClose={this.handleCloseModal}
                 />
-                <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
+                <svg width="250" height="60" xmlns="http://www.w3.org/2000/svg" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#1774c5" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#4dc3ff" stopOpacity="1" />
+                    </linearGradient>
+                </defs>
+                <text
+                    x="50%"
+                    y="50%"
+                    fontFamily="Segoe UI, sans-serif"
+                    fontSize="30"
+                    fontWeight="bold"
+                    fill="url(#grad1)"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                >
+                    eventhub
+                </text>
+                </svg>
+                {/* <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
                     <img src={EventHubLogo} alt="Logo" className="logo"/>
                 </div>
-                <h2>Вход</h2>
+                <h2>Вход</h2> */}
                 <form onSubmit={this.handleSubmit}>
                     <input
                         type="text"
@@ -311,10 +335,14 @@ class Login extends React.Component {
                     />
                     <button className="auth-button" type="submit">Войти</button>
                     <div className="custom-auth">
-                        <button type="submit-google" class="login-with-google-btn" onClick={this.handleGoogleLogin} >
+                        <a class="login-with-google-btn" onClick={this.handleGoogleLogin}>
+                        <span class="google-icon"></span>
                             Войти через Google
-                        </button>
-                        <button id="VKIDSDKAuthButton" class="VkIdWebSdk__button VkIdWebSdk__button_reset">
+                        </a>
+                        {/* <button type="submit-google" class="login-with-google-btn" onClick={this.handleGoogleLogin} >
+                            Войти через Google
+                        </button> */}
+                        {/* <button id="VKIDSDKAuthButton" class="VkIdWebSdk__button VkIdWebSdk__button_reset">
                             <div class="VkIdWebSdk__button_container">
                                 <div class="VkIdWebSdk__button_icon">
                                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -327,7 +355,11 @@ class Login extends React.Component {
                                     Войти с VK ID
                                 </div>
                             </div>
-                        </button>
+                        </button> */}
+                        <a class="yandex-oauth-btn" onClick={this.handleGoogleLogin}>
+                        <span class="yandex-icon"></span>
+                            Войти с Яндекс ID
+                        </a>
                     </div>
                 </form>
                 <p onClick={this.handleToggle} className="toggle-link">
