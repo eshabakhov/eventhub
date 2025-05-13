@@ -103,7 +103,7 @@ public class JwtUtil {
                 .maxAge((int) (jwtProperties.getExpirationMs() / 1000))
                 .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh", refreshToken)
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")
