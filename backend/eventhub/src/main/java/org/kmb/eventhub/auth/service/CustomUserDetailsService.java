@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -106,16 +107,27 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return authResponse;
     }
-    public ResponseCookie getCookieWithJwtToken(UserDetails userDetails) {
 
-        final String token = jwtUtil.generateToken(userDetails);
+    public Map<String, ResponseCookie> getAuthCookies(UserDetails userDetails) {
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        return ResponseCookie.from("token", token)
+        ResponseCookie accessCookie = ResponseCookie.from("token", accessToken)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge((int) (jwtProperties.getExpirationMs() / 1000))
                 .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge((int) (jwtProperties.getRefreshExpirationMs() / 1000))
+                .build();
+
+        return Map.of("access", accessCookie, "refresh", refreshCookie);
     }
 }

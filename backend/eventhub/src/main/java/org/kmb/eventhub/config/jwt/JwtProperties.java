@@ -9,5 +9,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
     private String secret;
-    private long expirationMs = 1000L * 60 * 60 * 10; // по умолчанию 10 часов
+    private long expirationMs = 1000L * 10; // access token expiration
+    private long refreshExpirationMs = 1000L * 60 * 60 * 24; // refresh token expiration (например, 24 часа)
 }
+
