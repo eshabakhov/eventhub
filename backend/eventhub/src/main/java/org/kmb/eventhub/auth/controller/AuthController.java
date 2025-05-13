@@ -6,7 +6,9 @@ import org.kmb.eventhub.auth.dto.AuthRequest;
 import org.kmb.eventhub.auth.dto.AuthResponse;
 import org.kmb.eventhub.auth.service.CustomUserDetailsService;
 import org.kmb.eventhub.auth.exception.InvalidCredentialsException;
+import org.kmb.eventhub.auth.service.LoginAttemptService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -26,17 +28,29 @@ public class AuthController {
 
     private CustomUserDetailsService userDetailsService;
 
+    private LoginAttemptService loginAttemptService;
+
     @PostMapping("/login")
     public void login(@RequestBody AuthRequest request, HttpServletResponse response) {
+        String username = request.getUsername();
+
+        if (loginAttemptService.isBlocked(username)) {
+            response.setStatus(HttpStatus.LOCKED.value());
+            return;
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
         } catch (AuthenticationException e) {
+            loginAttemptService.loginFailed(username);
             throw new InvalidCredentialsException("Invalid credentials");
         }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
 
+        loginAttemptService.resetAttempts(username);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         response.addHeader(HttpHeaders.SET_COOKIE, userDetailsService.getCookieWithJwtToken(userDetails).toString());
     }
 

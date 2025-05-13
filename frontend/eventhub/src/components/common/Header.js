@@ -1,7 +1,7 @@
-﻿import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
+﻿import ProfileDropdown from "../profile/ProfileDropdown";
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import Logo from "./Logo";
 import "../../css/Header.css";
 
 const Header = ({onBurgerButtonClick, title, user}) => {
@@ -12,9 +12,10 @@ const Header = ({onBurgerButtonClick, title, user}) => {
                 <div className="burger-button" onClick={onBurgerButtonClick}>
                     <i className="bi bi-list"></i>
                 </div>
-                <div className="top-logo" onClick={() => navigate("/events")}>
+                {/* <div className="top-logo" onClick={() => navigate("/events")}>
                     <img src={EventHubLogo} alt="Logo" className="logo"/>
-                </div>
+                </div> */}
+                <Logo/>
             </div>
             <h1 className="header-title">{title}</h1>
             <div className="login-button-container">

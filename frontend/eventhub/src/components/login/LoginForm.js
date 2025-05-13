@@ -3,9 +3,9 @@ import "../../css/AuthPage.css";
 import UserContext from "../../UserContext";
 import {Navigate} from "react-router";
 import API_BASE_URL from "../../config";
-import EventHubLogo from "../../img/eventhub.png";
 import {useNavigate, useLocation} from "react-router-dom";
 import ConfirmModal from "../common/ConfirmModal";
+import Logo from "../common/Logo"
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => {
@@ -121,6 +121,7 @@ class Login extends React.Component {
                 body: JSON.stringify({username, password})
             })
                 .then(res => {
+                    if (res.status == 423) throw new Error("Превышен лимит некорректных попыток входа. Попробуйте заново через 5 минут.");
                     if (!res.ok) throw new Error("Неверные учетные данные");
                 })
                 .then(data => {
@@ -130,7 +131,7 @@ class Login extends React.Component {
                     console.error(err);
                     this.setState({
                         showConfirmModal: true,
-                        mainText: "Ошибка при входе"
+                        mainText: err.message
                     });
                 });
 
@@ -292,26 +293,7 @@ class Login extends React.Component {
                     okText="Ок"
                     onClose={this.handleCloseModal}
                 />
-                <svg width="250" height="60" xmlns="http://www.w3.org/2000/svg" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
-                <defs>
-                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#1774c5" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#4dc3ff" stopOpacity="1" />
-                    </linearGradient>
-                </defs>
-                <text
-                    x="50%"
-                    y="50%"
-                    fontFamily="Segoe UI, sans-serif"
-                    fontSize="30"
-                    fontWeight="bold"
-                    fill="url(#grad1)"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                >
-                    eventhub
-                </text>
-                </svg>
+                <Logo/>
                 {/* <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
                     <img src={EventHubLogo} alt="Logo" className="logo"/>
                 </div>
