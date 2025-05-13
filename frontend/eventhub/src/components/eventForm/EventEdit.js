@@ -382,28 +382,28 @@ class EventEdit extends React.Component {
 
                 <div className="event-edit-container">
                     <div className="event-edit-card">
-                        <form onSubmit={this.handleSubmit}>
+                        <label className="event-edit-label">
+                            Название:
+                            <input className="event-edit-input" type="text" name="title" value={title}
+                                   onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Описание:
+                            <textarea className="event-edit-input" name="description" value={description}
+                                      onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Краткое описание:
+                            <input className="event-edit-input" type="text" name="shortDescription"
+                                   value={shortDescription} onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Локация:
+                            <input className="event-edit-input" type="text" name="location" value={location}
+                                   onChange={this.handleChange}/>
+                        </label>
 
-                            <label className="event-edit-label">
-                                Название:
-                                <input className="event-edit-input" type="text" name="title" value={title}
-                                       onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Описание:
-                                <textarea className="event-edit-input" name="description" value={description}
-                                          onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Краткое описание:
-                                <input className="event-edit-input" type="text" name="shortDescription"
-                                       value={shortDescription} onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Локация:
-                                <input className="event-edit-input" type="text" name="location" value={location}
-                                       onChange={this.handleChange}/>
-                            </label>
+                        <div className="event-edit-row">
                             <label className="event-label">
                                 Дата начала:
                                 <input
@@ -441,101 +441,102 @@ class EventEdit extends React.Component {
                                     <option value="ONLINE">Онлайн</option>
                                 </select>
                             </label>
+                        </div>
 
-                            {/* Поле для добавления тегов */}
-                            <label className="event-edit-label">
-                                Теги:
-                                <div className="event-edit-input">
-                                    <input
-                                        type="text"
-                                        className="event-input"
-                                        value={newTag}
-                                        onChange={this.handleTagInputChange}
-                                        placeholder="Добавьте тег"
-                                    />
-                                    <button
-                                        className="event-edit-button"
-                                        onClick={this.handleAddTag}
-                                    >
-                                        Добавить
-                                    </button>
-                                </div>
-                                <div className="tags-container">
-                                    {tags.map((tag, index) => (
-                                        <span key={tag.id || index} className="tag">
-                                                {tag.name || tag}
-                                            <button
-                                                type="button"
-                                                className="tag-remove"
-                                                onClick={() => this.handleRemoveTag(tag)}
-                                            >
-                                                    ×
-                                                </button>
-                                            </span>
-                                    ))}
-                                </div>
-                            </label>
-
-
-                            <div>
+                        {/* Поле для добавления тегов */}
+                        <label className="event-edit-label">
+                            Теги:
+                            <div className="tags-input-container">
                                 <input
-                                    type="file"
-                                    accept="*/*"
-                                    style={{display: "none"}}
-                                    ref={(ref) => (this.fileInputRef = ref)}
-                                    onChange={this.handleFileChange}
+                                    type="text"
+                                    className="event-input tag-input"
+                                    value={newTag}
+                                    onChange={this.handleTagInputChange}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter')
+                                            this.handleAddTag(e);
+                                    }}
+                                    placeholder="Добавьте тег"
                                 />
-                                <button
-                                    type="button"
-                                    className="event-edit-button"
-                                    onClick={this.handleSelectFile}
-                                >
-                                    Прикрепить файл
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="event-edit-button"
-                                    onClick={this.handleUploadFile}
-                                    disabled={!this.state.selectedFile}
-                                >
-                                    ⬆️ Загрузить
-                                </button>
-                                {this.state.selectedFile && (
-                                    <div>
-                                        Файл: <strong>{this.state.selectedFile.name}</strong>
-                                    </div>
-                                )}
+                                <div className="add-tag-button">
+                                    <i onClick={this.handleAddTag} className="bi bi-check-circle-fill"></i>
+                                </div>
                             </div>
-
-                            {/* Поле для добавления файлов */}
-                            <label className="event-label">
-                                <div className="files-container">
-                                    {files.map((file, index) => (
-                                        <span key={file.fileId || index} className="file">
-                                                {file.fileName || file}
-                                            <button
-                                                type="button"
-                                                className="file-remove"
-                                                onClick={() => this.handleRemoveFile(file)}
-                                            >
+                            <div className="tags-container">
+                                {tags.map((tag, index) => (
+                                    <span key={tag.id || index} className="tag">
+                                                {tag.name || tag}
+                                        <button
+                                            type="button"
+                                            className="tag-remove"
+                                            onClick={() => this.handleRemoveTag(tag)}
+                                        >
                                                     ×
                                                 </button>
                                             </span>
-                                    ))}
-                                </div>
-                            </label>
-
-                            <div className="event-edit-card-buttons">
-                                <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">
-                                    Отмена
-                                </button>
-
-                                <button type="submit" className="event-edit-button save">
-                                    Сохранить
-                                </button>
+                                ))}
                             </div>
-                        </form>
+                        </label>
+
+
+                        <div>
+                            <input
+                                type="file"
+                                accept="*/*"
+                                style={{display: "none"}}
+                                ref={(ref) => (this.fileInputRef = ref)}
+                                onChange={this.handleFileChange}
+                            />
+                            <button
+                                type="button"
+                                className="event-edit-button"
+                                onClick={this.handleSelectFile}
+                            >
+                                <i className="bi bi-paperclip"></i> Прикрепить файл
+                            </button>
+
+                            <button
+                                type="button"
+                                className="event-edit-button"
+                                onClick={this.handleUploadFile}
+                                disabled={!this.state.selectedFile}
+                            ><i className="bi bi-upload"></i>   Загрузить
+                            </button>
+                            {this.state.selectedFile && (
+                                <div>
+                                    Файл: <strong>{this.state.selectedFile.name}</strong>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Поле для добавления файлов */}
+                        <label className="event-label">
+                            <div className="files-container">
+                                {files.map((file, index) => (
+                                    <span key={file.fileId || index} className="file">
+                                        <i className="bi bi-file-earmark-fill"></i>
+                                         {file.fileName || file}
+                                        <button
+                                            type="button"
+                                            className="file-remove"
+                                            onClick={() => this.handleRemoveFile(file)}
+                                        >
+                                                    ×
+                                                </button>
+                                            </span>
+                                ))}
+                            </div>
+                        </label>
+
+                        <div className="event-edit-card-buttons">
+                            <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">
+                                Отмена
+                            </button>
+
+                            <button onClick={this.handleSubmit} className="event-edit-button save">
+                                Сохранить
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

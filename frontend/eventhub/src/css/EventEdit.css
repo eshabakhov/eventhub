@@ -39,6 +39,7 @@
         box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 2px 4px rgba(0, 0, 0, .25);
     }
 }
+
 .save {
     background-color: #3b82f6;
 }
@@ -49,8 +50,6 @@
     border-width: 1px;
     border-style: solid;
 }
-
-
 
 .event-edit-input {
     width: 100%;
@@ -95,21 +94,23 @@ textarea.event-edit {
 /* Стили для тегов */
 .tags-input-container {
     display: flex;
-    gap: 8px;
     margin-bottom: 8px;
 }
 
 .add-tag-button {
-    padding: 8px 12px;
-    background-color: #4CAF50;
-    color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
+    position: relative;
+    top: 0.5rem;
+    right: 1rem;
 }
-
 .add-tag-button:hover {
-    background-color: #45a049;
+    color: green;
+}
+.tag-input {
+    margin-bottom : 0;
+    width: 100%;
+    margin-right: -10px;
 }
 
 .tags-container {
@@ -176,28 +177,8 @@ textarea.event-edit {
     align-items: center;
     display: flex;
 }
-
-.event-edit-header {
-    align-self: flex-start;
-    margin-bottom: 10px;
-    height: 100%;
-    width: 100%;
+.event-edit-row {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
 }
-.event-edit-header:hover{
-    background-color: #f0f0f0;
-    cursor: pointer;
-}
-.back-button {
-    background-color: transparent;
-    border: none;
-    color: gray;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 5px 10px;
-    transition: color 0.2s;
-}
-
-
-
-
-
