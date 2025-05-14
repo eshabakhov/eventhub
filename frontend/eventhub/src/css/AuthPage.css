@@ -1,4 +1,15 @@
-﻿.auth-container {
+﻿.logo-icon {
+  margin-right: 10px;
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.auth-container {
   max-width: 500px;
   margin: 80px auto;
   padding: 2rem;
@@ -19,7 +30,7 @@
   gap: 0.75rem;
 }
 
-.auth-container .custom-auth {
+.auth-container .custom-auth  {
   display: flex;
   flex-direction: row;
   gap: 0.75rem;

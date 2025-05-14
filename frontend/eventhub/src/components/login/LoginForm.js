@@ -6,6 +6,7 @@ import API_BASE_URL from "../../config";
 import {useNavigate, useLocation} from "react-router-dom";
 import ConfirmModal from "../common/ConfirmModal";
 import Logo from "../common/Logo"
+import LogoImage from "../../img/EvenHubLogoWithoutTitle.png"
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => {
@@ -287,6 +288,9 @@ class Login extends React.Component {
         const {navigate} = this.props;
         return (
             <>
+                <div>
+                    <img src={LogoImage} alt='eventhub' className="logo-icon"/>
+                </div>
                 <ConfirmModal
                     isOpen={showConfirmModal}
                     mainText={mainText}
