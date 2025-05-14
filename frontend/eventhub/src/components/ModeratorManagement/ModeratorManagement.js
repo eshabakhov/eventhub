@@ -5,10 +5,10 @@ import DeleteIcon from "../../img/delete.png";
 import "../../css/Accreditation.css";
 import {useNavigate} from "react-router-dom";
 import UserContext from "../../UserContext";
-import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import ConfirmModal from "../common/ConfirmModal";
+import api from "../common/AxiosInstance";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -51,23 +51,22 @@ class ModeratorsPage extends Component {
         }
     };
 
-    loadModerators = () => {
-        fetch(`${API_BASE_URL}/v1/users/moderators`, {
-            method: "GET",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-        })
-            .then(res => res.json())
-            .then(data => {
-                const loadedModerators = data.list.map((e) => ({
-                    id: e.id,
-                    displayName: e.displayName,
-                    email: e.email,
-                    userName: e.username
-                }))
-                this.setState({moderators: loadedModerators});
-            })
-            .catch(err => console.error("Ошибка загрузки модераторов:", err));
+    loadModerators = async () => {
+        try {
+            const response = await api.get(`/v1/users/moderators`);
+            const data = response.data;
+
+            const loadedModerators = data.list.map((e) => ({
+                id: e.id,
+                displayName: e.displayName,
+                email: e.email,
+                userName: e.username
+            }))
+
+            this.setState({moderators: loadedModerators});
+        }  catch (err) {
+            console.error("Ошибка загрузки модераторов:", err);
+        }
     };
 
     handleEdit = (moderatorId) => {
@@ -83,19 +82,19 @@ class ModeratorsPage extends Component {
         });
     };
 
-    handleDelete = (moderatorId) => {
-        fetch(`${API_BASE_URL}/v1/users/${moderatorId}`, {
-            method: "DELETE",
-            credentials: "include",
-        })
-            .then(res => {
-                if (res.ok) this.loadModerators();
-                else alert("Ошибка удаления модератора");
-            })
-            .catch(err => console.error("Ошибка удаления модератора:", err))
-            .finally(() => {
-                this.handleCloseModal();
-            });
+    handleDelete = async (moderatorId) => {
+        try {
+            const response = await api.delete(`/v1/users/${moderatorId}`);
+            if (response.status === 204) {
+                await this.loadModerators();
+            } else {
+                alert("Ошибка удаления модератора");
+            }
+        } catch (error) {
+            console.error("Ошибка удаления модератора:", error)
+        } finally {
+            this.handleCloseModal();
+        }
     };
 
     handleCreate = () => {

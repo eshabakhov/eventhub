@@ -13,6 +13,7 @@ import API_BASE_URL from "../../config";
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import CurrentUser from "../common/CurrentUser";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -168,7 +169,7 @@ class EventsPage extends Component {
     sidebarRef = React.createRef();
 
     componentDidMount() {
-        this.checkAuth();
+        CurrentUser.fetchCurrentUser(this.context.setUser);
         this.loadEvents(1, this.state.search);
         this.loadTags();
         document.addEventListener("mousedown", this.handleClickOutside);
@@ -277,46 +278,46 @@ class EventsPage extends Component {
     }
 
     checkAuth = () => {
-        const {user, setUser} = this.context;
-
-        // Если пользователь уже есть в контексте, пропускаем
-        //if (user && user.id) return;
-
-        fetch(`${API_BASE_URL}/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("Не авторизован");
-                return res.json();
-            })
-            .then((data) => {
-                const ctx = this.context;
-                ctx.setUser({
-                    id: data.user.id,
-                    role: data.user.role,
-                    email: data.user.email,
-                    username: data.user.username,
-                    displayName: data.user.displayName,
-                    loggedIn: true,
-                    memberLastName: data.customUser.lastName,
-                    memberFirstName: data.customUser.firstName,
-                    memberPatronymic: data.customUser.patronymic,
-                    memberBirthDate: data.customUser.birthDate,
-                    memberBirthCity: data.customUser.birthCity,
-                    mebmerPrivacy: data.customUser.privacy,
-                    organizerName: data.customUser.name,
-                    organizerDescription: data.customUser.description,
-                    organizerIndustry: data.customUser.industry,
-                    organizerAddress: data.customUser.address,
-                    organizerAccredited: data.customUser.isAccredited,
-                    moderatorIsAdmin: data.customUser.isAdmin
-                    //token: data.token
-                }); // сохраняем в context + localStorage
-            })
-            .catch((err) => {
-                console.log("Ошибка авторизации:", err.message);
-            });
+        // const {user, setUser} = this.context;
+        //
+        // // Если пользователь уже есть в контексте, пропускаем
+        // //if (user && user.id) return;
+        //
+        // fetch(`${API_BASE_URL}/auth/me`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        // })
+        //     .then((res) => {
+        //         if (!res.ok) throw new Error("Не авторизован");
+        //         return res.json();
+        //     })
+        //     .then((data) => {
+        //         const ctx = this.context;
+        //         ctx.setUser({
+        //             id: data.user.id,
+        //             role: data.user.role,
+        //             email: data.user.email,
+        //             username: data.user.username,
+        //             displayName: data.user.displayName,
+        //             loggedIn: true,
+        //             memberLastName: data.customUser.lastName,
+        //             memberFirstName: data.customUser.firstName,
+        //             memberPatronymic: data.customUser.patronymic,
+        //             memberBirthDate: data.customUser.birthDate,
+        //             memberBirthCity: data.customUser.birthCity,
+        //             mebmerPrivacy: data.customUser.privacy,
+        //             organizerName: data.customUser.name,
+        //             organizerDescription: data.customUser.description,
+        //             organizerIndustry: data.customUser.industry,
+        //             organizerAddress: data.customUser.address,
+        //             organizerAccredited: data.customUser.isAccredited,
+        //             moderatorIsAdmin: data.customUser.isAdmin
+        //             //token: data.token
+        //         }); // сохраняем в context + localStorage
+        //     })
+        //     .catch((err) => {
+        //         console.log("Ошибка авторизации:", err.message);
+        //     });
     };
 
     render() {

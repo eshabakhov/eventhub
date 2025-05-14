@@ -13,26 +13,15 @@ import AccreditationPage from "./components/accreditation/AccreditationPage";
 import EventDetailsPage from "./components/events/EventDetailsPage";
 import EventEditForm from "./components/eventForm/EventEdit";
 import ModeratorsPage from "./components/ModeratorManagement/ModeratorManagement";
-import ModeratorManagement from "./components/ModeratorManagement/ModeratorManagement";
 import ModeratorCreate from "./components/ModeratorManagement/ModeratorCreate";
 
-const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-        
-    }
-
-  }
   
   render() {
     return (
       <div>
         <Router>
-          <UserProvider value={{ user: user}}>
+          <UserProvider>
             <Routes>
               <Route path="/" element={<Navigate to="/events" />} />
               <Route path='/login' exact={true} element={<LoginForm/>}/>
@@ -52,35 +41,6 @@ class App extends React.Component {
         </Router>
       </div>
     )
-  }
-
-  deleteUser(id) {
-    this.setState({
-      users: this.state.users.filter((el) => el.id !== id)
-    })
-  }
-
-  editUser(user) {
-    let allUsers = this.state.users
-    allUsers[user.id - 1] = user
-
-    this.setState({ users: [] }, () => {
-      this.setState({ users: [...allUsers] })
-    })
-  }
-
-  addUser(user) {
-    const id = this.state.users.length + 1
-    this.setState({ 
-      users: [...this.state.users, {id, ...user}]
-    })
-  }
-
-  mapStateToProps(state) {
-    const {userReducer} = state;
-    return {
-        users: userReducer.users
-    }
   }
 }
 
