@@ -3,10 +3,10 @@ import React, {Component} from "react";
 import {motion} from "framer-motion";
 import "../../css/Accreditation.css";
 import UserContext from "../../UserContext";
-import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import ConfirmModal from "../common/ConfirmModal";
+import api from '../common/AxiosInstance';
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -59,33 +59,31 @@ class AccreditationPage extends Component {
     };
 
     // Загрузка организаций
-    loadOrgs = (page, search = "") => {
+    loadOrgs = async (page, search = "") => {
         const {orgsPerPage} = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-        const currentUser = this.context.user
-        let url = `${API_BASE_URL}/v1/users/organizers?${searchParam}&page=${page}&pageSize=${orgsPerPage}`;
-        fetch(url, {
-            method: "GET",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                const loadedOrgs = data.list.map((e) => ({
-                    id: e.id,
-                    name: e.name,
-                    description: e.description,
-                    industry: e.industry,
-                    address: e.address,
-                    isAccredited: e.isAccredited,
-                }));
-                this.setState({
-                    orgs: loadedOrgs,
-                    currentPage: page,
-                    totalOrgs: data.total || 0,
-                });
-            })
-            .catch((err) => console.error("Ошибка при загрузке организаций:", err));
+
+        try {
+            const response = await api.get(`/v1/users/organizers?page=${page}&pageSize=${orgsPerPage}${searchParam}`);
+            const data = response.data;
+
+            const loadedOrgs = data.list.map((e) => ({
+                id: e.id,
+                name: e.name,
+                description: e.description,
+                industry: e.industry,
+                address: e.address,
+                isAccredited: e.isAccredited,
+            }));
+
+            this.setState({
+                orgs: loadedOrgs,
+                currentPage: page,
+                totalOrgs: data.total || 0,
+            });
+        } catch (err) {
+            console.error("Ошибка при загрузке организаций:", err);
+        }
     };
 
     // Обработка изменения поискового запроса
@@ -119,48 +117,31 @@ class AccreditationPage extends Component {
         }
     };
 
-    cancelAccreditation = (selectedOrg, user) => {
-        const updatedData = {"isAccredited": "false"};
-        fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify(updatedData)
-        })
-            .then((res) => {
-                if (res.ok) {
-                    // Обновляем список
-                    this.loadOrgs(this.state.currentPage, this.state.search);
-                } else {
-                    console.error("Ошибка при отмене аккредитации");
-                }
-            })
-            .catch((err) => console.error("Ошибка при отмене аккредитации", err))
-            .finally(() => {
-                this.handleCloseModal();
+    cancelAccreditation = async (selectedOrg) => {
+        try {
+            await api.put(`/v1/users/organizers/${selectedOrg.id}`, {
+                isAccredited: "false",
             });
-    }
-    approveAccreditation = (selectedOrg, user) => {
-        const updatedData = {"isAccredited": "true"};
-        fetch(`${API_BASE_URL}/v1/users/organizers/${selectedOrg.id}`, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify(updatedData)
-        })
-            .then((res) => {
-                if (res.ok) {
-                    // Обновляем список
-                    this.loadOrgs(this.state.currentPage, this.state.search);
-                } else {
-                    console.error("Ошибка при добавлении аккредитации");
-                }
-            })
-            .catch((err) => console.error("Ошибка при добавлении аккредитации", err))
-            .finally(() => {
-                this.handleCloseModal();
+            this.loadOrgs(this.state.currentPage, this.state.search);
+        } catch (err) {
+            console.error("Ошибка при отмене аккредитации", err);
+        } finally {
+            this.handleCloseModal();
+        }
+    };
+
+    approveAccreditation = async (selectedOrg) => {
+        try {
+            await api.put(`/v1/users/organizers/${selectedOrg.id}`, {
+                isAccredited: "true",
             });
-    }
+            this.loadOrgs(this.state.currentPage, this.state.search);
+        } catch (err) {
+            console.error("Ошибка при добавлении аккредитации", err);
+        } finally {
+            this.handleCloseModal();
+        }
+    };
 
     // Обработка перехода на другую страницу
     handlePageClick = (pageNumber) => {

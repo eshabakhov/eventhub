@@ -2,16 +2,14 @@ package org.kmb.eventhub.event.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
-import org.kmb.eventhub.tag.dto.TagDTO;
 import org.kmb.eventhub.event.enums.EventFormat;
 import org.kmb.eventhub.enums.FormatType;
 import org.kmb.eventhub.common.exception.AlreadyExistsException;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
 import org.kmb.eventhub.common.exception.MissingFieldException;
-import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.event.mapper.EventMapper;
 import org.kmb.eventhub.event.mapper.EventFileMapper;
 import org.kmb.eventhub.tag.mapper.TagMapper;
@@ -52,7 +50,7 @@ public class EventService {
 
     private final EventSecurityService eventSecurityService;
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService userDetailsService;
 
     private Condition getCommonListCondition(String search, List<String> tags) {
         Condition condition = trueCondition();
@@ -218,7 +216,7 @@ public class EventService {
     }
     @Transactional
     public Long delete(Long eventId) {
-        if (eventSecurityService.isUserOwnEvent(eventId, customUserDetailsService.getAuthenticatedUser())) {
+        if (eventSecurityService.isUserOwnEvent(eventId, userDetailsService.getAuthenticatedUser())) {
             eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
             eventDao.deleteById(eventId);
         }

@@ -7,6 +7,8 @@ import "../../css/EventEdit.css";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
 import ConfirmModal from "../common/ConfirmModal";
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
 
 export function withParams(Component) {
     return props => <Component {...props} params={useParams()}/>;
@@ -53,10 +55,13 @@ class EventEdit extends React.Component {
         };
     }
 
+    sidebarRef = React.createRef();
+
     componentDidMount() {
         console.log('ok')
         const {eventId} = this.props.params;
         console.log(eventId)
+        document.addEventListener("mousedown", this.handleClickOutside);
 
         if (eventId) {
             fetch(`${API_BASE_URL}/v1/events/${eventId}`, {
@@ -81,6 +86,10 @@ class EventEdit extends React.Component {
         }
     }
 
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
     handleChange = (e) => {
         this.setState({
             [e.target.name]: e.target.value,
@@ -91,14 +100,28 @@ class EventEdit extends React.Component {
         });
     };
 
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
+
     handleTagInputChange = (e) => {
         this.setState({newTag: e.target.value});
     };
 
     handleAddTag = async (e) => {
         e.preventDefault();
-        const { newTag, tags } = this.state;
-        const { eventId } = this.props.params;
+        const {newTag, tags} = this.state;
+        const {eventId} = this.props.params;
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
             try {
@@ -110,7 +133,7 @@ class EventEdit extends React.Component {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        tags: [{ name: newTag.trim() }]
+                        tags: [{name: newTag.trim()}]
                     })
                 });
 
@@ -131,7 +154,7 @@ class EventEdit extends React.Component {
             } catch (err) {
                 console.error('Ошибка при добавлении тега:', err);
                 // Можно добавить отображение ошибки пользователю
-                this.setState({ error: 'Не удалось добавить тег' });
+                this.setState({error: 'Не удалось добавить тег'});
             }
         }
     };
@@ -242,7 +265,6 @@ class EventEdit extends React.Component {
     };
 
 
-
     handleSelectFile = () => {
         this.fileInputRef.click();
     };
@@ -300,7 +322,6 @@ class EventEdit extends React.Component {
                 addedFile.fileName = eventFileDTO.fileName;
 
 
-
                 this.setState(prevState => ({
                     files: [...prevState.files, addedFile],
                     selectedFile: null
@@ -335,8 +356,10 @@ class EventEdit extends React.Component {
     };
 
     render() {
-        const {title, description, shortDescription, location, errors, isEditing,
-            tags, newTag, files, showConfirmModal, mainText} = this.state;
+        const {
+            title, description, shortDescription, location, errors, isEditing,
+            tags, newTag, files, showConfirmModal, mainText, sideBarOpen
+        } = this.state;
         const {navigate} = this.props;
 
         return (
@@ -347,188 +370,173 @@ class EventEdit extends React.Component {
                     okText="Ок"
                     onClose={this.handleCloseModal}
                 />
-                <div className="header-bar">
-                    <div className="top-logo">
-                        <img src={EventHubLogo} alt="Logo" className="logo"/>
-                    </div>
-                    <label className="panel-title">Редактирование мероприятия</label>
-                    <div className="login-button-container">
-                        <button className="create-button" onClick={() => navigate("/my-events")}>
-                            Мои мероприятия
-                        </button>
-                        <ProfileDropdown navigate={navigate}/>
-                    </div>
-                </div>
+
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Редактирование мероприятия"
+                    user={this.context.user}
+                    navigate={navigate}
+                />
+                <div className={`sidebar-overlay ${this.state.sidebarOpen ? 'active' : ''}`}></div>
+                <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
+
                 <div className="event-edit-container">
-                    <div className="event-edit-header" onClick={this.handleBack}>
-                        <button className="back-button">← Назад</button>
-                    </div>
-
                     <div className="event-edit-card">
-                        <form onSubmit={this.handleSubmit}>
+                        <label className="event-edit-label">
+                            Название:
+                            <input className="event-edit-input" type="text" name="title" value={title}
+                                   onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Описание:
+                            <textarea className="event-edit-input" name="description" value={description}
+                                      onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Краткое описание:
+                            <input className="event-edit-input" type="text" name="shortDescription"
+                                   value={shortDescription} onChange={this.handleChange}/>
+                        </label>
+                        <label className="event-edit-label">
+                            Локация:
+                            <input className="event-edit-input" type="text" name="location" value={location}
+                                   onChange={this.handleChange}/>
+                        </label>
 
-                            <label className="event-edit-label">
-                                Название:
-                                <input className="event-edit-input" type="text" name="title" value={title}
-                                       onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Описание:
-                                <textarea className="event-edit-input" name="description" value={description}
-                                          onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Краткое описание:
-                                <input className="event-edit-input" type="text" name="shortDescription"
-                                       value={shortDescription} onChange={this.handleChange}/>
-                            </label>
-                            <label className="event-edit-label">
-                                Локация:
-                                <input className="event-edit-input" type="text" name="location" value={location}
-                                       onChange={this.handleChange}/>
-                            </label>
-
-                            {/* Поле для добавления тегов */}
-
-                            <label className="event-edit-label">
-                                Теги:
-                                <div className="event-edit-input">
-                                    <input
-                                        type="text"
-                                        className="event-input"
-                                        value={newTag}
-                                        onChange={this.handleTagInputChange}
-                                        placeholder="Добавьте тег"
-                                    />
-                                    <button
-                                        className="event-edit-button"
-                                        onClick={this.handleAddTag}
-                                    >
-                                        Добавить
-                                    </button>
-                                </div>
-                                <div className="tags-container">
-                                    {tags.map((tag, index) => (
-                                        <span key={tag.id || index} className="tag">
-                                                {tag.name || tag}
-                                            <button
-                                                type="button"
-                                                className="tag-remove"
-                                                onClick={() => this.handleRemoveTag(tag)}
-                                            >
-                                                    ×
-                                                </button>
-                                            </span>
-                                    ))}
-                                </div>
-                            </label>
-
-
-                            <div className="file-upload-buttons">
+                        <div className="event-edit-row">
+                            <label className="event-label">
+                                Дата начала:
                                 <input
-                                    type="file"
-                                    accept="*/*"
-                                    style={{display: "none"}}
-                                    ref={(ref) => (this.fileInputRef = ref)}
-                                    onChange={this.handleFileChange}
+                                    className="event-time-input"
+                                    type="datetime-local"
+                                    name="startDateTime"
+                                    value={this.state.startDateTime}
+                                    onChange={this.handleChange}
                                 />
-                                <button
-                                    type="button"
-                                    className="event-edit-button"
-                                    onClick={this.handleSelectFile}
-                                >
-                                    Прикрепить файл
-                                </button>
+                                {errors.startDateTime &&
+                                    <span className="error-message">{errors.startDateTime}</span>}
+                            </label>
 
-                                <button
-                                    type="button"
-                                    className="event-edit-button"
-                                    onClick={this.handleUploadFile}
-                                    disabled={!this.state.selectedFile}
+                            <label className="event-label">
+                                Дата окончания:
+                                <input
+                                    className="event-time-input"
+                                    type="datetime-local"
+                                    name="endDateTime"
+                                    value={this.state.endDateTime}
+                                    onChange={this.handleChange}
+                                />
+                                {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
+                            </label>
+
+                            <label className="event-label">
+                                Тип мероприятия:
+                                <select
+                                    className="event-format-input"
+                                    name="format"
+                                    value={this.state.format}
+                                    onChange={this.handleChange}
                                 >
-                                    ⬆️ Загрузить
-                                </button>
-                                {this.state.selectedFile && (
-                                    <div className="selected1-file-info">
-                                        Файл: <strong>{this.state.selectedFile.name}</strong>
-                                    </div>
-                                )}
+                                    <option value="OFFLINE">Офлайн</option>
+                                    <option value="ONLINE">Онлайн</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        {/* Поле для добавления тегов */}
+                        <label className="event-edit-label">
+                            Теги:
+                            <div className="tags-input-container">
+                                <input
+                                    type="text"
+                                    className="event-input tag-input"
+                                    value={newTag}
+                                    onChange={this.handleTagInputChange}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter')
+                                            this.handleAddTag(e);
+                                    }}
+                                    placeholder="Добавьте тег"
+                                />
+                                <div className="add-tag-button">
+                                    <i onClick={this.handleAddTag} className="bi bi-check-circle-fill"></i>
+                                </div>
                             </div>
-
-                            {/* Поле для добавления файлов */}
-                            <div className="form-group">
-                                <label className="event-label">
-                                    <div className="files-input-container">
-                                    </div>
-                                    <div className="files-container">
-                                        {files.map((file, index) => (
-                                            <span key={file.fileId || index} className="file">
-                                                {file.fileName || file}
-                                                <button
-                                                    type="button"
-                                                    className="file-remove"
-                                                    onClick={() => this.handleRemoveFile(file)}
-                                                >
+                            <div className="tags-container">
+                                {tags.map((tag, index) => (
+                                    <span key={tag.id || index} className="tag">
+                                                {tag.name || tag}
+                                        <button
+                                            type="button"
+                                            className="tag-remove"
+                                            onClick={() => this.handleRemoveTag(tag)}
+                                        >
                                                     ×
                                                 </button>
                                             </span>
-                                        ))}
-                                    </div>
-                                </label>
+                                ))}
                             </div>
+                        </label>
 
-                            <div className="form-group">
-                                <label className="event-label">
-                                    Дата начала:
-                                    <input
-                                        className="event-time-input"
-                                        type="datetime-local"
-                                        name="startDateTime"
-                                        value={this.state.startDateTime}
-                                        onChange={this.handleChange}
-                                    />
-                                    {errors.startDateTime &&
-                                        <span className="error-message">{errors.startDateTime}</span>}
-                                </label>
+
+                        <div>
+                            <input
+                                type="file"
+                                accept="*/*"
+                                style={{display: "none"}}
+                                ref={(ref) => (this.fileInputRef = ref)}
+                                onChange={this.handleFileChange}
+                            />
+                            <button
+                                type="button"
+                                className="event-edit-button"
+                                onClick={this.handleSelectFile}
+                            >
+                                <i className="bi bi-paperclip"></i> Прикрепить файл
+                            </button>
+
+                            <button
+                                type="button"
+                                className="event-edit-button"
+                                onClick={this.handleUploadFile}
+                                disabled={!this.state.selectedFile}
+                            ><i className="bi bi-upload"></i>   Загрузить
+                            </button>
+                            {this.state.selectedFile && (
+                                <div>
+                                    Файл: <strong>{this.state.selectedFile.name}</strong>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Поле для добавления файлов */}
+                        <label className="event-label">
+                            <div className="files-container">
+                                {files.map((file, index) => (
+                                    <span key={file.fileId || index} className="file">
+                                        <i className="bi bi-file-earmark-fill"></i>
+                                         {file.fileName || file}
+                                        <button
+                                            type="button"
+                                            className="file-remove"
+                                            onClick={() => this.handleRemoveFile(file)}
+                                        >
+                                                    ×
+                                                </button>
+                                            </span>
+                                ))}
                             </div>
+                        </label>
 
-                            <div className="form-group">
-                                <label className="event-label">
-                                    Дата окончания:
-                                    <input
-                                        className="event-time-input"
-                                        type="datetime-local"
-                                        name="endDateTime"
-                                        value={this.state.endDateTime}
-                                        onChange={this.handleChange}
-                                    />
-                                    {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
-                                </label>
-                            </div>
+                        <div className="event-edit-card-buttons">
+                            <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">
+                                Отмена
+                            </button>
 
-                            <div className="form-group">
-                                <label className="event-label">
-                                    Тип мероприятия:
-                                    <select
-                                        className="event-format-input"
-                                        name="format"
-                                        value={this.state.format}
-                                        onChange={this.handleChange}
-                                    >
-                                        <option value="OFFLINE">Офлайн</option>
-                                        <option value="ONLINE">Онлайн</option>
-                                    </select>
-                                </label>
-                            </div>
-
-                            <div className="card-buttons mt-4">
-                                <button type="submit" className="event-edit-button">
-                                    Сохранить изменения
-                                </button>
-                            </div>
-
-
-                        </form>
+                            <button onClick={this.handleSubmit} className="event-edit-button save">
+                                Сохранить
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

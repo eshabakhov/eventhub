@@ -16,11 +16,9 @@ import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.pojos.Moderator;
 import org.kmb.eventhub.tables.pojos.Organizer;
 import org.kmb.eventhub.tables.pojos.User;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +26,7 @@ import java.util.Objects;
 
 @Service
 @AllArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
     private UserRepository userRepository;
 
@@ -105,17 +103,5 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         return authResponse;
-    }
-    public ResponseCookie getCookieWithJwtToken(UserDetails userDetails) {
-
-        final String token = jwtUtil.generateToken(userDetails);
-
-        return ResponseCookie.from("token", token)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .path("/")
-                .maxAge((int) (jwtProperties.getExpirationMs() / 1000))
-                .build();
     }
 }

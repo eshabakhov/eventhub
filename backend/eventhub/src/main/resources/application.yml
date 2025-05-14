@@ -29,6 +29,16 @@ spring:
             client-authentication-method: post
             scope: email
             client-name: VK
+          yandex:
+            client-id: YOUR_YANDEX_CLIENT_ID
+            client-secret: YOUR_YANDEX_CLIENT_SECRET
+            client-name: Yandex
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/yandex"
+            scope:
+              - login:email
+              - login:info
+            provider: yandex
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
@@ -40,6 +50,11 @@ spring:
             token-uri: https://oauth.vk.com/access_token
             user-info-uri: https://api.vk.com/method/users.get
             user-name-attribute: response
+          yandex:
+            authorization-uri: https://oauth.yandex.ru/authorize
+            token-uri: https://oauth.yandex.ru/token
+            user-info-uri: https://login.yandex.ru/info
+            user-name-attribute: id
 
 
 springdoc:

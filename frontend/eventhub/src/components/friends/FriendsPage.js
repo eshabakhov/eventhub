@@ -7,7 +7,6 @@ import SideBar from "../common/SideBar";
 import UserContext from "../../UserContext";
 import ConfirmModal from "../common/ConfirmModal";
 
-
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 };

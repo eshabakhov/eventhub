@@ -4,7 +4,7 @@ import "../../css/EventDetailsPage.css";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
-import API_BASE_URL from "../../config";
+import api from "../common/AxiosInstance";
 
 const formatDateRange = (start, end) => {
     const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
@@ -14,52 +14,14 @@ const formatDateRange = (start, end) => {
 };
 
 async function checkSubscription(id, user) {
-    const res = await fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${id}`, {
-        method: "GET",
+    const res = await api.get(`/v1/members/${user.id}/subscribe/${id}`, {
         credentials: "include",
     });
-    if (!res.ok) return false;
+    if (!res.status !== 200) return false;
 
-    const data = await res.json();
+    const data = await res.data;
     return data.eventId === parseInt(id) && data.userId === user.id;
 }
-
-const checkAuth = (setUser) => {
-    fetch(`${API_BASE_URL}/auth/me`, {
-        method: 'GET',
-        credentials: 'include',
-    })
-        .then((res) => {
-            if (!res.ok) throw new Error("Не авторизован");
-            return res.json();
-        })
-        .then((data) => {
-            setUser({
-                id: data.user.id,
-                role: data.user.role,
-                email: data.user.email,
-                username: data.user.username,
-                displayName: data.user.displayName,
-                loggedIn: true,
-                memberLastName: data.customUser.lastName,
-                memberFirstName: data.customUser.firstName,
-                memberPatronymic: data.customUser.patronymic,
-                memberBirthDate: data.customUser.birthDate,
-                memberBirthCity: data.customUser.birthCity,
-                memberPrivacy: data.customUser.privacy,
-                organizerName: data.customUser.name,
-                organizerDescription: data.customUser.description,
-                organizerIndustry: data.customUser.industry,
-                organizerAddress: data.customUser.address,
-                organizerAccredited: data.customUser.isAccredited,
-                moderatorIsAdmin: data.customUser.isAdmin
-                //token: data.token
-            }); // сохраняем в context + localStorage
-        })
-        .catch((err) => {
-            console.log("Ошибка авторизации:", err.message);
-        });
-};
 
 const EventDetailsPage = () => {
     const { id } = useParams();
@@ -70,15 +32,13 @@ const EventDetailsPage = () => {
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
-        checkAuth(setUser);
         const fetchEvent = async () => {
             try {
-                const res = await fetch(`${API_BASE_URL}/v1/events/${id}`, {
-                    method: "GET",
+                const res = await api.get(`/v1/events/${id}`, {
                     credentials: "include",
                 });
 
-                const data = await res.json();
+                const data = res.data;
                 setEvent(data);
                 setLoading(false);
 
@@ -96,35 +56,40 @@ const EventDetailsPage = () => {
         fetchEvent();
     }, [id, user?.id]);
 
-    const handleSubscription = () => {
+    const handleSubscription = async () => {
         if (!user || !user.id) {
             navigate("/login", { state: { from: `/events/${id}` } });
         }
-        const method = isSubscribed ? "DELETE" : "POST";
-        fetch(`${API_BASE_URL}/v1/members/${user.id}/subscribe/${id}`, {
-            method: method,
-            credentials: "include",
-        })
-            .then(() => {
-                setIsSubscribed(!isSubscribed);
+        if (isSubscribed) {
+            await api.delete(`/v1/members/${user.id}/subscribe/${id}`, {
+                credentials: "include",
             })
-            .catch((err) => {
-                console.error("Ошибка при изменении подписки:", err);
-            });
+                .then(() => {
+                    setIsSubscribed(!isSubscribed);
+                })
+                .catch((err) => {
+                    console.error("Ошибка при изменении подписки:", err);
+                });
+        } else {
+            api.post(`/v1/members/${user.id}/subscribe/${id}`, {
+                credentials: "include",
+            })
+                .then(() => {
+                    setIsSubscribed(!isSubscribed);
+                })
+                .catch((err) => {
+                    console.error("Ошибка при изменении подписки:", err);
+                });
+        }
     };
 
     const handleFileDownload = async (fileId, fileName) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/v1/events/file/download1/${fileId}`, {
-                method: 'GET',
+            const response = await api.get(`/v1/events/file/download1/${fileId}`, {
                 credentials: 'include',
+                responseType: 'blob'
             });
-
-            if (!response.ok) {
-                throw new Error('Не удалось скачать файл');
-            }
-
-            const blob = await response.blob();
+            const blob = response.data;
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;

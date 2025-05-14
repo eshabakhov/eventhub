@@ -2,7 +2,7 @@ package org.kmb.eventhub.user.service;
 
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.common.exception.AlreadyExistsException;
 import org.kmb.eventhub.common.exception.MissingFieldException;
 import org.kmb.eventhub.common.exception.UnexpectedException;
@@ -50,7 +50,7 @@ public class  UserService {
 
     private final AdminSecurityService adminSecurityService;
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService userDetailsService;
 
     private final UserSecurityService userSecurityService;
 
@@ -116,7 +116,7 @@ public class  UserService {
 
         ResponseList<User> responseList = new ResponseList<>();
 
-        if (adminSecurityService.isAdmin(customUserDetailsService.getAuthenticatedUser())) {
+        if (adminSecurityService.isAdmin(userDetailsService.getAuthenticatedUser())) {
              responseList = new ResponseList<>();
 
             List<User> list = userRepository.fetchModerators(search, page, pageSize);
@@ -169,7 +169,7 @@ public class  UserService {
     @Transactional
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
 
-        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+        if (!userSecurityService.isUserOwnData(id, userDetailsService.getAuthenticatedUser()))
             throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         userDao.findOptionalById(id)
@@ -196,7 +196,7 @@ public class  UserService {
     @Transactional
     public Member updateMember(Long id, MemberDTO memberDTO) {
 
-        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+        if (!userSecurityService.isUserOwnData(id, userDetailsService.getAuthenticatedUser()))
             throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         userDao.findOptionalById(id)
@@ -231,7 +231,7 @@ public class  UserService {
     @Transactional
     public Moderator updateModerator(Long id, ModeratorDTO moderatorDTO) {
 
-        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+        if (!userSecurityService.isUserOwnData(id, userDetailsService.getAuthenticatedUser()))
             throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         if (Objects.isNull(moderatorDTO.getIsAdmin()))
@@ -282,7 +282,7 @@ public class  UserService {
     @Transactional
     public User update(Long id, UserDTO userDTO) {
 
-        if (!userSecurityService.isUserOwnData(id, customUserDetailsService.getAuthenticatedUser()))
+        if (!userSecurityService.isUserOwnData(id, userDetailsService.getAuthenticatedUser()))
             throw new AccessDeniedException(String.format("У вас нет прав для редактирования пользователя с id %d", id));
 
         User user = userDao.findOptionalById(id)

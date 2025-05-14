@@ -6,6 +6,7 @@ import "../../css/ProfilePage.css";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
+import api from "../common/AxiosInstance";
 
 function ModeratorCreateWithNavigation(props) {
     const navigate = useNavigate();
@@ -23,8 +24,6 @@ class ModeratorCreate extends Component {
     };
 
     componentDidMount() {
-        const { user } = this.context;
-
         const formData = {
             role: 'MODERATOR',
             email: '',
@@ -46,11 +45,9 @@ class ModeratorCreate extends Component {
             }
         }));
     };
-
     handleSubmit = async (e) => {
         e.preventDefault();
-        const {user, setUser} = this.context;
-        const {formData, userId} = this.state;
+        const {formData} = this.state;
 
         const commonEndpoint = `${API_BASE_URL}/v1/users`;
 
@@ -73,24 +70,18 @@ class ModeratorCreate extends Component {
 
         try {
             // 1. Создание пользователя
-            const createResponse = await fetch(commonEndpoint, {
-                method: 'POST',
+            const createResponse = await api.post(commonEndpoint, commonFields, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
-                body: JSON.stringify(commonFields)
             });
 
-            const createdUser = await createResponse.json();
+            const createdUser = createResponse.data;
             const userId = createdUser.id;
 
             // 2. Обновление ролевых данных
-            const roleEndpoint = `${API_BASE_URL}/v1/users/moderators/${userId}`;
-
-            await fetch(roleEndpoint, {
-                method: 'PUT',
+            await api.put(`/v1/users/moderators/${userId}`, restFields,{
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
-                body: JSON.stringify(restFields)
             });
             this.setState({
                 successMessage: 'Модератор успешно создан',
@@ -103,27 +94,13 @@ class ModeratorCreate extends Component {
         }
     };
 
-    getRoleDisplayName = (role) => {
-        switch (role) {
-            case 'MEMBER':
-                return 'Участник';
-            case 'ORGANIZER':
-                return 'Организатор';
-            case 'MODERATOR':
-                return 'Модератор';
-            default:
-                return 'Неизвестно';
-        }
-    };
-
     handleBack = () => {
         this.props.navigate('/moderator-management');
     };
 
     render() {
         const { navigate } = this.props;
-        const { user } = this.context;
-        const { formData, loading, successMessage, userId } = this.state;
+        const { formData, loading, successMessage } = this.state;
 
         if (loading) return <div className="profile-loading">Загрузка...</div>;
 

@@ -3,9 +3,10 @@ import "../../css/AuthPage.css";
 import UserContext from "../../UserContext";
 import {Navigate} from "react-router";
 import API_BASE_URL from "../../config";
-import EventHubLogo from "../../img/eventhub.png";
 import {useNavigate, useLocation} from "react-router-dom";
 import ConfirmModal from "../common/ConfirmModal";
+import Logo from "../common/Logo"
+import LogoImage from "../../img/EvenHubLogoWithoutTitle.png"
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => {
@@ -121,6 +122,7 @@ class Login extends React.Component {
                 body: JSON.stringify({username, password})
             })
                 .then(res => {
+                    if (res.status == 423) throw new Error("Превышен лимит некорректных попыток входа. Попробуйте заново через 5 минут.");
                     if (!res.ok) throw new Error("Неверные учетные данные");
                 })
                 .then(data => {
@@ -130,7 +132,7 @@ class Login extends React.Component {
                     console.error(err);
                     this.setState({
                         showConfirmModal: true,
-                        mainText: "Ошибка при входе"
+                        mainText: err.message
                     });
                 });
 
@@ -277,21 +279,29 @@ class Login extends React.Component {
         window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
 
+    handleYandexLogin = () => {
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/yandex`;
+    };
+
     renderLogin() {
         const {username, password, showConfirmModal, mainText} = this.state;
         const {navigate} = this.props;
         return (
             <>
+                <div>
+                    <img src={LogoImage} alt='eventhub' className="logo-icon"/>
+                </div>
                 <ConfirmModal
                     isOpen={showConfirmModal}
                     mainText={mainText}
                     okText="Ок"
                     onClose={this.handleCloseModal}
                 />
-                <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
+                <Logo/>
+                {/* <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
                     <img src={EventHubLogo} alt="Logo" className="logo"/>
                 </div>
-                <h2>Вход</h2>
+                <h2>Вход</h2> */}
                 <form onSubmit={this.handleSubmit}>
                     <input
                         type="text"
@@ -311,10 +321,14 @@ class Login extends React.Component {
                     />
                     <button className="auth-button" type="submit">Войти</button>
                     <div className="custom-auth">
-                        <button type="submit-google" class="login-with-google-btn" onClick={this.handleGoogleLogin} >
+                        <a class="login-with-google-btn" onClick={this.handleGoogleLogin}>
+                        <span class="google-icon"></span>
                             Войти через Google
-                        </button>
-                        <button id="VKIDSDKAuthButton" class="VkIdWebSdk__button VkIdWebSdk__button_reset">
+                        </a>
+                        {/* <button type="submit-google" class="login-with-google-btn" onClick={this.handleGoogleLogin} >
+                            Войти через Google
+                        </button> */}
+                        {/* <button id="VKIDSDKAuthButton" class="VkIdWebSdk__button VkIdWebSdk__button_reset">
                             <div class="VkIdWebSdk__button_container">
                                 <div class="VkIdWebSdk__button_icon">
                                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -327,7 +341,11 @@ class Login extends React.Component {
                                     Войти с VK ID
                                 </div>
                             </div>
-                        </button>
+                        </button> */}
+                        <a class="yandex-oauth-btn" onClick={this.handleYandexLogin}>
+                        <span class="yandex-icon"></span>
+                            Войти с Яндекс ID
+                        </a>
                     </div>
                 </form>
                 <p onClick={this.handleToggle} className="toggle-link">
