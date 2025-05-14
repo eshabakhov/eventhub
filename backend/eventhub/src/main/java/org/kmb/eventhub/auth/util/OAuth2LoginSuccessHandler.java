@@ -3,7 +3,9 @@ package org.kmb.eventhub.auth.util;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
+import org.kmb.eventhub.config.FrontendProperties;
+import org.kmb.eventhub.config.jwt.JwtUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -21,7 +23,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtUtil jwtUtil;
+
+    private final FrontendProperties frontendProperties;
+
+    private final UserDetailsService userDetailsService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -30,22 +36,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
+        String email = null;
         if (Objects.nonNull(oAuth2User.getAttribute("email"))) {
-            String email = oAuth2User.getAttribute("email");
-            UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
-            Map<String, ResponseCookie> cookieMap = customUserDetailsService.getAuthCookies(userDetails);
-            response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("access").toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("refresh").toString());
-            response.sendRedirect("http://localhost:3000/");
+            email = oAuth2User.getAttribute("email");
         }
         if (Objects.nonNull(oAuth2User.getAttribute("emails"))) {
             List<String> emailList = oAuth2User.getAttribute("emails");
-            String email = emailList.get(0);
-            UserDetails userDetails = customUserDetailsService.loadUserByEmail(email);
-            Map<String, ResponseCookie> cookieMap = customUserDetailsService.getAuthCookies(userDetails);
-            response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("access").toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("refresh").toString());
-            response.sendRedirect("http://localhost:3000/");
+            if (Objects.nonNull(emailList) && !emailList.isEmpty()) {
+                email = emailList.getFirst();
+            }
         }
+        UserDetails userDetails = userDetailsService.loadUserByEmail(email);
+        Map<String, ResponseCookie> cookieMap = jwtUtil.generateTokenCookies(userDetails);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("access").toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("refresh").toString());
+        response.sendRedirect(frontendProperties.getAddress());
     }
 }

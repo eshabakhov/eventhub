@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +25,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private JwtUtil jwtUtil;
 
-    private CustomUserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
@@ -46,7 +46,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (Objects.isNull(jwt) && Objects.nonNull(request.getCookies())) {
             jwt = Arrays.stream(request.getCookies())
-                    .filter(cookie -> "token".equals(cookie.getName()))
+                    .filter(cookie -> "access".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);

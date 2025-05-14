@@ -3,7 +3,7 @@ package org.kmb.eventhub.config;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.auth.service.CustomOAuth2UserService;
+import org.kmb.eventhub.auth.service.OAuth2UserService;
 import org.kmb.eventhub.auth.util.OAuth2LoginSuccessHandler;
 import org.kmb.eventhub.config.jwt.JwtAuthenticationEntryPoint;
 import org.kmb.eventhub.config.jwt.JwtRequestFilter;
@@ -65,7 +65,7 @@ public class SecurityConfig {
 
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2UserService OAuth2UserService;
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -96,6 +96,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/api-docs/**").hasRole(RoleEnum.MODERATOR.name())
 
+                        .requestMatchers(HttpMethod.GET, V1_USERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name(), RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.POST, V1_USERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name(), RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name(), RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.PUT, V1_USERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name(), RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.DELETE, V1_USERS_ID).hasRole(RoleEnum.MODERATOR.name())
 
                         .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS).hasRole(RoleEnum.MODERATOR.name())
@@ -121,11 +125,6 @@ public class SecurityConfig {
                         .requestMatchers("/auth/refresh").permitAll()
                         .requestMatchers("/auth/login").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, V1_USERS).permitAll()
-                        .requestMatchers(HttpMethod.POST, V1_USERS).permitAll()
-                        .requestMatchers(HttpMethod.GET, V1_USERS_ID).permitAll()
-                        .requestMatchers(HttpMethod.PUT, V1_USERS_ID).permitAll()
-
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_EVENTS_ID).permitAll()
@@ -133,7 +132,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
+                                .userService(OAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
@@ -171,12 +170,20 @@ public class SecurityConfig {
 
     public LogoutHandler jwtCookieLogoutHandler() {
         return (request, response, authentication) -> {
-            Cookie cookie = new Cookie("token", null);
+            Cookie cookie = new Cookie("access", null);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setMaxAge(0);
             cookie.setSecure(true);
+
+            Cookie cookie1 = new Cookie("refresh", null);
+            cookie1.setPath("/");
+            cookie1.setHttpOnly(true);
+            cookie1.setMaxAge(0);
+            cookie1.setSecure(true);
+
             response.addCookie(cookie);
+            response.addCookie(cookie1);
         };
     }
 }

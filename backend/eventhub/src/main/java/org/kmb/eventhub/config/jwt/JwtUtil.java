@@ -95,7 +95,7 @@ public class JwtUtil {
         String accessToken = generateAccessToken(userDetails);
         String refreshToken = generateRefreshToken(userDetails);
 
-        ResponseCookie accessCookie = ResponseCookie.from("token", accessToken)
+        ResponseCookie accessCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")
@@ -103,7 +103,7 @@ public class JwtUtil {
                 .maxAge((int) (jwtProperties.getExpirationMs() / 1000))
                 .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh", refreshToken)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")

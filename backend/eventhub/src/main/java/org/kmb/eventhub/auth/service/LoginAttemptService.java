@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class LoginAttemptService {
 
-    private final int MAX_ATTEMPT = 5;
-    private final long LOCK_TIME_DURATION = TimeUnit.MINUTES.toMillis(5);
+    private static final int MAX_ATTEMPT = 5;
+    private static final long LOCK_TIME_DURATION = TimeUnit.MINUTES.toMillis(5);
     private final ConcurrentHashMap<String, Integer> attemptsCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> lockTimeCache = new ConcurrentHashMap<>();
 
