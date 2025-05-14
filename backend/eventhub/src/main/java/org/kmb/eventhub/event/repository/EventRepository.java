@@ -52,4 +52,10 @@ public class EventRepository {
                 .having(DSL.countDistinct(TAG.NAME).eq(tags.size()))
                 .fetchInto(Long.class);
     }
+
+    public List<Event> findAll() {
+        return dslContext
+                .selectFrom(EVENT)
+                .fetchInto(Event.class);
+    }
 }

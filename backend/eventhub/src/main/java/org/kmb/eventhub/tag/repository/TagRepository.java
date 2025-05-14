@@ -4,15 +4,12 @@ import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Insert;
-import org.jooq.Query;
 import org.kmb.eventhub.tables.pojos.Tag;
 import org.kmb.eventhub.tables.records.TagRecord;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.kmb.eventhub.Tables.*;
 
@@ -98,7 +95,7 @@ public class TagRepository {
     }
 
     public Set<Long> getUsedTagIdsForUser(Long userId) {
-        return dslContext.select(USER_TAGS.USER_ID)
+        return dslContext.select(USER_TAGS.TAG_ID)
                 .from(USER_TAGS)
                 .where(USER_TAGS.USER_ID.eq(userId))
                 .fetchSet(USER_TAGS.TAG_ID);

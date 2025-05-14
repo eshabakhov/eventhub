@@ -225,4 +225,16 @@ public class EventService {
 
         return eventId;
     }
+
+    public List<EventDTO> getAll() {
+        List<Event> eventList = eventRepository.findAll();
+        List<EventDTO> eventDTOList = new ArrayList<>();
+        eventList.forEach(event -> {
+            EventDTO eventDTO = eventMapper.toDto(event);
+            eventDTO.setTags(tagRepository.fetch(event.getId()).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
+            eventDTOList.add(eventDTO);
+        });
+
+        return eventDTOList;
+    }
 }
