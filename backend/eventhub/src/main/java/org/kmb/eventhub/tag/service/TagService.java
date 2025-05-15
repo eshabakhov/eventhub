@@ -62,7 +62,7 @@ public class TagService {
     }
 
     @Transactional
-    public void addTagsToEvent(Long eventId, EventTagsDTO eventTagsDTO) {
+    public List<Tag> addTagsToEvent(Long eventId, EventTagsDTO eventTagsDTO) {
 
         eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
@@ -72,6 +72,7 @@ public class TagService {
         List<Tag> newTags = tagRepository.fetch(newTagNames);
 
         assignTagsToEvent(eventId, newTags);
+        return newTags;
     }
 
     @Transactional

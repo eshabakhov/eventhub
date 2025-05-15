@@ -13,6 +13,8 @@ import org.kmb.eventhub.tag.service.TagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/v1/tags")
@@ -64,10 +66,10 @@ public class TagController {
                     schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/events/{id}")
-    public void addTagsToEvent(
+    public List<Tag> addTagsToEvent(
             @PathVariable Long id,
             @RequestBody EventTagsDTO eventTagsDTO) {
-        tagService.addTagsToEvent(id, eventTagsDTO);
+        return tagService.addTagsToEvent(id, eventTagsDTO);
     }
 
     @Operation(summary = "Удалить тег у мероприятия.",
