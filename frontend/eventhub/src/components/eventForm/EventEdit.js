@@ -125,7 +125,7 @@ class EventEdit extends React.Component {
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
             try {
-                const response = await fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
+                const response = await fetch(`${API_BASE_URL}/v1/tags/events/${eventId}`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -162,17 +162,13 @@ class EventEdit extends React.Component {
     handleRemoveTag = (tagToRemove) => {
         const {eventId} = this.props.params;
 
-        fetch(`${API_BASE_URL}/v1/events/${eventId}/tag`, {
+        fetch(`${API_BASE_URL}/v1/tags/${tagToRemove.id}/events/${eventId}`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                id: tagToRemove.id,
-                name: tagToRemove.name
-            })
+            }
         })
             .then(res => {
                 if (!res.ok) throw new Error('Ошибка удаления тега');
