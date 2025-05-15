@@ -18,7 +18,7 @@ api.interceptors.response.use(
         await api.post('/auth/refresh'); // обновление токена, куки отправятся автоматически
         return api(originalRequest);     // повторный запрос
       } catch (refreshError) {
-        window.location.href = '/login'; // редирект на логин при неудаче
+        //window.location.href = '/login'; // редирект на логин при неудаче
         return Promise.reject(refreshError);
       }
     }

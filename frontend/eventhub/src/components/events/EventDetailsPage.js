@@ -5,6 +5,7 @@ import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import api from "../common/AxiosInstance";
+import CurrentUser from "../common/CurrentUser";
 
 const formatDateRange = (start, end) => {
     const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
@@ -17,7 +18,7 @@ async function checkSubscription(id, user) {
     const res = await api.get(`/v1/members/${user.id}/subscribe/${id}`, {
         credentials: "include",
     });
-    if (!res.status !== 200) return false;
+    if (res.status !== 200) return false;
 
     const data = await res.data;
     return data.eventId === parseInt(id) && data.userId === user.id;
@@ -53,12 +54,14 @@ const EventDetailsPage = () => {
                 setLoading(false);
             }
         };
+        CurrentUser.fetchCurrentUser(setUser);
         fetchEvent();
     }, [id, user?.id]);
 
     const handleSubscription = async () => {
         if (!user || !user.id) {
             navigate("/login", { state: { from: `/events/${id}` } });
+            return;
         }
         if (isSubscribed) {
             await api.delete(`/v1/members/${user.id}/subscribe/${id}`, {
