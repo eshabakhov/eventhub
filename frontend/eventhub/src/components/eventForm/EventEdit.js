@@ -50,11 +50,38 @@ class EventEdit extends React.Component {
             newTag: '',
             errors: {},
             isEditing: false,
-            selectedFile: null,
+            selectedFiles: [],
             uploadedFiles: []
         };
     }
 
+    // Новые методы
+    getFileIcon = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        switch (extension) {
+            case 'pdf':
+                return 'bi-file-earmark-pdf';
+            case 'doc':
+            case 'docx':
+                return 'bi-file-earmark-word';
+            case 'xls':
+            case 'xlsx':
+                return 'bi-file-earmark-excel';
+            case 'ppt':
+            case 'pptx':
+                return 'bi-file-earmark-ppt';
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+                return 'bi-file-earmark-image';
+            case 'zip':
+            case 'rar':
+                return 'bi-file-earmark-zip';
+            default:
+                return 'bi-file-earmark';
+        }
+    };
     sidebarRef = React.createRef();
 
     componentDidMount() {
@@ -266,78 +293,93 @@ class EventEdit extends React.Component {
     };
 
     handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            this.setState({selectedFile: file});
+        const files = Array.from(e.target.files);
+        if (files && files.length > 0) {
+            this.setState(prevState => ({
+                selectedFiles: [...prevState.selectedFiles, ...files]
+            }));
         }
     };
 
-    handleUploadFile = () => {
-        const {selectedFile} = this.state;
+    handleRemoveSelectedFile = (index) => {
+        this.setState(prev => ({
+            selectedFiles: prev.selectedFiles.filter((_, i) => i !== index)
+        }));
+    };
+
+    formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+
+    handleUploadFiles = async () => {
+        const {selectedFiles} = this.state;
         const {eventId} = this.props.params;
 
-        if (!selectedFile) {
+        if (!selectedFiles || selectedFiles.length === 0) {
             this.setState({
                 showConfirmModal: true,
-                mainText: "Сначала выберите файл"
+                mainText: "Сначала выберите файлы"
             });
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const fileContentBase64 = reader.result.split(',')[1];
+        try {
+            const uploadPromises = selectedFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        const fileContentBase64 = reader.result.split(',')[1];
 
-            const eventFileDTO = {
-                fileName: selectedFile.name,
-                fileType: selectedFile.type,
-                fileSize: selectedFile.size,
-                fileContent: fileContentBase64
-            };
+                        const eventFileDTO = {
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileSize: file.size,
+                            fileContent: fileContentBase64
+                        };
 
-            let addedFile = {
-                fileId: null,
-                fileName: undefined
-            };
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
+                                method: "POST",
+                                credentials: "include",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json"
+                                },
+                                body: JSON.stringify(eventFileDTO)
+                            });
 
-            try {
-                const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
-                    method: "POST",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify(eventFileDTO)
+                            if (!res.ok) throw new Error("Ошибка при загрузке файла");
+
+                            const fileId = await res.json();
+                            resolve({fileId, fileName: file.name});
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.readAsDataURL(file);
                 });
+            });
 
-                if (!res.ok) throw new Error("Ошибка при загрузке файла");
+            const results = await Promise.all(uploadPromises);
 
+            this.setState(prev => ({
+                files: [...prev.files, ...results],
+                selectedFiles: [],
+                showConfirmModal: true,
+                mainText: `Успешно загружено ${results.length} файлов`
+            }));
 
-                addedFile.fileId = await res.json(); // Получаем данные ответа
-                addedFile.fileName = eventFileDTO.fileName;
-
-
-                this.setState(prevState => ({
-                    files: [...prevState.files, addedFile],
-                    selectedFile: null
-                }));
-                this.setState({
-                    showConfirmModal: true,
-                    mainText: "Файл успешно загружен!"
-                });
-                this.setState({selectedFile: null});
-            } catch (err) {
-                console.error("Ошибка при загрузке файла:", err);
-                this.setState({
-                    showConfirmModal: true,
-                    mainText: "Не удалось загрузить файл."
-                });
-
-            }
-        };
-
-        reader.readAsDataURL(selectedFile);
+        } catch (err) {
+            console.error("Ошибка при загрузке файлов:", err);
+            this.setState({
+                showConfirmModal: true,
+                mainText: "Не удалось загрузить некоторые файлы"
+            });
+        }
     };
 
     handleBack = () => {
@@ -439,7 +481,7 @@ class EventEdit extends React.Component {
                             </label>
                         </div>
 
-                        {/* Поле для добавления тегов */}
+                        {/* Поле для тегов */}
                         <label className="event-edit-label">
                             Теги:
                             <div className="tags-input-container">
@@ -461,68 +503,168 @@ class EventEdit extends React.Component {
                             <div className="tags-container">
                                 {tags.map((tag, index) => (
                                     <span key={tag.id || index} className="tag">
-                                                {tag.name || tag}
+                                        {tag.name || tag}
                                         <button
                                             type="button"
                                             className="tag-remove"
                                             onClick={() => this.handleRemoveTag(tag)}
                                         >
-                                                    ×
-                                                </button>
-                                            </span>
+                                            ×
+                                        </button>
+                                    </span>
                                 ))}
                             </div>
                         </label>
 
+                        {/* Поле для файлов */}
+                        <div className="files-section">
+                            <h3 className="files-title">Прикрепленные файлы</h3>
 
-                        <div>
-                            <input
-                                type="file"
-                                accept="*/*"
-                                style={{display: "none"}}
-                                ref={(ref) => (this.fileInputRef = ref)}
-                                onChange={this.handleFileChange}
-                            />
-                            <button
-                                type="button"
-                                className="event-edit-button"
+                            {files.length > 0 && (
+                                <div className="uploaded-files-container">
+                                    {files.map((file, index) => (
+                                        <div key={file.fileId || index} className="uploaded-file">
+                                            <div className="file-icon-name">
+                                                <i className={`bi ${this.getFileIcon(file.fileName)}`}></i>
+                                                <span className="file-name">{file.fileName || file}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={() => this.handleRemoveFile(file)}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div
+                                id="dropZone"
+                                className="drop-zone"
                                 onClick={this.handleSelectFile}
-                            >
-                                <i className="bi bi-paperclip"></i> Прикрепить файл
-                            </button>
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.add("dragover");
+                                }}
+                                onDragLeave={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.remove("dragover");
+                                }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.remove("dragover");
 
-                            <button
-                                type="button"
-                                className="event-edit-button"
-                                onClick={this.handleUploadFile}
-                                disabled={!this.state.selectedFile}
-                            ><i className="bi bi-upload"></i>   Загрузить
-                            </button>
-                            {this.state.selectedFile && (
-                                <div>
-                                    Файл: <strong>{this.state.selectedFile.name}</strong>
+                                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                        this.setState(prevState => ({
+                                            selectedFiles: [...prevState.selectedFiles, ...Array.from(e.dataTransfer.files)]
+                                        }));
+                                        e.dataTransfer.clearData();
+                                    }
+                                }}
+                            >
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    style={{display: 'none'}}
+                                    ref={(ref) => (this.fileInputRef = ref)}
+                                    onChange={this.handleFileChange}
+                                    multiple
+                                />
+                                <div className="drop-zone-content">
+                                    <i className="bi bi-cloud-arrow-up"></i>
+                                    <p>Перетащите файлы сюда или кликните для выбора</p>
+                                    <small>Можно выбрать несколько файлов</small>
+                                </div>
+                            </div>
+
+                            {this.state.selectedFiles && this.state.selectedFiles.length > 0 && (
+                                <div className="selected-files-container">
+                                    <h4>Выбранные файлы:</h4>
+                                    {this.state.selectedFiles.map((file, index) => (
+                                        <div key={index} className="selected-file">
+                                            <span className="file-name">{file.name}</span>
+                                            <span className="file-size">({this.formatFileSize(file.size)})</span>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={() => this.handleRemoveSelectedFile(index)}
+                                            >
+                                                <i className="bi bi-x-circle"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        className="event-edit-button upload-button"
+                                        onClick={this.handleUploadFiles}
+                                    >
+                                        <i className="bi bi-upload"></i> Загрузить все файлы
+                                    </button>
                                 </div>
                             )}
                         </div>
 
+                        {/*<div>*/}
+                        {/*    <input*/}
+                        {/*        type="file"*/}
+
+                        {/*        style={{display: "none"}}*/}
+                        {/*        ref={(ref) => (this.fileInputRef = ref)}*/}
+                        {/*        onChange={this.handleFileChange}*/}
+                        {/*    />*/}
+                        {/*    <button*/}
+                        {/*        type="button"*/}
+                        {/*        className="event-edit-button"*/}
+                        {/*        onClick={this.handleSelectFile}*/}
+                        {/*    >*/}
+                        {/*        <i className="bi bi-paperclip"></i> Прикрепить файл*/}
+                        {/*    </button>*/}
+
+                        {/*    <button*/}
+                        {/*        type="button"*/}
+                        {/*        className="event-edit-button"*/}
+                        {/*        onClick={this.handleUploadFile}*/}
+                        {/*        disabled={!this.state.selectedFile}*/}
+                        {/*    ><i className="bi bi-upload"></i> Загрузить*/}
+                        {/*    </button>*/}
+                        {/*    {this.state.selectedFile && (*/}
+                        {/*        <div>*/}
+                        {/*            Файл: <strong>{this.state.selectedFile.name}</strong>*/}
+                        {/*        </div>*/}
+                        {/*    )}*/}
+                        {/*</div>*/}
+
                         {/* Поле для добавления файлов */}
-                        <label className="event-label">
-                            <div className="files-container">
-                                {files.map((file, index) => (
-                                    <span key={file.fileId || index} className="file">
-                                        <i className="bi bi-file-earmark-fill"></i>
-                                         {file.fileName || file}
-                                        <button
-                                            type="button"
-                                            className="file-remove"
-                                            onClick={() => this.handleRemoveFile(file)}
-                                        >
-                                                    ×
-                                                </button>
-                                            </span>
-                                ))}
-                            </div>
-                        </label>
+                        {/*<label className="event-label">*/}
+                        {/*    <div className="files-container">*/}
+                        {/*        {files.map((file, index) => (*/}
+                        {/*            <span key={file.fileId || index} className="file">*/}
+                        {/*                <i className="bi bi-file-earmark-fill"></i>*/}
+                        {/*                {file.fileName || file}*/}
+                        {/*                <button*/}
+                        {/*                    type="button"*/}
+                        {/*                    className="file-remove"*/}
+                        {/*                    onClick={() => this.handleRemoveFile(file)}*/}
+                        {/*                >*/}
+                        {/*                            ×*/}
+                        {/*                        </button>*/}
+                        {/*                    </span>*/}
+                        {/*        ))}*/}
+                        {/*    </div>*/}
+                        {/*</label>*/}
+                        {/*<div className="form-group">*/}
+                        {/*    <label>Attachments</label>*/}
+                        {/*    <div id="dropZone" className="drop-zone">*/}
+                        {/*        <input type="file" id="fileInput" multiple style={{display: 'inline'}}/>*/}
+                        {/*        или перетащите его сюда*/}
+                        {/*    </div>*/}
+                        {/*    <div className="note">Upload up to 3 Files. Max File Size: 10 MB</div>*/}
+                        {/*</div>*/}
 
                         <div className="event-edit-card-buttons">
                             <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">

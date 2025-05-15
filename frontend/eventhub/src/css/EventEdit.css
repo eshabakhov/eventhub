@@ -149,17 +149,6 @@ textarea.event-edit {
     gap: 8px;
     margin-top: 8px;
 }
-
-.file-remove {
-    margin-left: 6px;
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-}
-
 .tag-remove:hover {
     color: #f44336;
 }
@@ -181,4 +170,181 @@ textarea.event-edit {
     display: flex;
     flex-direction: row;
     gap: 1rem;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.submit-button {
+    background-color: #f16262;
+    border: none;
+    color: white;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Стили для зоны перетаскивания */
+.drop-zone {
+    border: 2px dashed #ccc;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    background-color: #fff;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.drop-zone.dragover {
+    background-color: #e6f7ff;
+    border-color: #3b82f6;
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.drop-zone-content i {
+    font-size: 2rem;
+    color: #3b82f6;
+}
+
+.drop-zone-content p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.file {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 14px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+.file-remove {
+    background: none;
+    border: none;
+    margin-left: 6px;
+    color: #666;
+    cursor: pointer;
+    padding: 2px;
+    font-size: 1rem;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.file-remove:hover {
+    color: #f44336;
+}
+
+.note {
+    font-size: 12px;
+    color: gray;
+    margin-top: 5px;
+    text-align: center;
+}
+/* Секция файлов */
+.files-section {
+    margin-top: 0.5rem;
+    border-top: 1px solid #eee;
+}
+
+.files-title {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* Загруженные файлы */
+.uploaded-files-container {
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #f9f9f9;
+}
+
+.uploaded-file {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 5px;
+    margin-bottom: 5px;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.uploaded-file:last-child {
+    margin-bottom: 0;
+}
+
+.file-icon-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-icon-name i {
+    font-size: 1.2rem;
+    color: #3b82f6;
+}
+
+.file-name {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Выбранные файлы перед загрузкой */
+.selected-files-container {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.selected-files-container h4 {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px;
+    background-color: #f0f7ff;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.selected-file .file-name {
+    flex-grow: 1;
+}
+
+.selected-file .file-size {
+    color: #3b82f6;
+}
+
+/* Кнопки */
+.upload-button {
+    margin-top: 12px;
+    width: 100%;
+}
+
+.drop-zone-content small {
+    color: #888;
+    font-size: 0.8rem;
 }
