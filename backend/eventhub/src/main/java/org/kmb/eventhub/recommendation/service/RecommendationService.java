@@ -1,7 +1,7 @@
 package org.kmb.eventhub.recommendation.service;
 
 import lombok.AllArgsConstructor;
-import org.kmb.eventhub.auth.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.recommendation.dto.UserHistoryDTO;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RecommendationService {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService UserDetailsService;
 
     private final RecommendationRepository recommendationRepository;
 
@@ -32,7 +32,7 @@ public class RecommendationService {
     private final UserHistoryMapper userHistoryMapper;
 
     public List<EventDTO> getRecommendedEvents(Integer limitRec) {
-        Long userId =  customUserDetailsService.getAuthenticatedUser().getId();
+        Long userId =  UserDetailsService.getAuthenticatedUser().getId();
 
         // 1. Получаем id избранных тегов
         Set<Long> userTagIds = tagRepository.getUsedTagIdsForUser(userId);
