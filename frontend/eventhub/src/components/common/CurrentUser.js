@@ -29,7 +29,7 @@ class CurrentUser extends Component {
             });
         } catch (error) {
             console.error('Ошибка при получении пользователя:', error);
-            throw error;
+            //throw error;
         }
     }
 }
