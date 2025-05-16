@@ -5,12 +5,15 @@ import "../../css/Accreditation.css";
 import UserContext from "../../UserContext";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import Pagination from "../common/Pagination";
 import ConfirmModal from "../common/ConfirmModal";
 import api from '../common/AxiosInstance';
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
+
+
 
 class AccreditationPage extends Component {
     static contextType = UserContext;
@@ -210,14 +213,8 @@ class AccreditationPage extends Component {
                             </button>
                         </div>
                         {/* Верхняя пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({length: totalPages}, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1}
-                                        onClick={() => this.handlePageClick(i + 1)}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                        </div>
+                        <Pagination totalPages={totalPages} currentPage={currentPage}
+                                    handlePageClick={this.handlePageClick}/>
 
                         {/* Карточки событий */}
                         {orgs.map((org) => (
@@ -261,14 +258,8 @@ class AccreditationPage extends Component {
                             </motion.div>
                         ))}
                         {/* Нижняя пагинация */}
-                        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-                            {Array.from({length: totalPages}, (_, i) => (
-                                <button key={i} className="pagination-button" disabled={currentPage === i + 1}
-                                        onClick={() => this.handlePageClick(i + 1)}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                        </div>
+                        <Pagination totalPages={totalPages} currentPage={currentPage}
+                                    handlePageClick={this.handlePageClick}/>
                     </motion.div>
                 </div>
             </div>
