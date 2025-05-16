@@ -3,8 +3,11 @@ package org.kmb.eventhub.tag.service;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.kmb.eventhub.common.dto.ResponseList;
+import org.kmb.eventhub.common.exception.AlreadyExistsException;
+import org.kmb.eventhub.common.exception.MissingFieldException;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
 import org.kmb.eventhub.tables.daos.UserDao;
+import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tag.dto.EventTagsDTO;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.tag.exception.TagNotFoundException;
@@ -62,17 +65,25 @@ public class TagService {
     }
 
     @Transactional
-    public List<Tag> addTagsToEvent(Long eventId, EventTagsDTO eventTagsDTO) {
+    public Tag addTagsToEvent(Long eventId, TagDTO tagDTO) {
+
+        if (Objects.isNull(tagDTO.getName()) || tagDTO.getName().isEmpty())
+            throw new MissingFieldException("name");
+
+        Tag tag = tagMapper.toEntity(tagDTO);
+
+        var existingTag = tagDao.fetchByName(tagDTO.getName());
+
+        if (existingTag.isEmpty()) {
+            tagDao.insert(tag);
+        } else {
+            tag.setId(existingTag.getFirst().getId());
+        }
 
         eventDao.findOptionalById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        List<String> tagNames = eventTagsDTO.getTags().stream().map(TagDTO::getName).toList();
-
-        List<String> newTagNames = createNewTags(tagNames);
-        List<Tag> newTags = tagRepository.fetch(newTagNames);
-
-        assignTagsToEvent(eventId, newTags);
-        return newTags;
+        assignTagToEvent(eventId, tag);
+        return tag;
     }
 
     @Transactional
@@ -119,8 +130,12 @@ public class TagService {
     }
 
     public void assignTagsToEvent(Long eventId, List<Tag> tags) {
-         tagRepository.assignNewEventTag(eventId, tags);
+         tagRepository.assignNewEventTags(eventId, tags);
     }
+    public void assignTagToEvent(Long eventId, Tag tag) {
+        tagRepository.assignNewEventTag(eventId, tag);
+    }
+
 
     public Set<Long> getUsedTagIdsForUser(Long userId) {
         return tagRepository.getUsedTagIdsForUser(userId);

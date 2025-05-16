@@ -101,7 +101,7 @@ public class TagRepository {
                 .fetchSet(USER_TAGS.TAG_ID);
     }
 
-    public void assignNewEventTag(Long eventId, List<Tag> tags) {
+    public void assignNewEventTags(Long eventId, List<Tag> tags) {
         var batch = dslContext.batch(
                 tags.stream()
                         .map(tag -> dslContext.insertInto(EVENT_TAGS)
@@ -110,6 +110,13 @@ public class TagRepository {
                         .toArray(Insert[]::new)
         );
         batch.execute();
+    }
+
+    public void assignNewEventTag(Long eventId, Tag tag) {
+        dslContext.insertInto(EVENT_TAGS)
+                .set(EVENT_TAGS.EVENT_ID, eventId)
+                .set(EVENT_TAGS.TAG_ID, tag.getId())
+                .execute();
     }
 
 
