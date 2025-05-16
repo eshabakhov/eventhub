@@ -159,9 +159,7 @@ class EventEdit extends React.Component {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        tags: [{name: newTag.trim()}]
-                    })
+                    body: JSON.stringify({name: newTag.trim()})
                 });
 
                 if (!response.ok) {
