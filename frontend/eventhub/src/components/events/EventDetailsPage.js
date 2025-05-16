@@ -88,7 +88,7 @@ const EventDetailsPage = () => {
 
     const handleFileDownload = async (fileId, fileName) => {
         try {
-            const response = await api.get(`/v1/events/file/download1/${fileId}`, {
+            const response = await api.get(`/v1/events/file/download/${fileId}`, {
                 credentials: 'include',
                 responseType: 'blob'
             });
