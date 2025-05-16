@@ -48,14 +48,12 @@ public class SubscribeRepository {
                 .offset((page - 1) * pageSize)
                 .fetchInto(Event.class);
     }
-    public List<Long> fetchEventsIDsByMemberId(Long memberId, Integer page, Integer pageSize) {
+    public List<Long> fetchEventsIDsByMemberId(Long memberId) {
         return dslContext
                 .select(EVENT.ID)
                 .from(EVENT)
                 .innerJoin(EVENT_MEMBERS).on(EVENT_MEMBERS.EVENT_ID.eq(EVENT.ID))
                 .where(EVENT_MEMBERS.MEMBER_ID.eq(memberId))
-                .limit(pageSize)
-                .offset((page - 1) * pageSize)
                 .fetchInto(Long.class);
     }
 }

@@ -116,7 +116,7 @@ public class EventService {
     public ResponseList<EventDTO> getListByMemberId(Integer page, Integer pageSize, String search, List<String> tags, Long memberId) {
         Condition condition = getCommonListCondition(search, tags);
         if (Objects.nonNull(memberId)) {
-            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId)));
         }
         return getCommonList(condition, page, pageSize);
     }
