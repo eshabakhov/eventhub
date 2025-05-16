@@ -24,6 +24,7 @@ async function checkSubscription(id, user) {
     return data.eventId === parseInt(id) && data.userId === user.id;
 }
 
+
 const getFileIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
     switch (extension) {
@@ -66,6 +67,7 @@ const EventDetailsPage = () => {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -78,11 +80,15 @@ const EventDetailsPage = () => {
                 setEvent(data);
                 setLoading(false);
 
-                if (user && user.id) {
+                if (user && user.id && user.role === "MEMBER") {
                     const subscribed = await checkSubscription(id, user);
                     setIsSubscribed(subscribed);
                 } else {
                     setIsSubscribed(false);
+                }
+                if (user && user.id && user.role === "ORGANIZER") {
+                    const isOwner = data.organizerId === user.id;
+                    setIsOwner(isOwner);
                 }
             } catch (err) {
                 console.error("Ошибка загрузки мероприятия:", err);
@@ -160,7 +166,7 @@ const EventDetailsPage = () => {
                 <div className="event-details-content">
                     <h1 className="event-title">{event.title}</h1>
                     <p className="event-format">{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</p>
-                    <p className="event-details-date">{formatDateRange(new Date(event.startDateTime), new Date(event.endDateTime))}</p>
+                    <p className="event-details-date">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
                     <p className="event-location"><strong>Место проведения:</strong> {event.location}</p>
                     <p className="event-description">{event.description}</p>
 
@@ -213,12 +219,23 @@ const EventDetailsPage = () => {
                         <button className="back-button-event-details" onClick={() => navigate("/events")}>
                             Назад к списку
                         </button>
-                        <button
-                            className={`subscription-button ${isSubscribed ? "non-subscribed" : ""}`}
-                            onClick={handleSubscription}
-                        >
-                            {isSubscribed ? "Отказаться от участия" : "Принять участие"}
-                        </button>
+                        {user?.role === "MEMBER" && (
+                            <button
+                                className={`subscription-button ${isSubscribed ? "non-subscribed" : ""}`}
+                                onClick={handleSubscription}
+                            >
+                                {isSubscribed ? "Отказаться от участия" : "Принять участие"}
+                            </button>
+                        )}
+                        {user?.role === "ORGANIZER" && isOwner && (
+                            <button
+                                className={`subscription-button`}
+                                onClick={() => navigate(`/event-edit/${event.id}`)}
+                            >
+                                Редактировать
+                            </button>
+                        )}
+
                     </div>
                 </div>
             </div>
