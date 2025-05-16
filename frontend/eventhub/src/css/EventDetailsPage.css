@@ -105,3 +105,103 @@
     background-color: #C62828;
     transform: translateY(0);
 }
+/* Добавьте эти стили в ваш EventDetailsPage.css */
+
+.event-files-section {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+
+.files-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.files-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.file-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.file-icon-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.file-icon-name i {
+    font-size: 1.5rem;
+    color: #3b82f6;
+}
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-name {
+    font-size: 0.9rem;
+    color: #212529;
+    font-weight: 500;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 1; /* количество строк */
+    max-height: calc(1.2em * 3); /* по необходимости */
+    word-break: break-all;
+}
+.file-type {
+    font-size: 0.9rem;
+    color: #212529;
+    font-weight: 500;
+    text-align: left;
+}
+
+.file-name-type {
+    display: flex;
+    flex-direction: row;
+}
+
+.file-size {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    text-align: left;
+}
+
+.download-icon {
+    color: #6c757d;
+    font-size: 1.25rem;
+    transition: color 0.2s ease;
+}
+
+.file-item:hover .download-icon {
+    color: #3b82f6;
+}
+
+/* Остальные существующие стили оставьте без изменений */

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, {useEffect, useState, useContext} from "react";
+import {useParams, useNavigate} from "react-router-dom";
 import "../../css/EventDetailsPage.css";
 import UserContext from "../../UserContext";
 import EventHubLogo from "../../img/eventhub.png";
@@ -8,7 +8,7 @@ import api from "../common/AxiosInstance";
 import CurrentUser from "../common/CurrentUser";
 
 const formatDateRange = (start, end) => {
-    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+    const options = {day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"};
     const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     return `${startStr} - ${endStr}`;
@@ -24,10 +24,45 @@ async function checkSubscription(id, user) {
     return data.eventId === parseInt(id) && data.userId === user.id;
 }
 
+const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    switch (extension) {
+        case 'pdf':
+            return 'bi-file-earmark-pdf';
+        case 'doc':
+        case 'docx':
+            return 'bi-file-earmark-word';
+        case 'xls':
+        case 'xlsx':
+            return 'bi-file-earmark-excel';
+        case 'ppt':
+        case 'pptx':
+            return 'bi-file-earmark-ppt';
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+            return 'bi-file-earmark-image';
+        case 'zip':
+        case 'rar':
+            return 'bi-file-earmark-zip';
+        default:
+            return 'bi-file-earmark';
+    }
+};
+
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
 const EventDetailsPage = () => {
-    const { id } = useParams();
+    const {id} = useParams();
     const navigate = useNavigate();
-    const { user, setUser } = useContext(UserContext);
+    const {user, setUser} = useContext(UserContext);
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -60,7 +95,7 @@ const EventDetailsPage = () => {
 
     const handleSubscription = async () => {
         if (!user || !user.id) {
-            navigate("/login", { state: { from: `/events/${id}` } });
+            navigate("/login", {state: {from: `/events/${id}`}});
             return;
         }
         if (isSubscribed) {
@@ -96,36 +131,36 @@ const EventDetailsPage = () => {
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
-            link.setAttribute('download', fileName); // Указываем имя файла
+            link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            window.URL.revokeObjectURL(downloadUrl); // Освобождаем память
+            window.URL.revokeObjectURL(downloadUrl);
         } catch (error) {
             console.error('Ошибка при скачивании файла:', error);
             alert('Произошла ошибка при скачивании файла');
         }
     };
 
-    if (loading) return <div className="styles.event-details-container">Загрузка...</div>;
-    if (!event) return <div className="styles.event-details-container">Мероприятие не найдено</div>;
+    if (loading) return <div className="event-details-container">Загрузка...</div>;
+    if (!event) return <div className="event-details-container">Мероприятие не найдено</div>;
 
     return (
         <div className="event-details-container">
             <div className="header-bar">
-                <div className="top-logo" onClick={() => navigate("/events")} style={{ cursor: "pointer" }}>
-                    <img src={EventHubLogo} alt="Logo" className="logo" />
+                <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
+                    <img src={EventHubLogo} alt="Logo" className="logo"/>
                 </div>
                 <div className="login-button-container">
-                    <ProfileDropdown navigate={navigate} />
+                    <ProfileDropdown navigate={navigate}/>
                 </div>
             </div>
 
             <div className="event-details-wrapper">
                 <div className="event-details-content">
-                    <h1>{event.title}</h1>
+                    <h1 className="event-title">{event.title}</h1>
                     <p className="event-format">{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</p>
-                    <p className="event-details-date">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
+                    <p className="event-details-date">{formatDateRange(new Date(event.startDateTime), new Date(event.endDateTime))}</p>
                     <p className="event-location"><strong>Место проведения:</strong> {event.location}</p>
                     <p className="event-description">{event.description}</p>
 
@@ -139,35 +174,52 @@ const EventDetailsPage = () => {
                     )}
 
                     {event.files?.length > 0 && (
-                        <div className="event-files">
-                            <strong>Файлы:</strong>
-                            <div className="file-tags-container">
+                        <div className="event-files-section">
+                            <h3 className="files-title">Прикрепленные файлы</h3>
+                            <div className="files-container">
                                 {event.files.map((file, idx) => (
                                     <div
                                         key={idx}
-                                        className="file-tag"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleFileDownload(file.fileId, file.fileName);
-                                        }}
+                                        className="file-item"
+                                        onClick={() => handleFileDownload(file.fileId, file.fileName)}
                                     >
-                                        {file.fileName}
+                                        <div className="file-icon-name">
+                                            <i className={`bi ${getFileIcon(file.fileName)}`}></i>
+                                            <div className="file-info">
+                                                <span className="file-name-type">
+                                                    <span className="file-name" title={file.fileName}>
+                                                        {file.fileName.split('.')[0]}
+                                                    </span>
+                                                    <span className="file-type" title={file.fileName}>
+                                                        .{file.fileName.split('.').pop()}
+                                                    </span>
+                                                </span>
+
+                                                <span className="file-size">
+                                                    {file.fileSize ? formatFileSize(file.fileSize) : 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="download-icon">
+                                            <i className="bi bi-download"></i>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* Контейнер для кнопок */}
                     <div className="buttons-container">
-                        <button className="back-button-event-details" onClick={() => navigate("/events")}>Назад к списку</button>
-
-                        {/* Кнопка для подписки */}
-                        <button className={`subscription-button ${isSubscribed ? "non-subscribed" : ""}`} onClick={handleSubscription}>
+                        <button className="back-button-event-details" onClick={() => navigate("/events")}>
+                            Назад к списку
+                        </button>
+                        <button
+                            className={`subscription-button ${isSubscribed ? "non-subscribed" : ""}`}
+                            onClick={handleSubscription}
+                        >
                             {isSubscribed ? "Отказаться от участия" : "Принять участие"}
                         </button>
                     </div>
-                    
                 </div>
             </div>
         </div>

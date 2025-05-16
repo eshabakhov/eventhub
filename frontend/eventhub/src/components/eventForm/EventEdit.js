@@ -62,19 +62,25 @@ class EventEdit extends React.Component {
             case 'pdf':
                 return 'bi-file-earmark-pdf';
             case 'doc':
+                return 'bi bi-filetype-doc';
             case 'docx':
-                return 'bi-file-earmark-word';
+                return 'bi-filetype-docx';
             case 'xls':
+                return 'bi-filetype-xls'
             case 'xlsx':
-                return 'bi-file-earmark-excel';
+                return 'bi-filetype-xlsx'
             case 'ppt':
+                return 'bi-filetype-ppt';
             case 'pptx':
-                return 'bi-file-earmark-ppt';
+                return 'bi-filetype-pptx';
             case 'jpg':
+                return 'bi-filetype-jpg';
             case 'jpeg':
-            case 'png':
-            case 'gif':
                 return 'bi-file-earmark-image';
+            case 'png':
+                return 'bi-filetype-png';
+            case 'gif':
+                return 'bi-filetype-gif';
             case 'zip':
             case 'rar':
                 return 'bi-file-earmark-zip';
