@@ -57,6 +57,8 @@
     margin-top: 16px;
     color: #444;
     text-align: left;
+    text-wrap: wrap;
+    word-wrap: anywhere;
 }
 
 .event-tags {
