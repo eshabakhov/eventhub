@@ -9,6 +9,9 @@
     height: 8%;
     position: relative;
 }
+.burger-hidden {
+    visibility: hidden;
+}
 
 .header-left {
     display: flex;

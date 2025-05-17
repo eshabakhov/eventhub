@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {withNavigation} from "../events/EventsPage";
 import UserContext from "../../UserContext";
@@ -9,6 +9,45 @@ import API_BASE_URL from "../../config";
 import ConfirmModal from "../common/ConfirmModal";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import leaflet from "leaflet";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import offlineIconImg from "../../img/offline-marker.png";
+import onlineIconImg from "../../img/online-marker.png";
+import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+import {MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents} from "react-leaflet";
+// Иконки для маркеров
+const onlineIcon = new leaflet.Icon({
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+const offlineIcon = new leaflet.Icon({
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+
+// Компонент для центрирования карты
+function CenterMap({ center, zoom }) {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom]);
+    return null;
+}
+
+function MapClickHandler({ onClick }) {
+    const map = useMapEvents({
+        click: (e) => {
+            onClick(e.latlng);
+        },
+    });
+    return null;
+}
 
 export function withParams(Component) {
     return props => <Component {...props} params={useParams()}/>;
@@ -41,6 +80,8 @@ class EventEdit extends React.Component {
             description: '',
             shortDescription: '',
             location: '',
+            latitude: null,
+            longitude: null,
             startDateTime: '',
             endDateTime: '',
             format: 'OFFLINE',
@@ -50,11 +91,48 @@ class EventEdit extends React.Component {
             newTag: '',
             errors: {},
             isEditing: false,
-            selectedFile: null,
-            uploadedFiles: []
+            selectedFiles: [],
+            uploadedFiles: [],
+            isSuccess : false,
+            mapKey: Date.now() // Для принудительного перерисовывания карты
         };
+        this.mapRef = React.createRef();
     }
 
+
+    // Новые методы
+    getFileIcon = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        switch (extension) {
+            case 'pdf':
+                return 'bi-file-earmark-pdf';
+            case 'doc':
+                return 'bi bi-filetype-doc';
+            case 'docx':
+                return 'bi-filetype-docx';
+            case 'xls':
+                return 'bi-filetype-xls'
+            case 'xlsx':
+                return 'bi-filetype-xlsx'
+            case 'ppt':
+                return 'bi-filetype-ppt';
+            case 'pptx':
+                return 'bi-filetype-pptx';
+            case 'jpg':
+                return 'bi-filetype-jpg';
+            case 'jpeg':
+                return 'bi-file-earmark-image';
+            case 'png':
+                return 'bi-filetype-png';
+            case 'gif':
+                return 'bi-filetype-gif';
+            case 'zip':
+            case 'rar':
+                return 'bi-file-earmark-zip';
+            default:
+                return 'bi-file-earmark';
+        }
+    };
     sidebarRef = React.createRef();
 
     componentDidMount() {
@@ -91,13 +169,89 @@ class EventEdit extends React.Component {
     }
 
     handleChange = (e) => {
-        this.setState({
-            [e.target.name]: e.target.value,
-            errors: {
-                ...this.state.errors,
-                [e.target.name]: null
+        const { name, value } = e.target;
+
+        if (name === 'format' && value === 'ONLINE') {
+            this.setState({
+                [name]: value,
+                latitude: null,
+                longitude: null,
+                errors: {
+                    ...this.state.errors,
+                    location: null
+                }
+            });
+        } else {
+            this.setState({
+                [name]: value,
+                errors: {
+                    ...this.state.errors,
+                    [name]: null
+                }
+            });
+
+            // Если изменилось поле location и формат офлайн, пробуем геокодировать
+            if (name === 'location' && this.state.format === 'OFFLINE' && value) {
+                this.geocodeAddress(value);
             }
-        });
+        }
+    };
+
+    // Геокодирование адреса
+    geocodeAddress = async (address) => {
+        try {
+            const provider = new OpenStreetMapProvider();
+            const results = await provider.search({ query: address });
+
+            if (results.length > 0) {
+                const { x: lng, y: lat } = results[0];
+                this.setState({
+                    latitude: lat,
+                    longitude: lng,
+                    mapKey: Date.now() // Обновляем ключ карты для перерисовки
+                });
+            }
+        } catch (err) {
+            console.error('Ошибка геокодирования:', err);
+        }
+    };
+
+    // Обработка клика по карте
+    handleMapClick = async (latlng) => {
+        if (this.state.format !== 'OFFLINE') return;
+
+        const { lat, lng } = latlng;
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+
+            let address = data.display_name;
+            if (!address) {
+                // Если полный адрес не доступен, формируем его из доступных частей
+                const parts = [];
+                if (data.address?.road) parts.push(data.address.road);
+                if (data.address?.house_number) parts.push(data.address.house_number);
+                if (data.address?.city) parts.push(data.address.city);
+                if (data.address?.country) parts.push(data.address.country);
+                address = parts.join(', ');
+            }
+
+            this.setState({
+                latitude: lat,
+                longitude: lng,
+                location: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+            });
+        } catch (err) {
+            console.error('Ошибка обратного геокодирования:', err);
+            this.setState({
+                latitude: lat,
+                longitude: lng,
+                location: `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+            });
+        }
     };
 
     toggleSidebar = () => {
@@ -132,9 +286,7 @@ class EventEdit extends React.Component {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        tags: [{name: newTag.trim()}]
-                    })
+                    body: JSON.stringify({name: newTag.trim()})
                 });
 
                 if (!response.ok) {
@@ -232,6 +384,8 @@ class EventEdit extends React.Component {
                 description: this.state.description,
                 shortDescription: this.state.shortDescription,
                 location: this.state.location,
+                longitude: this.state.longitude,
+                latitude: this.state.latitude,
                 startDateTime: formatDateForBackend(this.state.startDateTime),
                 endDateTime: formatDateForBackend(this.state.endDateTime),
                 format: this.state.format,
@@ -255,6 +409,8 @@ class EventEdit extends React.Component {
             })
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка при сохранении');
+                    this.setState({isSuccess : true})
+
                 })
                 .catch(err => console.error('Ошибка сохранения:', err));
         }
@@ -266,78 +422,93 @@ class EventEdit extends React.Component {
     };
 
     handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            this.setState({selectedFile: file});
+        const files = Array.from(e.target.files);
+        if (files && files.length > 0) {
+            this.setState(prevState => ({
+                selectedFiles: [...prevState.selectedFiles, ...files]
+            }));
         }
     };
 
-    handleUploadFile = () => {
-        const {selectedFile} = this.state;
+    handleRemoveSelectedFile = (index) => {
+        this.setState(prev => ({
+            selectedFiles: prev.selectedFiles.filter((_, i) => i !== index)
+        }));
+    };
+
+    formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+
+    handleUploadFiles = async () => {
+        const {selectedFiles} = this.state;
         const {eventId} = this.props.params;
 
-        if (!selectedFile) {
+        if (!selectedFiles || selectedFiles.length === 0) {
             this.setState({
                 showConfirmModal: true,
-                mainText: "Сначала выберите файл"
+                mainText: "Сначала выберите файлы"
             });
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const fileContentBase64 = reader.result.split(',')[1];
+        try {
+            const uploadPromises = selectedFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        const fileContentBase64 = reader.result.split(',')[1];
 
-            const eventFileDTO = {
-                fileName: selectedFile.name,
-                fileType: selectedFile.type,
-                fileSize: selectedFile.size,
-                fileContent: fileContentBase64
-            };
+                        const eventFileDTO = {
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileSize: file.size,
+                            fileContent: fileContentBase64
+                        };
 
-            let addedFile = {
-                fileId: null,
-                fileName: undefined
-            };
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
+                                method: "POST",
+                                credentials: "include",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json"
+                                },
+                                body: JSON.stringify(eventFileDTO)
+                            });
 
-            try {
-                const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
-                    method: "POST",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify(eventFileDTO)
+                            if (!res.ok) throw new Error("Ошибка при загрузке файла");
+
+                            const fileId = await res.json();
+                            resolve({fileId, fileName: file.name});
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.readAsDataURL(file);
                 });
+            });
 
-                if (!res.ok) throw new Error("Ошибка при загрузке файла");
+            const results = await Promise.all(uploadPromises);
 
+            this.setState(prev => ({
+                files: [...prev.files, ...results],
+                selectedFiles: [],
+                showConfirmModal: true,
+                mainText: `Успешно загружено ${results.length} файлов`
+            }));
 
-                addedFile.fileId = await res.json(); // Получаем данные ответа
-                addedFile.fileName = eventFileDTO.fileName;
-
-
-                this.setState(prevState => ({
-                    files: [...prevState.files, addedFile],
-                    selectedFile: null
-                }));
-                this.setState({
-                    showConfirmModal: true,
-                    mainText: "Файл успешно загружен!"
-                });
-                this.setState({selectedFile: null});
-            } catch (err) {
-                console.error("Ошибка при загрузке файла:", err);
-                this.setState({
-                    showConfirmModal: true,
-                    mainText: "Не удалось загрузить файл."
-                });
-
-            }
-        };
-
-        reader.readAsDataURL(selectedFile);
+        } catch (err) {
+            console.error("Ошибка при загрузке файлов:", err);
+            this.setState({
+                showConfirmModal: true,
+                mainText: "Не удалось загрузить некоторые файлы"
+            });
+        }
     };
 
     handleBack = () => {
@@ -354,12 +525,16 @@ class EventEdit extends React.Component {
     render() {
         const {
             title, description, shortDescription, location, errors, isEditing,
-            tags, newTag, files, showConfirmModal, mainText, sideBarOpen
+            tags, newTag, files, showConfirmModal, mainText, sideBarOpen, isSuccess
         } = this.state;
         const {navigate} = this.props;
+        const position = this.state.latitude && this.state.longitude
+            ? [this.state.latitude, this.state.longitude]
+            : [55.75, 37.61];
+        const zoom = 18;
 
         return (
-            <div>
+            <div className='page-container'>
                 <ConfirmModal
                     isOpen={showConfirmModal}
                     mainText={mainText}
@@ -377,6 +552,11 @@ class EventEdit extends React.Component {
                 <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
 
                 <div className="event-edit-container">
+                    <div className={`msg ok_msg ${!isSuccess ? 'hidden' : ''}`}>
+                        <div role="alert" className="msg_text">
+                            <b>Изменения сохранены</b>
+                        </div>
+                    </div>
                     <div className="event-edit-card">
                         <label className="event-edit-label">
                             Название:
@@ -392,11 +572,6 @@ class EventEdit extends React.Component {
                             Краткое описание:
                             <input className="event-edit-input" type="text" name="shortDescription"
                                    value={shortDescription} onChange={this.handleChange}/>
-                        </label>
-                        <label className="event-edit-label">
-                            Локация:
-                            <input className="event-edit-input" type="text" name="location" value={location}
-                                   onChange={this.handleChange}/>
                         </label>
 
                         <div className="event-edit-row">
@@ -439,7 +614,46 @@ class EventEdit extends React.Component {
                             </label>
                         </div>
 
-                        {/* Поле для добавления тегов */}
+                        {this.state.format === 'OFFLINE' && (
+                            <>
+                                <label className="event-edit-label">
+                                    Место проведения:
+                                    <input
+                                        className="event-edit-input"
+                                        type="text"
+                                        name="location"
+                                        value={this.state.location}
+                                        onChange={this.handleChange}
+                                    />
+                                </label>
+
+                                <div className="map-container">
+                                    <MapContainer
+                                        key={this.state.mapKey}
+                                        center={position}
+                                        zoom={zoom}
+                                        style={{height: '300px', borderRadius: '8px'}}
+                                    >
+                                        <TileLayer
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        />
+                                        <CenterMap center={position} zoom={zoom}/>
+                                        <MapClickHandler onClick={this.handleMapClick}/>
+                                        {this.state.latitude && this.state.longitude && (
+                                            <Marker
+                                                position={[this.state.latitude, this.state.longitude]}
+                                                icon={offlineIcon}
+                                            >
+                                                <Popup>{this.state.location}</Popup>
+                                            </Marker>
+                                        )}
+                                    </MapContainer>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Поле для тегов */}
                         <label className="event-edit-label">
                             Теги:
                             <div className="tags-input-container">
@@ -461,68 +675,111 @@ class EventEdit extends React.Component {
                             <div className="tags-container">
                                 {tags.map((tag, index) => (
                                     <span key={tag.id || index} className="tag">
-                                                {tag.name || tag}
+                                        {tag.name || tag}
                                         <button
                                             type="button"
                                             className="tag-remove"
                                             onClick={() => this.handleRemoveTag(tag)}
                                         >
-                                                    ×
-                                                </button>
-                                            </span>
+                                            ×
+                                        </button>
+                                    </span>
                                 ))}
                             </div>
                         </label>
 
+                        {/* Поле для файлов */}
+                        <div className="files-section">
+                            <h3 className="files-title">Прикрепленные файлы</h3>
 
-                        <div>
-                            <input
-                                type="file"
-                                accept="*/*"
-                                style={{display: "none"}}
-                                ref={(ref) => (this.fileInputRef = ref)}
-                                onChange={this.handleFileChange}
-                            />
-                            <button
-                                type="button"
-                                className="event-edit-button"
+                            {files.length > 0 && (
+                                <div className="uploaded-files-container">
+                                    {files.map((file, index) => (
+                                        <div key={file.fileId || index} className="uploaded-file">
+                                            <div className="file-icon-name">
+                                                <i className={`bi ${this.getFileIcon(file.fileName)}`}></i>
+                                                <span className="file-name">{file.fileName || file}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={() => this.handleRemoveFile(file)}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div
+                                id="dropZone"
+                                className="drop-zone"
                                 onClick={this.handleSelectFile}
-                            >
-                                <i className="bi bi-paperclip"></i> Прикрепить файл
-                            </button>
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.add("dragover");
+                                }}
+                                onDragLeave={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.remove("dragover");
+                                }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.currentTarget.classList.remove("dragover");
 
-                            <button
-                                type="button"
-                                className="event-edit-button"
-                                onClick={this.handleUploadFile}
-                                disabled={!this.state.selectedFile}
-                            ><i className="bi bi-upload"></i>   Загрузить
-                            </button>
-                            {this.state.selectedFile && (
-                                <div>
-                                    Файл: <strong>{this.state.selectedFile.name}</strong>
+                                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                        this.setState(prevState => ({
+                                            selectedFiles: [...prevState.selectedFiles, ...Array.from(e.dataTransfer.files)]
+                                        }));
+                                        e.dataTransfer.clearData();
+                                    }
+                                }}
+                            >
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    style={{display: 'none'}}
+                                    ref={(ref) => (this.fileInputRef = ref)}
+                                    onChange={this.handleFileChange}
+                                    multiple
+                                />
+                                <div className="drop-zone-content">
+                                    <i className="bi bi-cloud-arrow-up"></i>
+                                    <p>Перетащите файлы сюда или кликните для выбора</p>
+                                    <small>Можно выбрать несколько файлов</small>
+                                </div>
+                            </div>
+
+                            {this.state.selectedFiles && this.state.selectedFiles.length > 0 && (
+                                <div className="selected-files-container">
+                                    <h4>Выбранные файлы:</h4>
+                                    {this.state.selectedFiles.map((file, index) => (
+                                        <div key={index} className="selected-file">
+                                            <span className="file-name">{file.name}</span>
+                                            <span className="file-size">({this.formatFileSize(file.size)})</span>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={() => this.handleRemoveSelectedFile(index)}
+                                            >
+                                                <i className="bi bi-x-circle"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        className="event-edit-button upload-button"
+                                        onClick={this.handleUploadFiles}
+                                    >
+                                        <i className="bi bi-upload"></i> Загрузить все файлы
+                                    </button>
                                 </div>
                             )}
                         </div>
-
-                        {/* Поле для добавления файлов */}
-                        <label className="event-label">
-                            <div className="files-container">
-                                {files.map((file, index) => (
-                                    <span key={file.fileId || index} className="file">
-                                        <i className="bi bi-file-earmark-fill"></i>
-                                         {file.fileName || file}
-                                        <button
-                                            type="button"
-                                            className="file-remove"
-                                            onClick={() => this.handleRemoveFile(file)}
-                                        >
-                                                    ×
-                                                </button>
-                                            </span>
-                                ))}
-                            </div>
-                        </label>
 
                         <div className="event-edit-card-buttons">
                             <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">

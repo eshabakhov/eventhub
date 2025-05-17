@@ -116,7 +116,7 @@ public class EventService {
     public ResponseList<EventDTO> getListByMemberId(Integer page, Integer pageSize, String search, List<String> tags, Long memberId) {
         Condition condition = getCommonListCondition(search, tags);
         if (Objects.nonNull(memberId)) {
-            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId, page, pageSize)));
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(subscribeRepository.fetchEventsIDsByMemberId(memberId)));
         }
         return getCommonList(condition, page, pageSize);
     }
@@ -198,9 +198,6 @@ public class EventService {
         if (Objects.nonNull(eventDTO.getEndDateTime()))
             event.setEndDateTime(eventDTO.getEndDateTime());
 
-        // TODO
-        // Нужно подумать проверять ли соответствие адреса координатам и что первичнее - адрес или координаты,
-        // если на вход придет московский адрес и координаты Дагестана
         if (Objects.nonNull(eventDTO.getLocation()))
             event.setLocation(eventDTO.getLocation());
 

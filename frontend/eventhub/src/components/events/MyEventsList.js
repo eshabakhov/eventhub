@@ -17,6 +17,7 @@ import ProfileDropdown from "../profile/ProfileDropdown";
 import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import Pagination from "../common/Pagination";
 import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
@@ -73,81 +74,6 @@ function FitToAllMarkers({events}) {
         }
     }, [events, map]);
     return null;
-}
-
-const Pagination = ({totalPages, currentPage, handlePageClick}) => {
-    return (
-        <div className={`pagination-controls ${totalPages < 2 ? "hidden" : ""}`}>
-            <button
-                className="back-forward"
-                onClick={() => handlePageClick(currentPage - 1)}
-                disabled={currentPage === 1}
-            >
-                &lt;
-            </button>
-
-            {/* Первая страница */}
-            <button
-                className="page-button"
-                onClick={() => handlePageClick(1)}
-                disabled={currentPage === 1}
-            >
-                1
-            </button>
-
-            {/* Многоточие после первой страницы */}
-            {currentPage > 3 && <span className="pagination-ellipsis">...</span>}
-
-            {/* Текущая - 1 */}
-            {currentPage > 2 && (
-                <button
-                    className="page-button"
-                    onClick={() => handlePageClick(currentPage - 1)}
-                >
-                    {currentPage - 1}
-                </button>
-            )}
-
-            {/* Текущая страница */}
-            {currentPage !== 1 && currentPage !== totalPages && (
-                <button className="page-button active" disabled>
-                    {currentPage}
-                </button>
-            )}
-
-            {/* Текущая + 1 */}
-            {currentPage < totalPages - 1 && (
-                <button
-                    className="page-button"
-                    onClick={() => handlePageClick(currentPage + 1)}
-                >
-                    {currentPage + 1}
-                </button>
-            )}
-
-            {/* Многоточие перед последней страницей */}
-            {currentPage < totalPages - 2 && <span className="pagination-ellipsis">...</span>}
-
-            {/* Последняя страница */}
-            {totalPages > 1 && (
-                <button
-                    className="page-button"
-                    onClick={() => handlePageClick(totalPages)}
-                    disabled={currentPage === totalPages}
-                >
-                    {totalPages}
-                </button>
-            )}
-
-            <button
-                className="back-forward"
-                onClick={() => handlePageClick(currentPage + 1)}
-                disabled={currentPage === totalPages}
-            >
-                &gt;
-            </button>
-        </div>
-    );
 }
 
 class MyEventsList extends Component {
@@ -220,9 +146,9 @@ class MyEventsList extends Component {
         const currentUser = this.context.user
         let url;
         if (currentUser && currentUser.role === "ORGANIZER") {
-            url = `${API_BASE_URL}/v1/events/organizers/${currentUser.id}?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/v1/events/organizers/${currentUser.id}?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`
         } else if (currentUser && currentUser.role === "MEMBER") {
-            url = `${API_BASE_URL}/v1/members/${currentUser.id}/events?page=${page}&size=${eventsPerPage}${searchParam}${searchTagsParam}`
+            url = `${API_BASE_URL}/v1/members/${currentUser.id}/events?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`
         }
         fetch(url, {
             method: "GET",
