@@ -207,6 +207,8 @@ public class EventService {
         if (Objects.nonNull(eventDTO.getLongitude()))
             event.setLongitude(eventDTO.getLongitude());
 
+        if (Objects.nonNull(eventDTO.getPictures()))
+            event.setPictures(eventDTO.getPictures());
         event.setId(id);
         eventDao.update(event);
         return event;
