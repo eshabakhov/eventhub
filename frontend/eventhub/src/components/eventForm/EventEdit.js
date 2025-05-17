@@ -228,16 +228,14 @@ class EventEdit extends React.Component {
             );
             const data = await response.json();
 
-            let address = data.display_name;
-            if (!address) {
-                // Если полный адрес не доступен, формируем его из доступных частей
-                const parts = [];
-                if (data.address?.road) parts.push(data.address.road);
-                if (data.address?.house_number) parts.push(data.address.house_number);
-                if (data.address?.city) parts.push(data.address.city);
-                if (data.address?.country) parts.push(data.address.country);
-                address = parts.join(', ');
-            }
+            // Если полный адрес не доступен, формируем его из доступных частей
+            const parts = [];
+            if (data.address?.country) parts.push(data.address.country);
+            if (data.address?.city) parts.push(data.address.city);
+            if (data.address?.road) parts.push(data.address.road);
+            if (data.address?.house_number) parts.push(data.address.house_number);
+
+            let address = parts.join(', ');
 
             this.setState({
                 latitude: lat,
@@ -410,7 +408,7 @@ class EventEdit extends React.Component {
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка при сохранении');
                     this.setState({isSuccess : true})
-
+                    document.scrollingElement.scrollTo(0,0)
                 })
                 .catch(err => console.error('Ошибка сохранения:', err));
         }
