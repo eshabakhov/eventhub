@@ -1,10 +1,10 @@
 .event-details-wrapper {
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* выравнивание контента сверху */
-    min-height: calc(100vh - 60px); /* оставляем для обеспечения высоты */
+    align-items: flex-start;
+    min-height: calc(100vh - 60px);
     background-color: #f5f5f5;
-    padding: 40px 20px;
+    padding: 20px 20px;
 }
 
 .event-details-content {
@@ -12,8 +12,7 @@
     padding: 32px;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: 100%;
+    max-width: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,12 +27,25 @@
     color: #333;
 }
 
+.event-description-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+
 .event-details-date,
-.event-location {
-    font-size: 16px;
+.event-location,
+.event-details-format {
+    font-size: 1rem;
     font-weight: 500;
     color: #666;
-    margin-bottom: 8px;
+    margin-left: 10px;
 }
 
 .event-description {
@@ -41,17 +53,18 @@
     line-height: 1.6;
     margin-top: 16px;
     color: #444;
+    text-align: left;
 }
 
 .event-tags {
-    margin-bottom: 24px; /* увеличен отступ между тегами и кнопкой */
+    margin-bottom: 24px;
 }
 
 .buttons-container {
     display: flex;
-    justify-content: space-between; /* Для выравнивания кнопок по краям */
+    justify-content: space-between;
     width: 100%;
-    margin-top: 20px; /* Отступ сверху для блока с кнопками */
+    margin-top: 20px;
     gap: 20px;
 }
 
@@ -106,7 +119,6 @@
     background-color: #C62828;
     transform: translateY(0);
 }
-/* Добавьте эти стили в ваш EventDetailsPage.css */
 
 .event-files-section {
     width: 100%;
@@ -144,7 +156,7 @@
 .file-item:hover {
     background-color: #e9ecef;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .file-icon-name {
@@ -172,10 +184,11 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    -webkit-line-clamp: 1; /* количество строк */
-    max-height: calc(1.2em * 3); /* по необходимости */
+    -webkit-line-clamp: 1;
+    max-height: calc(1.2em * 3);
     word-break: break-all;
 }
+
 .file-type {
     font-size: 0.9rem;
     color: #212529;
@@ -205,4 +218,40 @@
     color: #3b82f6;
 }
 
-/* Остальные существующие стили оставьте без изменений */
+/* Стили для карты */
+.event-map-section {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+
+.map-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.map-container {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.marker-cluster-custom {
+    background: #3b82f6;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.marker-cluster-custom span {
+    font-size: 12px;
+}

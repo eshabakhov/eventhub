@@ -6,6 +6,26 @@ import EventHubLogo from "../../img/eventhub.png";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import api from "../common/AxiosInstance";
 import CurrentUser from "../common/CurrentUser";
+import {MapContainer, TileLayer, Marker, Popup, useMap} from "react-leaflet";
+import leaflet from "leaflet";
+import "leaflet/dist/leaflet.css";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import offlineIconImg from "../../img/offline-marker.png";
+import onlineIconImg from "../../img/online-marker.png";
+
+const onlineIcon = new leaflet.Icon({
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+const offlineIcon = new leaflet.Icon({
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
 
 const formatDateRange = (start, end) => {
     const options = {day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"};
@@ -13,6 +33,14 @@ const formatDateRange = (start, end) => {
     const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     return `${startStr} - ${endStr}`;
 };
+
+function CenterMap({center, zoom}) {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom]);
+    return null;
+}
 
 async function checkSubscription(id, user) {
     const res = await api.get(`/v1/members/${user.id}/subscribe/${id}`, {
@@ -23,7 +51,6 @@ async function checkSubscription(id, user) {
     const data = await res.data;
     return data.eventId === parseInt(id) && data.userId === user.id;
 }
-
 
 const getFileIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
@@ -151,6 +178,11 @@ const EventDetailsPage = () => {
     if (loading) return <div className="event-details-container">Загрузка...</div>;
     if (!event) return <div className="event-details-container">Мероприятие не найдено</div>;
 
+    // Координаты для карты
+    const hasCoordinates = event.latitude && event.longitude;
+    const position = hasCoordinates ? [event.latitude, event.longitude] : [55.75, 37.61];
+    const zoom = event.format === "ONLINE" ? 4 : 15;
+
     return (
         <div className="event-details-container">
             <div className="header-bar">
@@ -164,18 +196,59 @@ const EventDetailsPage = () => {
 
             <div className="event-details-wrapper">
                 <div className="event-details-content">
-                    <h1 className="event-title">{event.title}</h1>
-                    <p className="event-format">{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</p>
-                    <p className="event-details-date">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
-                    <p className="event-location"><strong>Место проведения:</strong> {event.location}</p>
-                    <p className="event-description">{event.description}</p>
 
+                    <h1 className="event-title">{event.title}</h1>
                     {event.tags?.length > 0 && (
                         <div className="event-tags">
-                            <strong>Теги:</strong>{" "}
                             {event.tags.map((tag, idx) => (
                                 <span key={idx} className="event-tag">{tag.name}</span>
                             ))}
+                        </div>
+                    )}
+                    <div className="event-description-header">Формат:
+                        <div className="event-details-format">
+                            {event.format === "ONLINE" ? " Онлайн" : " Офлайн"}
+                        </div>
+                    </div>
+
+                    <div className="event-description-header"> Дата проведения:
+                        <div className="event-details-date">
+                            {formatDateRange(event.startDateTime, event.endDateTime)}
+                        </div>
+                    </div>
+
+                    <div className="event-description-header"> Адрес:
+                        <div className="event-location">
+                            {event.location}
+                        </div>
+                    </div>
+
+                    <h2 className="event-description-header">О событии:</h2>
+                    <p className="event-description">{event.description}</p>
+
+                    {/* Карта */}
+                    {event.format === "OFFLINE" && hasCoordinates && (
+                        <div className="event-map-section">
+                            <h3 className="map-title">Место проведения</h3>
+                            <div className="map-container">
+                                <MapContainer
+                                    center={position}
+                                    zoom={event.format === "OFFLINE" ? 18 : 10}
+                                    style={{height: "300px", borderRadius: "8px"}}
+                                >
+                                    <TileLayer
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    />
+                                    <CenterMap center={position} zoom={event.format === "OFFLINE" ? 18 : 10}/>
+                                    <Marker
+                                        position={position}
+                                        icon={event.format === "ONLINE" ? onlineIcon : offlineIcon}
+                                    >
+                                        <Popup>{event.location}</Popup>
+                                    </Marker>
+                                </MapContainer>
+                            </div>
                         </div>
                     )}
 
@@ -235,7 +308,6 @@ const EventDetailsPage = () => {
                                 Редактировать
                             </button>
                         )}
-
                     </div>
                 </div>
             </div>
