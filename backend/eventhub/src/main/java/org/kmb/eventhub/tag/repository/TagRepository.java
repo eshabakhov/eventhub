@@ -19,12 +19,10 @@ public class TagRepository {
 
     private final DSLContext dslContext;
 
-    public List<Tag> fetch(Condition condition, Integer page, Integer pageSize) {
+    public List<Tag> fetch(Condition condition) {
         return dslContext
                 .selectFrom(TAG)
                 .where(condition)
-                .limit(pageSize)
-                .offset((page - 1) * pageSize)
                 .fetchInto(Tag.class);
     }
 
