@@ -1,6 +1,7 @@
 package org.kmb.eventhub.recommendation.controller;
 
 import lombok.AllArgsConstructor;
+import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.recommendation.service.RecommendationService;
 import org.kmb.eventhub.event.dto.EventDTO;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +15,11 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
 
     @GetMapping
-    public List<EventDTO> getRecommendations(
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        return recommendationService.getRecommendedEvents(pageSize);
+    public ResponseList<EventDTO> getRecommendations(
+            @RequestParam(value = "lat") double latitude,
+            @RequestParam(value = "lon") double longitude,
+            @RequestParam(value = "limit", defaultValue = "10") Integer limit
+            ) {
+        return recommendationService.getRecommendedEvents(latitude, longitude, limit);
     }
 }

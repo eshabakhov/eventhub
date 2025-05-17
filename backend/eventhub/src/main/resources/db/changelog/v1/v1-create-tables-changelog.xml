@@ -214,31 +214,28 @@
             ]]>
         </sql>
     </changeSet>
-    <changeSet id="eventhub-tables/v1/13-05-2025/1" author="Lebedev_Danil">
+    <changeSet id="eventhub-tables/v1/15-05-2025/1" author="Lebedev_Danil">
         <sql>
             <![CDATA[
-            CREATE TABLE user_history (
+            CREATE TABLE user_event_interactions (
                 id BIGSERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL,
-                event_id BIGINT NOT NULL,
-                action_type VARCHAR(20) NOT NULL,
-                action_value VARCHAR(50),
-                action_time timestamp NOT NULL DEFAULT NOW(),
-                latitude numeric,
-                longitude numeric,
-                CONSTRAINT fk_user_history_user
+                user_id BIGINT,
+                event_id BIGINT,
+                interaction_type VARCHAR(50),
+                created_at timestamp NOT NULL DEFAULT NOW(),
+            CONSTRAINT valid_interaction_type CHECK (interaction_type IN ('VIEW', 'FAVORITE')),
+            CONSTRAINT fk_user_interactions
                     FOREIGN KEY (user_id)
                         REFERENCES public.user(id)
                         ON DELETE RESTRICT
                          ON UPDATE CASCADE,
-                CONSTRAINT fk_user_history_event
+            CONSTRAINT fk_event_interactions
                     FOREIGN KEY (event_id)
                         REFERENCES public.event(id)
                         ON DELETE RESTRICT
-                         ON UPDATE CASCADE,
-                CONSTRAINT chk_action_type CHECK (action_type IN ('VIEW', 'FAVORITE', 'RATE', 'SHARE'))
-
+                         ON UPDATE CASCADE
 );
+CREATE INDEX idx_user_event_interactions_user_id ON user_event_interactions(user_id);
             ]]>
         </sql>
     </changeSet>
