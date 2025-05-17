@@ -34,7 +34,6 @@ public class MapService {
         // Здесь превращаем адрес в строку Страна, Край, город, улица, номер дома
         Map<String, Object> addr = (Map<String, Object>) response.getOrDefault("address", Map.of());
         String country = (String) addr.getOrDefault("country", "");
-        country = Objects.equals(country, "Россия") ? "" : country;
         String city = (String) addr.getOrDefault("city", "");
         String road = (String) addr.getOrDefault("road", "");
         String houseNumber = (String) addr.getOrDefault("house_number", "");

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {withNavigation} from "../events/EventsPage";
 import UserContext from "../../UserContext";
@@ -9,6 +9,45 @@ import API_BASE_URL from "../../config";
 import ConfirmModal from "../common/ConfirmModal";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
+import leaflet from "leaflet";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import offlineIconImg from "../../img/offline-marker.png";
+import onlineIconImg from "../../img/online-marker.png";
+import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+import {MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents} from "react-leaflet";
+// Иконки для маркеров
+const onlineIcon = new leaflet.Icon({
+    iconUrl: onlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+const offlineIcon = new leaflet.Icon({
+    iconUrl: offlineIconImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+
+// Компонент для центрирования карты
+function CenterMap({ center, zoom }) {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom]);
+    return null;
+}
+
+function MapClickHandler({ onClick }) {
+    const map = useMapEvents({
+        click: (e) => {
+            onClick(e.latlng);
+        },
+    });
+    return null;
+}
 
 export function withParams(Component) {
     return props => <Component {...props} params={useParams()}/>;
@@ -41,6 +80,8 @@ class EventEdit extends React.Component {
             description: '',
             shortDescription: '',
             location: '',
+            latitude: null,
+            longitude: null,
             startDateTime: '',
             endDateTime: '',
             format: 'OFFLINE',
@@ -51,9 +92,13 @@ class EventEdit extends React.Component {
             errors: {},
             isEditing: false,
             selectedFiles: [],
-            uploadedFiles: []
+            uploadedFiles: [],
+            isSuccess : false,
+            mapKey: Date.now() // Для принудительного перерисовывания карты
         };
+        this.mapRef = React.createRef();
     }
+
 
     // Новые методы
     getFileIcon = (fileName) => {
@@ -124,13 +169,87 @@ class EventEdit extends React.Component {
     }
 
     handleChange = (e) => {
-        this.setState({
-            [e.target.name]: e.target.value,
-            errors: {
-                ...this.state.errors,
-                [e.target.name]: null
+        const { name, value } = e.target;
+
+        if (name === 'format' && value === 'ONLINE') {
+            this.setState({
+                [name]: value,
+                latitude: null,
+                longitude: null,
+                errors: {
+                    ...this.state.errors,
+                    location: null
+                }
+            });
+        } else {
+            this.setState({
+                [name]: value,
+                errors: {
+                    ...this.state.errors,
+                    [name]: null
+                }
+            });
+
+            // Если изменилось поле location и формат офлайн, пробуем геокодировать
+            if (name === 'location' && this.state.format === 'OFFLINE' && value) {
+                this.geocodeAddress(value);
             }
-        });
+        }
+    };
+
+    // Геокодирование адреса
+    geocodeAddress = async (address) => {
+        try {
+            const provider = new OpenStreetMapProvider();
+            const results = await provider.search({ query: address });
+
+            if (results.length > 0) {
+                const { x: lng, y: lat } = results[0];
+                this.setState({
+                    latitude: lat,
+                    longitude: lng,
+                    mapKey: Date.now() // Обновляем ключ карты для перерисовки
+                });
+            }
+        } catch (err) {
+            console.error('Ошибка геокодирования:', err);
+        }
+    };
+
+    // Обработка клика по карте
+    handleMapClick = async (latlng) => {
+        if (this.state.format !== 'OFFLINE') return;
+
+        const { lat, lng } = latlng;
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+
+            // Если полный адрес не доступен, формируем его из доступных частей
+            const parts = [];
+            if (data.address?.country) parts.push(data.address.country);
+            if (data.address?.city) parts.push(data.address.city);
+            if (data.address?.road) parts.push(data.address.road);
+            if (data.address?.house_number) parts.push(data.address.house_number);
+
+            let address = parts.join(', ');
+
+            this.setState({
+                latitude: lat,
+                longitude: lng,
+                location: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+            });
+        } catch (err) {
+            console.error('Ошибка обратного геокодирования:', err);
+            this.setState({
+                latitude: lat,
+                longitude: lng,
+                location: `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+            });
+        }
     };
 
     toggleSidebar = () => {
@@ -263,6 +382,8 @@ class EventEdit extends React.Component {
                 description: this.state.description,
                 shortDescription: this.state.shortDescription,
                 location: this.state.location,
+                longitude: this.state.longitude,
+                latitude: this.state.latitude,
                 startDateTime: formatDateForBackend(this.state.startDateTime),
                 endDateTime: formatDateForBackend(this.state.endDateTime),
                 format: this.state.format,
@@ -286,6 +407,8 @@ class EventEdit extends React.Component {
             })
                 .then(res => {
                     if (!res.ok) throw new Error('Ошибка при сохранении');
+                    this.setState({isSuccess : true})
+                    document.scrollingElement.scrollTo(0,0)
                 })
                 .catch(err => console.error('Ошибка сохранения:', err));
         }
@@ -400,9 +523,13 @@ class EventEdit extends React.Component {
     render() {
         const {
             title, description, shortDescription, location, errors, isEditing,
-            tags, newTag, files, showConfirmModal, mainText, sideBarOpen
+            tags, newTag, files, showConfirmModal, mainText, sideBarOpen, isSuccess
         } = this.state;
         const {navigate} = this.props;
+        const position = this.state.latitude && this.state.longitude
+            ? [this.state.latitude, this.state.longitude]
+            : [55.75, 37.61];
+        const zoom = 18;
 
         return (
             <div className='page-container'>
@@ -423,6 +550,11 @@ class EventEdit extends React.Component {
                 <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
 
                 <div className="event-edit-container">
+                    <div className={`msg ok_msg ${!isSuccess ? 'hidden' : ''}`}>
+                        <div role="alert" className="msg_text">
+                            <b>Изменения сохранены</b>
+                        </div>
+                    </div>
                     <div className="event-edit-card">
                         <label className="event-edit-label">
                             Название:
@@ -480,11 +612,44 @@ class EventEdit extends React.Component {
                             </label>
                         </div>
 
-                        <label className="event-edit-label">
-                            Место проведения:
-                            <input className="event-edit-input" type="text" name="location" value={location}
-                                   onChange={this.handleChange}/>
-                        </label>
+                        {this.state.format === 'OFFLINE' && (
+                            <>
+                                <label className="event-edit-label">
+                                    Место проведения:
+                                    <input
+                                        className="event-edit-input"
+                                        type="text"
+                                        name="location"
+                                        value={this.state.location}
+                                        onChange={this.handleChange}
+                                    />
+                                </label>
+
+                                <div className="map-container">
+                                    <MapContainer
+                                        key={this.state.mapKey}
+                                        center={position}
+                                        zoom={zoom}
+                                        style={{height: '300px', borderRadius: '8px'}}
+                                    >
+                                        <TileLayer
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        />
+                                        <CenterMap center={position} zoom={zoom}/>
+                                        <MapClickHandler onClick={this.handleMapClick}/>
+                                        {this.state.latitude && this.state.longitude && (
+                                            <Marker
+                                                position={[this.state.latitude, this.state.longitude]}
+                                                icon={offlineIcon}
+                                            >
+                                                <Popup>{this.state.location}</Popup>
+                                            </Marker>
+                                        )}
+                                    </MapContainer>
+                                </div>
+                            </>
+                        )}
 
                         {/* Поле для тегов */}
                         <label className="event-edit-label">
@@ -613,63 +778,6 @@ class EventEdit extends React.Component {
                                 </div>
                             )}
                         </div>
-
-                        {/*<div>*/}
-                        {/*    <input*/}
-                        {/*        type="file"*/}
-
-                        {/*        style={{display: "none"}}*/}
-                        {/*        ref={(ref) => (this.fileInputRef = ref)}*/}
-                        {/*        onChange={this.handleFileChange}*/}
-                        {/*    />*/}
-                        {/*    <button*/}
-                        {/*        type="button"*/}
-                        {/*        className="event-edit-button"*/}
-                        {/*        onClick={this.handleSelectFile}*/}
-                        {/*    >*/}
-                        {/*        <i className="bi bi-paperclip"></i> Прикрепить файл*/}
-                        {/*    </button>*/}
-
-                        {/*    <button*/}
-                        {/*        type="button"*/}
-                        {/*        className="event-edit-button"*/}
-                        {/*        onClick={this.handleUploadFile}*/}
-                        {/*        disabled={!this.state.selectedFile}*/}
-                        {/*    ><i className="bi bi-upload"></i> Загрузить*/}
-                        {/*    </button>*/}
-                        {/*    {this.state.selectedFile && (*/}
-                        {/*        <div>*/}
-                        {/*            Файл: <strong>{this.state.selectedFile.name}</strong>*/}
-                        {/*        </div>*/}
-                        {/*    )}*/}
-                        {/*</div>*/}
-
-                        {/* Поле для добавления файлов */}
-                        {/*<label className="event-label">*/}
-                        {/*    <div className="files-container">*/}
-                        {/*        {files.map((file, index) => (*/}
-                        {/*            <span key={file.fileId || index} className="file">*/}
-                        {/*                <i className="bi bi-file-earmark-fill"></i>*/}
-                        {/*                {file.fileName || file}*/}
-                        {/*                <button*/}
-                        {/*                    type="button"*/}
-                        {/*                    className="file-remove"*/}
-                        {/*                    onClick={() => this.handleRemoveFile(file)}*/}
-                        {/*                >*/}
-                        {/*                            ×*/}
-                        {/*                        </button>*/}
-                        {/*                    </span>*/}
-                        {/*        ))}*/}
-                        {/*    </div>*/}
-                        {/*</label>*/}
-                        {/*<div className="form-group">*/}
-                        {/*    <label>Attachments</label>*/}
-                        {/*    <div id="dropZone" className="drop-zone">*/}
-                        {/*        <input type="file" id="fileInput" multiple style={{display: 'inline'}}/>*/}
-                        {/*        или перетащите его сюда*/}
-                        {/*    </div>*/}
-                        {/*    <div className="note">Upload up to 3 Files. Max File Size: 10 MB</div>*/}
-                        {/*</div>*/}
 
                         <div className="event-edit-card-buttons">
                             <button type="cancel" onClick={this.handleBack} className="event-edit-button cancel">
