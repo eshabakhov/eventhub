@@ -4,17 +4,15 @@ import {useNavigate} from "react-router-dom";
 import Logo from "./Logo";
 import "../../css/Header.css";
 
-const Header = ({onBurgerButtonClick, title, user}) => {
+const Header = ({onBurgerButtonClick, title, user, burgerVisible = true}) => {
     const navigate = useNavigate();
     return (
         <div className="header-bar">
             <div className="header-left">
-                <div className="burger-button" onClick={onBurgerButtonClick}>
-                    <i className="bi bi-list"></i>
+
+                <div className={`burger-button ${!burgerVisible ? 'burger-hidden' : ''} `} onClick={onBurgerButtonClick}>
+                    <i className="bi bi-list"/>
                 </div>
-                {/* <div className="top-logo" onClick={() => navigate("/events")}>
-                    <img src={EventHubLogo} alt="Logo" className="logo"/>
-                </div> */}
                 <Logo/>
             </div>
             <h1 className="header-title">{title}</h1>
