@@ -405,7 +405,7 @@ class EventEdit extends React.Component {
         const {navigate} = this.props;
 
         return (
-            <div>
+            <div className='page-container'>
                 <ConfirmModal
                     isOpen={showConfirmModal}
                     mainText={mainText}
@@ -438,11 +438,6 @@ class EventEdit extends React.Component {
                             Краткое описание:
                             <input className="event-edit-input" type="text" name="shortDescription"
                                    value={shortDescription} onChange={this.handleChange}/>
-                        </label>
-                        <label className="event-edit-label">
-                            Локация:
-                            <input className="event-edit-input" type="text" name="location" value={location}
-                                   onChange={this.handleChange}/>
                         </label>
 
                         <div className="event-edit-row">
@@ -484,6 +479,12 @@ class EventEdit extends React.Component {
                                 </select>
                             </label>
                         </div>
+
+                        <label className="event-edit-label">
+                            Место проведения:
+                            <input className="event-edit-input" type="text" name="location" value={location}
+                                   onChange={this.handleChange}/>
+                        </label>
 
                         {/* Поле для тегов */}
                         <label className="event-edit-label">

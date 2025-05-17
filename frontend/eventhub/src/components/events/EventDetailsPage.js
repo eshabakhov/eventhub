@@ -12,6 +12,7 @@ import "leaflet/dist/leaflet.css";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import onlineIconImg from "../../img/online-marker.png";
+import Header from "../common/Header";
 
 const onlineIcon = new leaflet.Icon({
     iconUrl: onlineIconImg,
@@ -185,14 +186,11 @@ const EventDetailsPage = () => {
 
     return (
         <div className="event-details-container">
-            <div className="header-bar">
-                <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
-                    <img src={EventHubLogo} alt="Logo" className="logo"/>
-                </div>
-                <div className="login-button-container">
-                    <ProfileDropdown navigate={navigate}/>
-                </div>
-            </div>
+
+            <Header
+                navigate={navigate}
+                burgerVisible={false}
+            />
 
             <div className="event-details-wrapper">
                 <div className="event-details-content">

@@ -6,6 +6,9 @@
     background-color: #f5f5f5;
     padding: 20px 20px;
 }
+.event-details-container {
+    height: 100vh;
+}
 
 .event-details-content {
     background-color: white;
