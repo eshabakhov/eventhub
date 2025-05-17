@@ -141,25 +141,42 @@
   }
 
   .event-card {
-    position: relative;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
+    display: flex;
+    flex-direction: row; /* Важный момент: обычный порядок */
+    justify-content: space-between;
+    align-items: stretch;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .event-info {
+    flex: 1; /* Занимает всё оставшееся пространство */
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .event-image {
+    width: 25%; /* Фиксированная ширина картинки */
+    height: auto;
+    object-fit: cover;
   }
 
   .event-card:hover {
     transform: scale(1.02);
   }
 
+  .event-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .event-date {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
     font-size: 0.75rem;
     color: #888;
+    margin-bottom: 32px
   }
 
   .event-title {

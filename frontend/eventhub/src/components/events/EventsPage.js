@@ -15,6 +15,7 @@ import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import Pagination from "../common/Pagination";
 import CurrentUser from "../common/CurrentUser";
+import defaultEventImage from "../../img/image-512.png";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -150,6 +151,7 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    imageUrl: e.imageUrl || null  // <-- добавлено
                 }));
                 this.setState({
                     events: loadedEvents,
@@ -310,37 +312,47 @@ class EventsPage extends Component {
 
                         {/* Карточки событий */}
                         {events.map((event) => (
-                            <motion.div key={event.id} className="event-card" whileHover={{scale: 1.02}}>
-                                <div className="event-date">{event.date}</div>
-                                <h3 className="event-title">{event.title}</h3>
-                                <p className="event-short-description">{event.shortDescription}</p>
-                                <p className="event-location">{event.location}</p>
-                                <div className="event-tags">
-                                    {event.tags.map((tag, idx) => (
-                                        <span key={idx} className="event-tag">{tag}</span>
-                                    ))}
-                                </div>
-                                <div className="card-buttons">
-                                    <div className="button-group">
-                                        <button onClick={() => navigate(`/events/${event.id}`)}
-                                                className="event-button details">
-                                            Подробнее
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                this.setState({
-                                                    focusedEvent: event,
-                                                    focusedMarkerId: this.getMarkerIdForEvent(event),
-                                                })
-                                            }
-                                            className="event-button map"
-                                        >
-                                            Показать на карте
-                                        </button>
+                            <motion.div key={event.id} className="event-card">
+                                <img
+                                    src={event.imageUrl || defaultEventImage}
+                                    alt={event.title}
+                                    className="event-image"
+                                />
+                                <div className="event-info">
+                                    <div className="event-title-container">
+                                        <div className="event-title">{event.title}</div>
+                                        <div className="event-date">{event.date}</div>
                                     </div>
-                                    <div
-                                        className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                    <p className="event-short-description">{event.shortDescription}</p>
+                                    <p className="event-location">{event.location}</p>
+                                    <div className="event-tags">
+                                        {event.tags.map((tag, idx) => (
+                                            <span key={idx} className="event-tag">{tag}</span>
+                                        ))}
+                                    </div>
+                                    <div className="card-buttons">
+                                        <div className="button-group">
+                                            <button onClick={() => navigate(`/events/${event.id}`)}
+                                                    className="event-button details">
+                                                Подробнее
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    this.setState({
+                                                        focusedEvent: event,
+                                                        focusedMarkerId: this.getMarkerIdForEvent(event),
+                                                    })
+                                                }
+                                                className="event-button map"
+                                            >
+                                                Показать на карте
+                                            </button>
+                                        </div>
+                                        <div
+                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                    </div>
                                 </div>
+
                             </motion.div>
                         ))}
                         {/* Нижняя пагинация */}

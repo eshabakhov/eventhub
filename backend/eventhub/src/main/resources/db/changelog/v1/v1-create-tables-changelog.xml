@@ -99,6 +99,7 @@
                    location varchar NOT NULL,
                    latitude numeric,
                    longitude numeric,
+                   pictures bytea,
                    organizer_id bigserial NOT NULL,
                    CONSTRAINT fk_event_organizer
                        FOREIGN KEY (organizer_id)
