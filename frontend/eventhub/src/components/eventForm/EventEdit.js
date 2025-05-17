@@ -96,9 +96,13 @@ class EventEdit extends React.Component {
             uploadedFiles: [],
             isSuccess: false,
             eventId: null,
-            mapKey: Date.now() // Для принудительного перерисовывания карты
+            mapKey: Date.now(),
+            image: null,
+            imagePreview: null,
+            imageFile: null
         };
         this.mapRef = React.createRef();
+        this.imageInputRef = React.createRef();
     }
 
 
@@ -136,6 +140,30 @@ class EventEdit extends React.Component {
         }
     };
     sidebarRef = React.createRef();
+
+    handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.setState({
+                    imageFile: file,
+                    imagePreview: reader.result,
+                    image: reader.result.split(',')[1]
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    handleRemoveImage = () => {
+        this.setState({
+            image: null,
+            imagePreview: null,
+            imageFile: null
+        });
+        this.imageInputRef.current.value = '';
+    };
 
     componentDidMount() {
         console.log('ok')
@@ -201,7 +229,6 @@ class EventEdit extends React.Component {
                     [name]: null
                 }
             });
-
             // Если изменилось поле location и формат офлайн, пробуем геокодировать
             if (name === 'location' && this.state.format === 'OFFLINE' && value) {
                 this.geocodeAddress(value);
@@ -220,7 +247,7 @@ class EventEdit extends React.Component {
                 this.setState({
                     latitude: lat,
                     longitude: lng,
-                    mapKey: Date.now() // Обновляем ключ карты для перерисовки
+                    mapKey: Date.now()
                 });
             }
         } catch (err) {
@@ -240,7 +267,7 @@ class EventEdit extends React.Component {
             );
             const data = await response.json();
 
-            // Если полный адрес не доступен, формируем его из доступных частей
+            // формируем адрес
             const parts = [];
             if (data.address?.country) parts.push(data.address.country);
             if (data.address?.city) parts.push(data.address.city);
@@ -309,7 +336,7 @@ class EventEdit extends React.Component {
         const addedTag = Array.isArray(result) ? result[0] : result;
 
         this.setState(prevState => ({
-            tags: [...prevState.tags, addedTag], // Добавляем тег с ID
+            tags: [...prevState.tags, addedTag],
             newTag: ''
         }));
         console.log('Тег успешно добавлен: ', addedTag);
@@ -332,7 +359,6 @@ class EventEdit extends React.Component {
                 await this.sendAddTagRequest(newTag.trim(), eventId);
             } catch (err) {
                 console.error('Ошибка при добавлении тега:', err);
-                // Можно добавить отображение ошибки пользователю
                 this.setState({error: 'Не удалось добавить тег'});
             }
         }
@@ -404,7 +430,8 @@ class EventEdit extends React.Component {
         const {user} = this.context;
         const {navigate} = this.props;
         const {eventId} = this.props.params || this.state.eventId;
-        const {isEditing, isCreating} = this.state;
+        const {isEditing, isCreating, image} = this.state;
+
         const eventData = {
             title: this.state.title,
             description: this.state.description,
@@ -416,14 +443,11 @@ class EventEdit extends React.Component {
             endDateTime: formatDateForBackend(this.state.endDateTime),
             format: this.state.format,
             organizerId: user.id,
+            pictures: image
         };
 
         if (this.validate()) {
             if (isCreating) {
-                console.log('handleSubmit');
-                console.log('Отправка данных мероприятия:', eventData);
-                // Здесь можно добавить вызов API для сохранения мероприятия
-                // this.props.onSubmit(eventData);
                 fetch(`${API_BASE_URL}/v1/events`, {
                     method: 'POST',
                     credentials: 'include',
@@ -437,14 +461,21 @@ class EventEdit extends React.Component {
                         if (!response.ok) throw new Error('Network response was not ok');
                         let event = await response.json();
                         this.setState({eventId: event.id});
-                        this.AddTags(event.id);
-                        await this.uploadFiles(event.id, this.state.selectedFiles);
-                        this.props.navigate('/my-events');
+
+                        await Promise.all([
+                            this.AddTags(event.id),
+                            this.uploadFiles(event.id, this.state.selectedFiles)
+                        ]);
+
+                        navigate('/my-events');
                     })
                     .catch(error => {
                         console.error('Error saving event:', error);
+                        this.setState({
+                            showConfirmModal: true,
+                            mainText: "Ошибка при создании события"
+                        });
                     });
-
             } else {
                 const method = this.state.isEditing ? 'PATCH' : 'POST';
                 const url = this.state.isEditing
@@ -460,16 +491,27 @@ class EventEdit extends React.Component {
                     },
                     body: JSON.stringify(eventData)
                 })
-                    .then(res => {
+                    .then(async res => {
                         if (!res.ok) throw new Error('Ошибка при сохранении');
-                        this.setState({isSuccess: true})
-                        document.scrollingElement.scrollTo(0, 0)
+
+                        // Если есть выбранные файлы - загружаем их
+                        if (this.state.selectedFiles.length > 0) {
+                            await this.uploadFiles(eventId, this.state.selectedFiles);
+                        }
+
+                        this.setState({isSuccess: true});
+                        document.scrollingElement.scrollTo(0, 0);
                     })
-                    .catch(err => console.error('Ошибка сохранения:', err));
+                    .catch(err => {
+                        console.error('Ошибка сохранения:', err);
+                        this.setState({
+                            showConfirmModal: true,
+                            mainText: "Ошибка при сохранении события"
+                        });
+                    });
             }
         }
     };
-
     handleSelectFile = () => {
         this.fileInputRef.click();
     };
@@ -612,6 +654,44 @@ class EventEdit extends React.Component {
                     <div className={`msg ok_msg ${!isSuccess ? 'hidden' : ''}`}>
                         <div role="alert" className="msg_text">
                             <b>Изменения сохранены</b>
+                        </div>
+                    </div>
+
+                    <div className="event-image-section">
+                        <h3>Изображение события</h3>
+                        <div className="image-upload-container">
+                            {this.state.imagePreview ? (
+                                <div className="image-preview-wrapper">
+                                    <img
+                                        src={this.state.imagePreview}
+                                        alt="Предпросмотр"
+                                        className="image-preview"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="remove-image-button"
+                                        onClick={this.handleRemoveImage}
+                                    >
+                                        <i className="bi bi-trash"></i> Удалить
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    className="image-upload-placeholder"
+                                    onClick={() => this.imageInputRef.current.click()}
+                                >
+                                    <i className="bi bi-image"></i>
+                                    <p>Нажмите для загрузки изображения</p>
+                                    <small>Рекомендуемый размер: 1200x630px</small>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                ref={this.imageInputRef}
+                                onChange={this.handleImageChange}
+                                accept="image/*"
+                                style={{display: 'none'}}
+                            />
                         </div>
                     </div>
                     <div className="event-edit-card">
