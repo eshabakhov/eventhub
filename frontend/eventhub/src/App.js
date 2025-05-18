@@ -36,6 +36,7 @@ class App extends React.Component {
               <Route path="/event-edit/:eventId" element={<EventEditForm />} />
               <Route path="/moderator-management" element={<ModeratorsPage />} />
               <Route path="/moderators/create" element={<ModeratorCreate/>}/>
+              <Route path="/moderators/edit/:moderatorId" element={<ModeratorCreate/>}/>
             </Routes>
           </UserProvider>
         </Router>
