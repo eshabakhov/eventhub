@@ -102,7 +102,8 @@ class ProfilePage extends Component {
 
     handleCancel = () => {
         this.setState((prevState) => ({
-            formData: { ...prevState.originalData }
+            formData: {...prevState.originalData},
+            isDirty: false
         }));
     };
 
@@ -336,7 +337,7 @@ class ProfilePage extends Component {
                                 )}
 
                                 <div className="button-wrapper">
-                                    <button className={`cancel-button ${this.state.isDirty ? 'dirty' : ''}`} onClick={this.handleCancel}>
+                                    <button type="button" className={`cancel-button ${this.state.isDirty ? 'dirty' : ''}`} onClick={this.handleCancel}>
                                         Отмена
                                     </button>
                                     <button type="submit" className="profile-button">Сохранить</button>
