@@ -184,7 +184,7 @@ public class EventService {
             event.setDescription(eventDTO.getDescription());
 
         if (Objects.nonNull(eventDTO.getShortDescription()))
-            event.setDescription(eventDTO.getShortDescription());
+            event.setShortDescription(eventDTO.getShortDescription());
 
         if (Objects.nonNull(eventDTO.getTitle()))
             event.setTitle(eventDTO.getTitle());
