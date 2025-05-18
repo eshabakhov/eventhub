@@ -65,7 +65,7 @@
             <![CDATA[
             CREATE TABLE public.moderator(
                 id bigserial primary key,
-                is_admin boolean,
+                is_admin boolean default false,
                 CONSTRAINT fk_moderator_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
