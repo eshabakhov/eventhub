@@ -515,3 +515,9 @@
 .file-tag:hover {
   background-color: #7a7f80;
 }
+.event-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+}
