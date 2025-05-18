@@ -6,6 +6,7 @@
     background-color: #f5f5f5;
     padding: 20px 20px;
 }
+
 .event-details-container {
     height: 100vh;
 }
@@ -23,11 +24,13 @@
     margin-top: 0;
 }
 
-.event-title {
+.event-details-title {
     font-size: 28px;
     font-weight: 700;
-    margin-bottom: 16px;
     color: #333;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .event-description-header {
@@ -57,6 +60,8 @@
     margin-top: 16px;
     color: #444;
     text-align: left;
+    text-wrap: wrap;
+    word-wrap: anywhere;
 }
 
 .event-tags {
@@ -257,4 +262,16 @@
 
 .marker-cluster-custom span {
     font-size: 12px;
+}
+.event-details-image {
+    width: 25%; /* Фиксированная ширина картинки */
+    height: auto;
+    border-radius: 50%;
+}
+.event-title-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
+    align-items: center;
 }

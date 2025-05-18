@@ -13,6 +13,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import onlineIconImg from "../../img/online-marker.png";
 import Header from "../common/Header";
+import defaultEventImage from "../../img/image-512.png";
 
 const onlineIcon = new leaflet.Icon({
     iconUrl: onlineIconImg,
@@ -194,8 +195,15 @@ const EventDetailsPage = () => {
 
             <div className="event-details-wrapper">
                 <div className="event-details-content">
+                    <div className="event-title-header">
+                        <img
+                            src={event.pictures ? `data:image/jpeg;base64,${event.pictures}` : defaultEventImage}
+                            alt={event.title}
+                            className="event-details-image"
+                        />
+                        <h1 className="event-details-title">{event.title}</h1>
+                    </div>
 
-                    <h1 className="event-title">{event.title}</h1>
                     {event.tags?.length > 0 && (
                         <div className="event-tags">
                             {event.tags.map((tag, idx) => (

@@ -151,7 +151,7 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
-                    imageUrl: e.imageUrl || null  // <-- добавлено
+                    imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
                     events: loadedEvents,
@@ -204,49 +204,6 @@ class EventsPage extends Component {
         }
         return null;
     }
-
-    checkAuth = () => {
-        // const {user, setUser} = this.context;
-        //
-        // // Если пользователь уже есть в контексте, пропускаем
-        // //if (user && user.id) return;
-        //
-        // fetch(`${API_BASE_URL}/auth/me`, {
-        //     method: 'GET',
-        //     credentials: 'include',
-        // })
-        //     .then((res) => {
-        //         if (!res.ok) throw new Error("Не авторизован");
-        //         return res.json();
-        //     })
-        //     .then((data) => {
-        //         const ctx = this.context;
-        //         ctx.setUser({
-        //             id: data.user.id,
-        //             role: data.user.role,
-        //             email: data.user.email,
-        //             username: data.user.username,
-        //             displayName: data.user.displayName,
-        //             loggedIn: true,
-        //             memberLastName: data.customUser.lastName,
-        //             memberFirstName: data.customUser.firstName,
-        //             memberPatronymic: data.customUser.patronymic,
-        //             memberBirthDate: data.customUser.birthDate,
-        //             memberBirthCity: data.customUser.birthCity,
-        //             mebmerPrivacy: data.customUser.privacy,
-        //             organizerName: data.customUser.name,
-        //             organizerDescription: data.customUser.description,
-        //             organizerIndustry: data.customUser.industry,
-        //             organizerAddress: data.customUser.address,
-        //             organizerAccredited: data.customUser.isAccredited,
-        //             moderatorIsAdmin: data.customUser.isAdmin
-        //             //token: data.token
-        //         }); // сохраняем в context + localStorage
-        //     })
-        //     .catch((err) => {
-        //         console.log("Ошибка авторизации:", err.message);
-        //     });
-    };
 
     render() {
         const {navigate} = this.props;
@@ -314,7 +271,7 @@ class EventsPage extends Component {
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card">
                                 <img
-                                    src={event.imageUrl || defaultEventImage}
+                                    src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
                                     alt={event.title}
                                     className="event-image"
                                 />
@@ -427,8 +384,7 @@ class EventsPage extends Component {
     }
 }
 
-{/* PopUp для сгрупированных событий */
-}
+{/* PopUp для сгрупированных событий */}
 
 function MultiEventPopup({events, navigate, initialEventId}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;

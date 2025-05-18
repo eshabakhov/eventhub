@@ -119,7 +119,7 @@
                  CONSTRAINT fk_event_id
                      FOREIGN KEY (event_id)
                          REFERENCES public.event(id)
-                         ON DELETE RESTRICT
+                         ON DELETE CASCADE
                          ON UPDATE CASCADE,
                  CONSTRAINT fk_tag_id
                      FOREIGN KEY (tag_id)
@@ -167,7 +167,7 @@
                      CONSTRAINT fk_event_file
                          FOREIGN KEY (event_id)
                              REFERENCES public.event(id)
-                             ON DELETE RESTRICT
+                             ON DELETE CASCADE
                              ON UPDATE CASCADE
 
                  );

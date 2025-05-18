@@ -19,6 +19,7 @@ import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import Pagination from "../common/Pagination";
 import ConfirmModal from "../common/ConfirmModal";
+import defaultEventImage from "../../img/image-512.png";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -167,6 +168,7 @@ class MyEventsList extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
                     events: loadedEvents,
@@ -422,34 +424,44 @@ class MyEventsList extends Component {
                         {/* Карточки событий */}
                         {events.map((event) => (
                             <motion.div key={event.id} className="event-card" whileHover={{scale: 1.02}}>
-                                {/*Кнопки в карточке в зависимости от роли*/}
-                                {this.context.user && this.context.user.role === "ORGANIZER" && (
-                                    <div className="params-buttons">
-                                        <button className="edit-button" title='Редактировать мероприятие'
-                                                onClick={() => this.handleEditClick(event)}
-                                        >
-                                            <img src={EditIcon} alt='Редактировать' className="icon"/>
-                                        </button>
-                                        <button className="delete-button" title='Удалить мероприятие'
-                                                onClick={() => this.handleDeleteClick(event)}
-                                        >
-                                            <img src={DeleteIcon} alt='Удалить' className="icon"/>
-                                        </button>
+                                <img
+                                    src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
+                                    alt={event.title}
+                                    className="event-image"
+                                />
+                                <div className="event-info">
+                                    <div className="event-title-container">
+                                        <div className="event-title">{event.title}</div>
+                                        <div>
+                                            {/*Кнопки в карточке в зависимости от роли*/}
+                                            {this.context.user && this.context.user.role === "ORGANIZER" && (
+                                                <div className="params-buttons">
+                                                    <button className="edit-button" title='Редактировать мероприятие'
+                                                            onClick={() => this.handleEditClick(event)}
+                                                    >
+                                                        <img src={EditIcon} alt='Редактировать' className="icon"/>
+                                                    </button>
+                                                    <button className="delete-button" title='Удалить мероприятие'
+                                                            onClick={() => this.handleDeleteClick(event)}
+                                                    >
+                                                        <img src={DeleteIcon} alt='Удалить' className="icon"/>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {this.context.user && this.context.user.role === "MEMBER" && (
+                                                <div className="params-buttons">
+                                                    <button
+                                                        className="delete-button"
+                                                        title='Отказаться от участия'
+                                                        onClick={() => this.handleDeclineClick(event)}
+                                                    >
+                                                        <img src={CrossIcon} alt='Удалить' className="icon"/>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            <div className="event-date-down">{event.date}</div>
+                                        </div>
                                     </div>
-                                )}
-                                {this.context.user && this.context.user.role === "MEMBER" && (
-                                    <div className="params-buttons">
-                                        <button
-                                            className="delete-button"
-                                            title='Отказаться от участия'
-                                            onClick={() => this.handleDeclineClick(event)}
-                                        >
-                                            <img src={CrossIcon} alt='Удалить' className="icon"/>
-                                        </button>
-                                    </div>
-                                )}
-                                <div className="event-date-down">{event.date}</div>
-                                <h3 className="event-title">{event.title}</h3>
                                 <p className="event-short-description">{event.shortDescription}</p>
                                 <p className="event-location">{event.location}</p>
                                 <div className="event-tags">
@@ -477,6 +489,7 @@ class MyEventsList extends Component {
                                     </div>
                                     <div
                                         className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                </div>
                                 </div>
                             </motion.div>
                         ))}
