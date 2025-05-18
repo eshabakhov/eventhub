@@ -25,7 +25,7 @@ public class UserSecurityService {
 
         if (RoleType.MODERATOR.equals(authenticatedUser.getRole())) {
             Optional<Moderator> moderator = moderatorDao.fetchOptionalById(authenticatedUser.getId());
-            if (moderator.isPresent() && moderator.get().getIsAdmin().equals(true)) {
+            if (moderator.isPresent()) {
                 return true;
             }
         }
