@@ -156,6 +156,12 @@ class EventEdit extends React.Component {
         }
     };
 
+    setPreviewImage = (file) => {
+        this.setState({
+            imagePreview: `data:image/jpeg;base64,${file}`,
+        });
+    };
+
     handleRemoveImage = () => {
         this.setState({
             image: null,
@@ -188,8 +194,10 @@ class EventEdit extends React.Component {
                         tags: data.tags || [],
                         files: data.files || [],
                         isEditing: true,
-                        isCreating: false
+                        isCreating: false,
+                        imageFile: data.pictures,
                     });
+                    this.setPreviewImage(data.pictures);
                 })
                 .catch(err => console.error('Ошибка получения данных мероприятия:', err));
         } else {
