@@ -196,21 +196,27 @@ const EventDetailsPage = () => {
             <div className="event-details-wrapper">
                 <div className="event-details-content">
                     <div className="event-title-header">
-                        <img
-                            src={event.pictures ? `data:image/jpeg;base64,${event.pictures}` : defaultEventImage}
-                            alt={event.title}
-                            className="event-details-image"
-                        />
-                        <h1 className="event-details-title">{event.title}</h1>
+                        <div className="event-title-tag-container">
+                            <div className="event-details-title">{event.title}</div>
+                            {event.tags?.length > 0 && (
+                                <div className="event-tags">
+                                    {event.tags.map((tag, idx) => (
+                                        <span key={idx} className="event-tag">{tag.name}</span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="event-details-image-container">
+                            <img
+                                className="event-details-image"
+                                src={event.pictures ? `data:image/jpeg;base64,${event.pictures}` : defaultEventImage}
+                                alt={event.title}
+                            />
+                        </div>
+
                     </div>
 
-                    {event.tags?.length > 0 && (
-                        <div className="event-tags">
-                            {event.tags.map((tag, idx) => (
-                                <span key={idx} className="event-tag">{tag.name}</span>
-                            ))}
-                        </div>
-                    )}
+
                     <div className="event-description-header">Формат:
                         <div className="event-details-format">
                             {event.format === "ONLINE" ? " Онлайн" : " Офлайн"}

@@ -157,9 +157,11 @@ class EventEdit extends React.Component {
     };
 
     setPreviewImage = (file) => {
-        this.setState({
-            imagePreview: `data:image/jpeg;base64,${file}`,
-        });
+        if (file) {
+            this.setState({
+                imagePreview: `data:image/jpeg;base64,${file}`,
+            });
+        }
     };
 
     handleRemoveImage = () => {
