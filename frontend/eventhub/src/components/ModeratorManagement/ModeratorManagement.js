@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {motion} from "framer-motion";
 import EditIcon from "../../img/edit.png";
 import DeleteIcon from "../../img/delete.png";
-import "../../css/Accreditation.css";
+import "../../css/ModeratorManagement.css";
 import {useNavigate} from "react-router-dom";
 import UserContext from "../../UserContext";
 import Header from "../common/Header";
@@ -156,7 +156,7 @@ class ModeratorsPage extends Component {
                         </div>
 
                         {moderators.map((mod) => (
-                            <motion.div key={mod.id} className="event-card" whileHover={{scale: 1.02}}>
+                            <motion.div key={mod.id} className="moderator-card" whileHover={{scale: 1.02}}>
                                 <div className="buttons">
                                     <h3 className="org-title">{mod.displayName || mod.username}</h3>
                                     <div>
