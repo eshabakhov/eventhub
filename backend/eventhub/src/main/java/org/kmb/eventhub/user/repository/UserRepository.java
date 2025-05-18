@@ -30,7 +30,7 @@ public class UserRepository {
                 .fetchInto(UserResponseDTO.class);
     }
 
-    public List<Member> fetchMembers (Condition condition, Integer page, Integer pageSize) {
+    public List<Member> fetchMembers(Condition condition, Integer page, Integer pageSize) {
         return dslContext
                 .select(MEMBER.fields())
                 .from(MEMBER)
@@ -65,6 +65,25 @@ public class UserRepository {
                 .limit(pageSize)
                 .offset((page - 1) * pageSize)
                 .fetchInto(User.class);
+    }
+
+    public List<UserResponseDTO> fetchWithoutCurrentUser(Condition condition, Integer page, Integer pageSize, Long currentUserId) {
+        return dslContext
+                .selectFrom(USER)
+                .where(condition)
+                .and(USER.IS_ACTIVE.eq(true))
+                .and(USER.ID.notEqual(currentUserId))
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchInto(UserResponseDTO.class);
+    }
+
+    public Long countMembers(Condition condition) {
+        return dslContext
+                .selectCount()
+                .from(MEMBER)
+                .where(condition)
+                .fetchOneInto(Long.class);
     }
 
     public Long countOrgs(Condition condition) {
