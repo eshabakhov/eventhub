@@ -88,6 +88,7 @@ public class RecommendationRepository {
                         EVENT.LATITUDE,
                         EVENT.LONGITUDE,
                         EVENT.ORGANIZER_ID,
+                        EVENT.PICTURES,
                         totalScore.as("score")
                 )
                 .from(EVENT)

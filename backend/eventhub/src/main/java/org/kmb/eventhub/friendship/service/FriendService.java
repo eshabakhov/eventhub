@@ -100,18 +100,17 @@ public class FriendService {
         Long count = friendRequestRepository.isFriend(senderId, currentUserId);
 
         Member member = memberDao.fetchOneById(senderId);
-
-        if (count > 0L) {
-            friendCheckDTO.setFriendly(true);
-            return friendCheckDTO;
-        }
-        friendCheckDTO.setFriendly(false);
         if (member.getPrivacy().equals(PrivacyType.ONLY_FRIENDS))
             friendCheckDTO.setPrivacy(PrivacyEnum.ONLY_FRIENDS);
         if (member.getPrivacy().equals(PrivacyType.PRIVATE))
             friendCheckDTO.setPrivacy(PrivacyEnum.PRIVATE);
         if (member.getPrivacy().equals(PrivacyType.PUBLIC))
             friendCheckDTO.setPrivacy(PrivacyEnum.PUBLIC);
+        if (count > 0L) {
+            friendCheckDTO.setFriendly(true);
+            return friendCheckDTO;
+        }
+        friendCheckDTO.setFriendly(false);
         return friendCheckDTO;
     }
 

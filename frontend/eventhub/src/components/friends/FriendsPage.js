@@ -266,8 +266,11 @@ class FriendsPage extends Component {
                                     {friends.map(friend => (
                                         <li key={friend.id} className="friends-item">
                                             <span>{friend.displayName || friend.username}</span>
+                                            <button className="view-profile-button" onClick={() => this.handleViewProfile(friend.id)}>
+                                                Профиль
+                                            </button>
                                             <button className="remove-button"
-                                                    onClick={() => this.handleRemoveFriend(friend.id)}>✖
+                                                    onClick={() => this.handleRemoveFriend(friend.id)}>Удалить из друзей
                                             </button>
                                         </li>
                                     ))}
@@ -298,11 +301,26 @@ class FriendsPage extends Component {
                                         <div key={user.id} className="search-result-item">
                                             <span>{user.displayName || user.username}</span>
                                             {sentRequests.some(req => req.id === user.id) ? (
-                                                <span className="request-sent">Запрос отправлен</span>
+                                                <>
+                                                    <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>
+                                                        Профиль
+                                                    </button>
+                                                    <span className="request-sent">Запрос отправлен</span>
+                                                </>
                                             ) : user.isFriend ? (
-                                                <button className="remove-button" onClick={() => this.handleRemoveFriend(user.id)}>✖</button>
+                                                <>
+                                                    <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>
+                                                        Профиль
+                                                    </button>
+                                                    <button className="remove-button" onClick={() => this.handleRemoveFriend(user.id)}>Удалить из друзей</button>
+                                                </>
                                             ) : incomingRequests.some(req => req.id === user.id) ? (
-                                                <button className="accept-frineds-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять</button>
+                                                <>
+                                                    <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>
+                                                        Профиль
+                                                    </button>
+                                                    <button className="accept-friends-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять запрос</button>
+                                                </>
                                             ) : (
                                                 <>
                                                     <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>
