@@ -222,6 +222,19 @@ class UserProfile extends Component {
                                     {isOrganizersPath && (
                                         <>
                                             <label className="profile-label">
+                                                <div className="accreditation-status">
+                                                    {formData.isAccredited ? (
+                                                        <span className="accredited">
+                        <i className="bi bi-check-circle-fill text-success"></i> Аккредитованная организация
+                    </span>
+                                                    ) : (
+                                                        <span className="not-accredited">
+                        <i className="bi bi-check-circle-fill text-secondary"></i> Неаккредитованая организация
+                    </span>
+                                                    )}
+                                                </div>
+                                            </label>
+                                            <label className="profile-label">
                                                 Название организации:
                                                 <input className="profile-input" type="text" name="name"
                                                        value={formData.name} disabled/>
@@ -241,12 +254,6 @@ class UserProfile extends Component {
                                                 <input className="profile-input" type="text" name="description"
                                                        value={formData.address} disabled/>
                                             </label>
-                                            <label className="profile-label">
-                                                Аккредитация:
-                                                <input className="profile-input" type="text" name="name"
-                                                       value={formData.isAccredited ? "Да" : "Нет"} disabled/>
-                                            </label>
-
                                         </>
                                     )}
                                 </>
