@@ -37,6 +37,20 @@ public class TagController {
         return tagService.getList(page, pageSize);
     }
 
+    @Operation(summary = "Получить список избранных тегов пользователя",
+            description = "Возвращает избранные теги.")
+    @ApiResponse(responseCode = "200",
+            description = "Список избранных тегов пользователя",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Tag.class)))
+    @GetMapping("/{userId}")
+    public ResponseList<Tag> getFavouriteList(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @PathVariable Long userId) {
+                return tagService.getFavouriteList(userId, page, pageSize);
+    }
+
     @Operation(summary = "Добавление тега в избранное пользователя.",
             description = "Добавляет тег в избранное пользователя.")
     @ApiResponse(responseCode = "201",

@@ -6,6 +6,7 @@ import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.common.exception.AlreadyExistsException;
 import org.kmb.eventhub.common.exception.MissingFieldException;
 import org.kmb.eventhub.event.exception.EventNotFoundException;
+import org.kmb.eventhub.tables.UserTags;
 import org.kmb.eventhub.tables.daos.UserDao;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tag.dto.EventTagsDTO;
@@ -49,6 +50,12 @@ public class TagService {
         responseList.setTotal(tagRepository.count(condition));
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
+        return responseList;
+    }
+    public ResponseList<Tag> getFavouriteList(Long userId, Integer page, Integer pageSize) {
+        ResponseList<Tag> responseList = new ResponseList<>();
+        List<Tag> list =  tagRepository.fetchFavourites(userId);
+        responseList.setList(list);
         return responseList;
     }
 
@@ -104,7 +111,7 @@ public class TagService {
         if (tagDao.fetchOptionalById(tagId).isEmpty()) {
             throw new TagNotFoundException(tagId);
         }
-        eventDao.fetchOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        userDao.fetchOptionalById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         tagRepository.deleteTagFromUser(tagId, userId);
         if (!tagRepository.tagIsUsed(tagId)) {

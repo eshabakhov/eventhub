@@ -35,6 +35,15 @@ public class TagRepository {
                 .fetchInto(Tag.class);
     }
 
+    public List<Tag> fetchFavourites(Long userId) {
+        return dslContext
+                .select(TAG.fields())
+                .from(TAG)
+                .innerJoin(USER_TAGS).on(USER_TAGS.TAG_ID.eq(TAG.ID))
+                .where(USER_TAGS.USER_ID.eq(userId))
+                .fetchInto(Tag.class);
+    }
+
     public List<Tag> fetch(List<String> tagNames) {
         return dslContext.selectFrom(TAG)
                 .where(TAG.NAME.in(tagNames))
