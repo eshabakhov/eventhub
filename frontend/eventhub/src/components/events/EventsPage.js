@@ -4,6 +4,8 @@ import leaflet from "leaflet";
 import {motion} from "framer-motion";
 import onlineIconImg from "../../img/online-marker.png";
 import offlineIconImg from "../../img/offline-marker.png";
+import onlineIconStarImg from "../../img/star-green.png";
+import offlineIconStarImg from "../../img/star-red.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
@@ -28,12 +30,28 @@ const onlineIcon = new leaflet.Icon({
     iconAnchor: [12, 41],
 });
 
+const onlineIconStar = new leaflet.Icon({
+    iconUrl: onlineIconStarImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
 const offlineIcon = new leaflet.Icon({
     iconUrl: offlineIconImg,
     shadowUrl: iconShadow,
     iconSize: [41, 41],
     iconAnchor: [12, 41],
 });
+const offlineIconStar = new leaflet.Icon({
+    iconUrl: offlineIconStarImg,
+    shadowUrl: iconShadow,
+    iconSize: [41, 41],
+    iconAnchor: [12, 41],
+});
+
+
+
 
 const FavoriteStar = ({ tag, userId, isFavorite, toggleFavorite }) => {
     const handleClick = (e) => {
@@ -550,7 +568,11 @@ class EventsPage extends Component {
                             >
                                 {[...groupedEvents.entries()].map(([key, group]) => {
                                     const [lat, lng] = key.split(",").map(Number);
-                                    const icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon;
+                                    const hasFavoriteTag = group[0].tags.some((tag) => this.state.tags.some((favtag) => favtag.name === tag && favtag.isFavorite));
+                                    let icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon;
+                                    if (hasFavoriteTag)
+                                        icon = group[0].format === "ONLINE" ? onlineIconStar : offlineIconStar;
+                                        console.log(group[0].title)
                                     const initialEventId = this.state.focusedEvent?.id;
                                     return (
                                         <Marker
