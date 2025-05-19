@@ -376,7 +376,11 @@
 }
 
 .tag-button {
-  padding: 6px 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
   font-size: 14px;
   border-radius: 20px;
   border: 1px solid #ccc;
@@ -385,12 +389,20 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
-.tag-button {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.star-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: all 0.2s ease;
 }
+
+.star-icon.favorite {
+  fill: #ffd700;
+  stroke: #ffd700;
+}
+
 
 .remove-icon {
   font-weight: bold;
@@ -536,16 +548,16 @@
   border-radius: 8px 8px 0 0;
   cursor: pointer;
   transition: background-color 0.3s, font-weight 0.3s;
-  width: 50%; /* Each tab takes half the width */
-  text-align: center; /* Center the text within the tab */
-  box-sizing: border-box; /* Ensure padding doesn't affect width */
+  width: 50%;
+  text-align: center;
+  box-sizing: border-box;
   font-weight: 700;
 }
 
 .tab-button.active {
-  background: rgba(173, 216, 230, 0.2); /* Light blue background with opacity */
+  background: rgba(173, 216, 230, 0.2);
   color: #1e90ff;
-  border-bottom: 2px solid #1e90ff; /* Blue border at the bottom */
+  border-bottom: 2px solid #1e90ff;
 }
 
 .tab-button:hover:not(.active) {

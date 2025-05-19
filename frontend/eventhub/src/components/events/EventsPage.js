@@ -35,6 +35,26 @@ const offlineIcon = new leaflet.Icon({
     iconAnchor: [12, 41],
 });
 
+const FavoriteStar = ({ tag, userId, isFavorite, toggleFavorite }) => {
+    const handleClick = (e) => {
+        e.stopPropagation(); // Prevent triggering the tag click
+        toggleFavorite(tag.id, userId, !isFavorite);
+    };
+
+    return (
+        <div className="star-container" onClick={handleClick}>
+            <svg
+                className={`star-icon ${isFavorite ? 'favorite' : ''}`}
+                viewBox="0 0 24 24"
+            >
+                <path
+                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                />
+            </svg>
+        </div>
+    );
+};
+
 // Подгонка карты под маркеры
 function FitToAllMarkers({events}) {
     const map = useMap();
@@ -132,8 +152,50 @@ class EventsPage extends Component {
             .then((res) => res.json())
             .then((data) => {
                 this.setState({tags: data.list});
+                this.loadFavouriteTags();
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
+    };
+    // Загрузка избранных тегов
+    loadFavouriteTags = () => {
+        const currentUser = this.context.user;
+        const userId = currentUser.id;
+        fetch(`${API_BASE_URL}/v1/tags/${userId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                data.list.map((favouriteTag)=>{
+                    this.state.tags.map((tag)=>{
+                        if (tag.id === favouriteTag.id) tag.isFavorite = true;
+                    })
+                })
+            })
+            .catch((err) => console.error("Ошибка при загрузке избранных тегов:", err));
+    };
+    // Добавление/удаление тега в избранное
+    toggleFavorite = async (tagId, userId, isFavorite) => {
+        try {
+            const method = isFavorite ? 'POST' : 'DELETE';
+            const response = await fetch(`${API_BASE_URL}/v1/tags/${tagId}/users/${userId}`, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+            });
+
+            if (response.ok) {
+                this.setState(prevState => ({
+                    tags: prevState.tags.map(tag =>
+                        tag.id === tagId ? { ...tag, isFavorite: isFavorite } : tag
+                    )
+                }));
+            }
+        } catch (err) {
+            console.error("Ошибка добавления тега в избранное", err);
+        }
     };
 
     // Загрузка мероприятий
@@ -326,13 +388,13 @@ class EventsPage extends Component {
                         {/* Вкладки */}
                         <div className="tabs-wrapper">
                             <button
-                                className={`tab-button ${activeTab === "allEvents" ? "active" : ""}`}
+                                className={`tab-button ${this.state.activeTab === "allEvents" ? "active" : ""}`}
                                 onClick={() => this.handleTabChange("allEvents")}
                             >
                                 Все мероприятия
                             </button>
                             <button
-                                className={`tab-button ${activeTab === "recommendations" ? "active" : ""}`}
+                                className={`tab-button ${this.state.activeTab === "recommendations" ? "active" : ""}`}
                                 onClick={() => this.handleTabChange("recommendations")}
                             >
                                 Рекомендации
@@ -349,7 +411,7 @@ class EventsPage extends Component {
                                 onChange={this.handleSearchChange}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") {
-                                        if (activeTab === "allEvents") {
+                                        if (this.state.activeTab === "allEvents") {
                                             this.loadEvents(1, this.state.search);
                                         } else {
                                             this.loadRecommendations(1, this.state.search);
@@ -360,7 +422,7 @@ class EventsPage extends Component {
                             <button
                                 className="search-button-inside"
                                 onClick={() => {
-                                    if (activeTab === "allEvents") {
+                                    if (this.state.activeTab === "allEvents") {
                                         this.loadEvents(1, this.state.search);
                                     } else {
                                         this.loadRecommendations(1, this.state.search);
@@ -385,6 +447,14 @@ class EventsPage extends Component {
                                         onClick={() => this.toggleTag(tag.name)}
                                         className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
+                                        {this.context.user && (
+                                            <FavoriteStar
+                                                tag={tag}
+                                                userId={this.context.user.id}
+                                                isFavorite={tag.isFavorite || false}
+                                                toggleFavorite={this.toggleFavorite}
+                                            />
+                                        )}
                                         {tag.name}
                                         {isSelected && <span className="remove-icon">×</span>}
                                     </button>
