@@ -218,7 +218,7 @@ class AccreditationPage extends Component {
 
                         {/* Карточки событий */}
                         {orgs.map((org) => (
-                            <motion.div key={org.id} className="event-card" whileHover={{scale: 1.02}}>
+                            <motion.div key={org.id} className="org-card" whileHover={{scale: 1.02}}>
 
                                 <div className="buttons">
                                     <h3 className="org-title">{org.name}</h3>

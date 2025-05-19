@@ -29,13 +29,14 @@ class App extends React.Component {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="/my-events" element={<MyEventsList />} />
-              <Route path='/create-event' exact={true} element={<EventForm/>}/>
+              <Route path='/create-event' exact={true} element={<EventEditForm/>}/>
               <Route path="/accreditation" element={<AccreditationPage />} />
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
               <Route path="/event-edit/:eventId" element={<EventEditForm />} />
               <Route path="/moderator-management" element={<ModeratorsPage />} />
               <Route path="/moderators/create" element={<ModeratorCreate/>}/>
+              <Route path="/moderators/edit/:moderatorId" element={<ModeratorCreate/>}/>
             </Routes>
           </UserProvider>
         </Router>

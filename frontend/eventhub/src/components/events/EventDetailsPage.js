@@ -13,6 +13,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import onlineIconImg from "../../img/online-marker.png";
 import Header from "../common/Header";
+import defaultEventImage from "../../img/image-512.png";
 
 const onlineIcon = new leaflet.Icon({
     iconUrl: onlineIconImg,
@@ -194,15 +195,28 @@ const EventDetailsPage = () => {
 
             <div className="event-details-wrapper">
                 <div className="event-details-content">
-
-                    <h1 className="event-title">{event.title}</h1>
-                    {event.tags?.length > 0 && (
-                        <div className="event-tags">
-                            {event.tags.map((tag, idx) => (
-                                <span key={idx} className="event-tag">{tag.name}</span>
-                            ))}
+                    <div className="event-title-header">
+                        <div className="event-title-tag-container">
+                            <div className="event-details-title">{event.title}</div>
+                            {event.tags?.length > 0 && (
+                                <div className="event-tags">
+                                    {event.tags.map((tag, idx) => (
+                                        <span key={idx} className="event-tag">{tag.name}</span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
+                        <div className="event-details-image-container">
+                            <img
+                                className="event-details-image"
+                                src={event.pictures ? `data:image/jpeg;base64,${event.pictures}` : defaultEventImage}
+                                alt={event.title}
+                            />
+                        </div>
+
+                    </div>
+
+
                     <div className="event-description-header">Формат:
                         <div className="event-details-format">
                             {event.format === "ONLINE" ? " Онлайн" : " Офлайн"}

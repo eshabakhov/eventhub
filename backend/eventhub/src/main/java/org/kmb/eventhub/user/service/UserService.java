@@ -87,7 +87,7 @@ public class  UserService {
         List<Member> list =  userRepository.fetchMembers(condition, page, pageSize);
 
         responseList.setList(list);
-        responseList.setTotal(userRepository.countOrgs(condition));
+        responseList.setTotal(userRepository.countMembers(condition));
         responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
         return responseList;

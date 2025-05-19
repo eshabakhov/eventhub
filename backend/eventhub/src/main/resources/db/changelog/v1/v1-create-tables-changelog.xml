@@ -65,7 +65,7 @@
             <![CDATA[
             CREATE TABLE public.moderator(
                 id bigserial primary key,
-                is_admin boolean,
+                is_admin boolean default false,
                 CONSTRAINT fk_moderator_user
                     FOREIGN KEY (id)
                     REFERENCES public.user(id)
@@ -99,6 +99,7 @@
                    location varchar NOT NULL,
                    latitude numeric,
                    longitude numeric,
+                   pictures bytea,
                    organizer_id bigserial NOT NULL,
                    CONSTRAINT fk_event_organizer
                        FOREIGN KEY (organizer_id)
@@ -118,7 +119,7 @@
                  CONSTRAINT fk_event_id
                      FOREIGN KEY (event_id)
                          REFERENCES public.event(id)
-                         ON DELETE RESTRICT
+                         ON DELETE CASCADE
                          ON UPDATE CASCADE,
                  CONSTRAINT fk_tag_id
                      FOREIGN KEY (tag_id)
@@ -137,6 +138,7 @@
                  sender_id bigint NOT NULL,
                  recipient_id bigint NOT NULL,
                  status friend_request_status_type NOT NULL,
+                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                  CONSTRAINT fk_sender_member_id
                      FOREIGN KEY (sender_id)
                          REFERENCES public.member(id)
@@ -165,7 +167,7 @@
                      CONSTRAINT fk_event_file
                          FOREIGN KEY (event_id)
                              REFERENCES public.event(id)
-                             ON DELETE RESTRICT
+                             ON DELETE CASCADE
                              ON UPDATE CASCADE
 
                  );

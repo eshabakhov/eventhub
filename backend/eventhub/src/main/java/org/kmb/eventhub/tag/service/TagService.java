@@ -43,7 +43,7 @@ public class TagService {
         ResponseList<Tag> responseList = new ResponseList<>();
         Condition condition = trueCondition();
 
-        List<Tag> list =  tagRepository.fetch(condition, page, pageSize);
+        List<Tag> list =  tagRepository.fetch(condition);
 
         responseList.setList(list);
         responseList.setTotal(tagRepository.count(condition));

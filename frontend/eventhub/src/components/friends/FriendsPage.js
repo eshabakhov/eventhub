@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import '../../css/FriendsPage.css';
 import {useNavigate} from "react-router-dom";
-import API_BASE_URL from "../../config";
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import UserContext from "../../UserContext";
 import ConfirmModal from "../common/ConfirmModal";
+import CurrentUser from "../common/CurrentUser";
+import api from "../common/AxiosInstance";
+import Pagination from "../common/Pagination";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -16,30 +18,31 @@ class FriendsPage extends Component {
 
     state = {
         friends: [],
+        friendsSearchResults: [],
         userId: null,
         searchQuery: '',
         searchResults: [],
-        searchPerformed: false,
         incomingRequests: [],
         sentRequests: [],
-        sidebarOpen: false
+        sidebarOpen: false,
+        nonFriends: [],
+        isLoading: false,
+        currentFriendsPage: 1,
+        friendsPerPage: 10,
+        totalFriends: 0,
+        currentUsersPage: 1,
+        usersPerPage: 10,
+        totalUsers: 0,
     };
     sidebarRef = React.createRef();
 
     componentDidMount() {
         document.addEventListener("mousedown", this.handleClickOutside);
-        fetch(`${API_BASE_URL}/auth/me`, {
-            credentials: 'include',
-        })
-            .then(res => res.json())
-            .then(data => {
-                const ctx = this.context;
-                ctx.setUser(data.user);
-                const userId = data.user.id;
-                this.setState({userId});
-                this.fetchFriends(userId);
-            })
-            .catch(console.error);
+        CurrentUser.fetchCurrentUser(this.context.setUser);
+        this.handleSearch(1);
+        this.fetchFriends(1);
+        this.fetchIncomingRequest();
+        this.fetchOutgoingRequests();
     }
 
     componentWillUnmount() {
@@ -60,58 +63,78 @@ class FriendsPage extends Component {
         }
     };
 
-    fetchFriends = (id) => {
-        fetch(`${API_BASE_URL}/v1/users/members/${id}/friends`, {
+    fetchFriends = (page) => {
+        const {friendsPerPage} = this.state;
+        api.get(`/v1/friends/list?page=${page}&pageSize=${friendsPerPage}`, {
             credentials: 'include',
         })
-            .then(res => res.json())
+            .then(res => res.data)
             .then(data => {
-                const list = Array.isArray(data.list) ? data.list : [];
-                const accepted = [];
-                const incoming = [];
-                const sent = [];
-
-                list.forEach(item => {
-                    const {sender, recipient, friendRequestStatus} = item;
-
-                    if (friendRequestStatus === 'ACCEPTED') {
-                        const friend = sender.id === id ? recipient : sender;
-                        accepted.push(friend);
-                    } else if (friendRequestStatus === 'PENDING') {
-                        if (recipient.id === id) {
-                            incoming.push(sender);
-                        } else if (sender.id === id) {
-                            sent.push(recipient);
-                        }
-                    }
-                });
-
-                this.setState({friends: accepted, incomingRequests: incoming, sentRequests: sent});
+                this.setState({
+                    friends: data.list || [],
+                    totalFriends: data.total,
+                    currentFriendsPage: page});
             })
             .catch(console.error);
     };
 
-    handleSearch = () => {
-        const {searchQuery} = this.state;
-
-        if (!searchQuery.trim()) {
-            this.setState({searchResults: [], searchPerformed: false});
-            return;
-        }
-
-        fetch(`${API_BASE_URL}/v1/users?search=${encodeURIComponent(searchQuery)}`, {
+    fetchIncomingRequest = () => {
+        api.get(`/v1/friends/incoming`, {
             credentials: 'include',
         })
-            .then(res => res.json())
+            .then(res => res.data)
             .then(data => {
-                const results = Array.isArray(data.list) ? data.list : [];
-                this.setState({searchResults: results, searchPerformed: true});
+                this.setState({incomingRequests: data});
+            })
+            .catch(console.error);
+    };
+
+    fetchOutgoingRequests = () => {
+        api.get(`/v1/friends/outgoing   `, {
+            credentials: 'include',
+        })
+            .then(res => res.data)
+            .then(data => {
+                this.setState({sentRequests: data});
+            })
+            .catch(console.error);
+    };
+
+    handleSearch = (page) => {
+        const {searchQuery, usersPerPage} = this.state;
+
+        api.get(`/v1/friends/?page=${page}&pageSize=${usersPerPage}&search=${encodeURIComponent(searchQuery)}`, {
+            credentials: 'include',
+        })
+            .then(res => res.data)
+            .then(async data => {
+                // НЕ кладём пока в searchResults, чтобы не показывать пользователей без статуса дружбы
+                this.setState({ totalUsers: data.total, currentUsersPage: page, searchResults: [], friendsSearchResults: [] });
+
+                const resultsWithFriendStatus = await Promise.all(
+                    data.list.map(async (user) => {
+                        try {
+                            const res = await api.get(`/v1/friends/${user.id}/isfriend`, { credentials: 'include' });
+                            return { ...user, isFriend: res.data.friendly };
+                        } catch (err) {
+                            console.error(err);
+                            return { ...user, isFriend: false };
+                        }
+                    })
+                );
+
+                // Устанавливаем окончательный список пользователей, с учётом дружбы
+                this.setState({
+                    searchResults: resultsWithFriendStatus,
+                    friendsSearchResults: resultsWithFriendStatus.filter(u => u.isFriend),
+                });
             })
             .catch(err => {
                 console.error(err);
-                this.setState({searchResults: [], searchPerformed: true});
+                this.setState({searchResults: [], friendsSearchResults: []});
             });
     };
+
 
     handleInputChange = (e) => {
         this.setState({searchQuery: e.target.value});
@@ -125,12 +148,10 @@ class FriendsPage extends Component {
     };
 
     handleAddFriend = (recipientId) => {
-        const {userId, searchResults} = this.state;
+        const {searchResults} = this.state;
 
-        fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends/send/request?idTo=${recipientId}`, {
-            method: 'POST',
+        api.post(`/v1/friends/${recipientId}/send`, {
             credentials: 'include',
-            headers: {'Content-Type': 'application/json'}
         })
             .then(() => {
                 const recipient = searchResults.find(user => user.id === recipientId);
@@ -149,25 +170,45 @@ class FriendsPage extends Component {
     };
 
     handleRemoveFriend = (friendId) => {
-        const {userId} = this.state;
-
-        fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends?idFrom=${friendId}`, {
-            method: 'DELETE',
+        api.delete(`/v1/friends/${friendId}/remove`, {
             credentials: 'include',
         })
-            .then(() => this.fetchFriends(userId))
+            .then(() => {
+                this.fetchFriends(1)
+                this.fetchIncomingRequest()
+                this.fetchOutgoingRequests()
+            })
             .catch(console.error);
+        this.fetchFriends(this.state.friendsPerPage);
+        this.handleSearch(this.state.currentUsersPage);
     };
 
     handleAcceptRequest = (senderId) => {
-        const {userId} = this.state;
-
-        fetch(`${API_BASE_URL}/v1/users/members/${userId}/friends/accept/request?idFrom=${senderId}`, {
-            method: 'POST',
+        api.post(`/v1/friends/${senderId}/accept`, {
             credentials: 'include',
         })
-            .then(() => this.fetchFriends(userId))
+            .then(() => {
+                this.fetchFriends(1)
+                this.fetchIncomingRequest()
+                this.fetchOutgoingRequests()
+            })
             .catch(console.error);
+        this.fetchFriends(this.state.friendsPerPage);
+        this.handleSearch(this.state.currentUsersPage);
+    };
+
+    handleUsersPageClick = (pageNumber) => {
+        this.handleSearch(pageNumber);
+        this.setState({
+            currentUsersPage: pageNumber,
+        });
+    };
+
+    handleFriendsPageClick = (pageNumber) => {
+        this.fetchFriends(pageNumber);
+        this.setState({
+            currentFriendsPage: pageNumber,
+        });
     };
 
     render() {
@@ -176,15 +217,20 @@ class FriendsPage extends Component {
             friends,
             searchQuery,
             searchResults,
-            searchPerformed,
             incomingRequests,
             sentRequests,
             sidebarOpen,
             showConfirmModal,
+            friendsPerPage,
+            totalFriends,
+            currentFriendsPage,
+            usersPerPage,
+            totalUsers,
+            currentUsersPage,
             mainText
         } = this.state;
-        console.log(this.context.user);
-
+        const totalUsersPages = Math.ceil(totalUsers / usersPerPage);
+        const totalFriendsPages = Math.ceil(totalFriends / friendsPerPage);
         return (
 
             <div className="events-container">
@@ -209,6 +255,8 @@ class FriendsPage extends Component {
                     <div className="friends-content">
                         <div className="friends-list-section">
                             <h2>Ваши друзья</h2>
+                            <Pagination totalPages={totalFriendsPages} currentPage={currentFriendsPage}
+                                        handlePageClick={this.handleFriendsPageClick}/>
                             {friends.length > 0 ? (
                                 <ul className="friends-list">
                                     {friends.map(friend => (
@@ -230,64 +278,36 @@ class FriendsPage extends Component {
                             <input
                                 type="text"
                                 className="search-input"
+                                placeholder="Введите имя пользователя"
                                 value={searchQuery}
                                 onChange={this.handleInputChange}
-                                placeholder="Поиск пользователей..."
                             />
-                            <button className="search-button" onClick={this.handleSearch}>Найти</button>
+                            <button className="search-button" onClick={() => this.handleSearch(1)}>Найти</button>
 
-                            {searchResults.length > 0 && (
-                                <div className="search-results">
-                                    <h3>Результаты поиска</h3>
-                                    <ul>
-                                        {searchResults.map(user => (
-                                            <li key={user.id} className="search-result-item">
-                                                <span>{user.displayName || user.username}</span>
-                                                {sentRequests.some(req => req.id === user.id) ? (
-                                                    <span className="request-sent">Запрос отправлен</span>
-                                                ) : (
-                                                    <button className="add-button"
-                                                            onClick={() => this.handleAddFriend(user.id)}>Добавить в
-                                                        друзья</button>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {searchPerformed && searchResults.length === 0 && (
-                                <p className="no-results-message">Пользователь не найден</p>
-                            )}
-
-                            {incomingRequests.length > 0 && (
-                                <div className="incoming-requests">
-                                    <h3>Входящие запросы</h3>
-                                    <ul>
-                                        {incomingRequests.map(user => (
-                                            <li key={user.id} className="incoming-request-item">
-                                                <span>{user.displayName || user.username}</span>
-                                                <button className="accept-frineds-button"
-                                                        onClick={() => this.handleAcceptRequest(user.id)}>Принять
+                            <div className="user-list">
+                                <Pagination totalPages={totalUsersPages} currentPage={currentUsersPage}
+                                            handlePageClick={this.handleUsersPageClick}/>
+                                {searchResults.length === 0 ? (
+                                    <p className="no-results-message">Пользователи не найдены</p>
+                                ) : (
+                                    searchResults.map(user => (
+                                        <div key={user.id} className="search-result-item">
+                                            <span>{user.displayName || user.username}</span>
+                                            {sentRequests.some(req => req.id === user.id) ? (
+                                                <span className="request-sent">Запрос отправлен</span>
+                                            ) : user.isFriend ? (
+                                                <button className="remove-button" onClick={() => this.handleRemoveFriend(user.id)}>✖</button>
+                                            ) : incomingRequests.some(req => req.id === user.id) ? (
+                                                <button className="accept-frineds-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять</button>
+                                            ) : (
+                                                <button className="add-button" onClick={() => this.handleAddFriend(user.id)}>
+                                                    Добавить в друзья
                                                 </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {sentRequests.length > 0 && (
-                                <div className="sent-requests">
-                                    <h3>Отправленные запросы</h3>
-                                    <ul>
-                                        {sentRequests.map(user => (
-                                            <li key={user.id} className="sent-request-item">
-                                                {user.displayName || user.username}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -184,7 +184,7 @@ public class EventService {
             event.setDescription(eventDTO.getDescription());
 
         if (Objects.nonNull(eventDTO.getShortDescription()))
-            event.setDescription(eventDTO.getShortDescription());
+            event.setShortDescription(eventDTO.getShortDescription());
 
         if (Objects.nonNull(eventDTO.getTitle()))
             event.setTitle(eventDTO.getTitle());
@@ -207,6 +207,8 @@ public class EventService {
         if (Objects.nonNull(eventDTO.getLongitude()))
             event.setLongitude(eventDTO.getLongitude());
 
+        if (Objects.nonNull(eventDTO.getPictures()))
+            event.setPictures(eventDTO.getPictures());
         event.setId(id);
         eventDao.update(event);
         return event;

@@ -1,23 +1,24 @@
-﻿import React, { Component } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+﻿import React, {Component} from "react";
+import {MapContainer, TileLayer, Marker, Popup, useMap} from "react-leaflet";
 import leaflet from "leaflet";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
 import onlineIconImg from "../../img/online-marker.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "../../css/EventsPage.css";
 import UserContext from "../../UserContext";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import API_BASE_URL from "../../config";
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import Header from "../common/Header";
 import SideBar from "../common/SideBar";
 import Pagination from "../common/Pagination";
 import CurrentUser from "../common/CurrentUser";
+import defaultEventImage from "../../img/image-512.png";
 
 export const withNavigation = (WrappedComponent) => {
-    return (props) => <WrappedComponent {...props} navigate={useNavigate()} />;
+    return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 };
 
 const onlineIcon = new leaflet.Icon({
@@ -35,24 +36,24 @@ const offlineIcon = new leaflet.Icon({
 });
 
 // Подгонка карты под маркеры
-function FitToAllMarkers({ events }) {
+function FitToAllMarkers({events}) {
     const map = useMap();
     React.useEffect(() => {
         if (events.length > 0) {
             const bounds = leaflet.latLngBounds(events.map((e) => e.position));
-            map.fitBounds(bounds, { padding: [30, 30] });
+            map.fitBounds(bounds, {padding: [30, 30]});
         }
     }, [events, map]);
     return null;
 }
 
 // Перемещение карты к маркеру
-function FlyToLocation({ position, markerId, markerRefs, format }) {
+function FlyToLocation({position, markerId, markerRefs, format}) {
     const map = useMap();
     React.useEffect(() => {
         if (position) {
             const zoom = format === "OFFLINE" ? 18 : 10;
-            map.flyTo(position, zoom, { duration: 1.5 });
+            map.flyTo(position, zoom, {duration: 1.5});
             const marker = markerRefs.current[markerId];
             if (marker) {
                 setTimeout(() => {
@@ -66,7 +67,7 @@ function FlyToLocation({ position, markerId, markerRefs, format }) {
 
 // Форматирование даты
 const formatDateRange = (start, end) => {
-    const options = { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
+    const options = {day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"};
     const startStr = start.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     const endStr = end.toLocaleString("ru-RU", options).replace(",", "").replaceAll("/", ".");
     return `${startStr} - ${endStr}`;
@@ -109,38 +110,35 @@ class EventsPage extends Component {
     }
 
     toggleSidebar = () => {
-        this.setState((prev) => ({ sidebarOpen: !prev.sidebarOpen }));
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
     };
 
     handleClickOutside = (event) => {
-        if (
-            this.state.sidebarOpen &&
+        if (this.state.sidebarOpen &&
             this.sidebarRef.current &&
             !this.sidebarRef.current.contains(event.target) &&
             !event.target.classList.contains('burger-button') &&
-            !event.target.closest('.burger-button')
-        ) {
-            this.setState({ sidebarOpen: false });
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
         }
     };
-
     // Загрузка тегов
     loadTags = () => {
         fetch(`${API_BASE_URL}/v1/tags`, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {
-                this.setState({ tags: data.list });
+                this.setState({tags: data.list});
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
     };
 
     // Загрузка мероприятий
     loadEvents = (page, search = "", searchTags = []) => {
-        const { eventsPerPage } = this.state;
+        const {eventsPerPage} = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
         fetch(`${API_BASE_URL}/v1/events?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`)
@@ -156,6 +154,7 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
                     events: loadedEvents,
@@ -241,9 +240,8 @@ class EventsPage extends Component {
     // Обработка изменения поискового запроса
     handleSearchChange = (e) => {
         const newSearch = e.target.value;
-        this.setState({ search: newSearch });
+        this.setState({search: newSearch});
     };
-
     // Обработка перехода на другую страницу
     handlePageClick = (pageNumber) => {
         const { activeTab, search, selectedTags } = this.state;
@@ -304,27 +302,23 @@ class EventsPage extends Component {
         return null;
     }
 
-    checkAuth = () => {
-        // Код авторизации закомментирован, оставлен без изменений
-    };
-
     render() {
-        const { navigate } = this.props;
-        const { events, recommendations, tags, search, currentPage, eventsPerPage, totalEvents, sidebarOpen, activeTab } = this.state;
+        const {navigate} = this.props;
+        const {events, tags, search, currentPage, eventsPerPage, totalEvents, sidebarOpen} = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
-        const displayEvents = activeTab === "allEvents" ? events : recommendations;
-        const groupedEvents = this.groupEventsByLocation(displayEvents);
+        const groupedEvents = this.groupEventsByLocation(events);
+
+        console.log(this.context.user);
 
         return (
             <div className="events-container">
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}
                     title=""
-                    navigate={navigate}
-                />
+                    navigate={navigate}/>
                 <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}></div>
 
-                <SideBar sidebarOpen={sidebarOpen} sidebarRef={this.sidebarRef} user={this.context.user} />
+                <SideBar sidebarOpen={sidebarOpen} sidebarRef={this.sidebarRef} user={this.context.user}/>
 
                 <div className="content-panels">
                     <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}
@@ -402,40 +396,48 @@ class EventsPage extends Component {
                                     handlePageClick={this.handlePageClick}/>
 
                         {/* Карточки событий */}
-                        {displayEvents.map((event) => (
-                            <motion.div key={event.id} className="event-card" whileHover={{ scale: 1.02 }}>
-                                <div className="event-date">{event.date}</div>
-                                <h3 className="event-title">{event.title}</h3>
-                                <p className="event-short-description">{event.shortDescription}</p>
-                                <p className="event-location">{event.location}</p>
-                                <div className="event-tags">
-                                    {event.tags.map((tag, idx) => (
-                                        <span key={idx} className="event-tag">{tag}</span>
-                                    ))}
-                                </div>
-                                <div className="card-buttons">
-                                    <div className="button-group">
-                                        <button onClick={() => navigate(`/events/${event.id}`)}
-                                                className="event-button details">
-                                            Подробнее
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                this.setState({
-                                                    focusedEvent: event,
-                                                    focusedMarkerId: this.getMarkerIdForEvent(event),
-                                                })
-                                            }
-                                            className="event-button map"
-                                        >
-                                            Показать на карте
-                                        </button>
+                        {events.map((event) => (
+                            <motion.div key={event.id} className="event-card">
+                                <img
+                                    src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
+                                    alt={event.title}
+                                    className="event-image"
+                                />
+                                <div className="event-info">
+                                    <div className="event-title-container">
+                                        <div className="event-title">{event.title}</div>
+                                        <div className="event-date">{event.date}</div>
                                     </div>
-                                    <div
-                                        className={`event-format ${event.format.toLowerCase()}`}>
-                                        {event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
+                                    <p className="event-short-description">{event.shortDescription}</p>
+                                    <p className="event-location">{event.location}</p>
+                                    <div className="event-tags">
+                                        {event.tags.map((tag, idx) => (
+                                            <span key={idx} className="event-tag">{tag}</span>
+                                        ))}
+                                    </div>
+                                    <div className="card-buttons">
+                                        <div className="button-group">
+                                            <button onClick={() => navigate(`/events/${event.id}`)}
+                                                    className="event-button details">
+                                                Подробнее
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    this.setState({
+                                                        focusedEvent: event,
+                                                        focusedMarkerId: this.getMarkerIdForEvent(event),
+                                                    })
+                                                }
+                                                className="event-button map"
+                                            >
+                                                Показать на карте
+                                            </button>
+                                        </div>
+                                        <div
+                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
                                     </div>
                                 </div>
+
                             </motion.div>
                         ))}
                         {/* Нижняя пагинация */}
@@ -443,13 +445,13 @@ class EventsPage extends Component {
                                     handlePageClick={this.handlePageClick}/>
                     </motion.div>
                     {/* Карта */}
-                    <motion.div className="right-panel" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.5 }}>
-                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{ height: "100%" }}
+                    <motion.div className="right-panel" initial={{opacity: 0, x: 50}} animate={{opacity: 1, x: 0}}
+                                transition={{duration: 0.5}}>
+                        <MapContainer center={[55.75, 37.61]} zoom={11} minZoom={2} style={{height: "100%"}}
                                       maxBounds={[[-90, -180], [90, 180]]}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                        attribution="&copy; OpenStreetMap contributors" maxZoom={18}/>
-                            {displayEvents.length > 0 && <FitToAllMarkers events={displayEvents}/>}
+                            {events.length > 0 && <FitToAllMarkers events={events}/>}
                             {this.state.focusedEvent && this.state.focusedMarkerId && (
                                 <FlyToLocation
                                     position={this.state.focusedEvent.position}
@@ -458,14 +460,16 @@ class EventsPage extends Component {
                                     format={this.state.focusedEvent.format}
                                 />
                             )}
+
                             <MarkerClusterGroup
                                 chunkedLoading
                                 spiderfyOnMaxZoom={true}
                                 showCoverageOnHover={false}
                                 zoomToBoundsOnClick={true}
                                 maxClusterRadius={60}
-                                spiderfyDistanceMultiplier={1.5}
+                                spiderfyDistanceMultiplier={1.5} // Расстояние между маркерами при раскрытии
                                 iconCreateFunction={(cluster) => {
+                                    // Кастомная иконка для кластера
                                     return leaflet.divIcon({
                                         html: `<span>${cluster.getChildCount()}</span>`,
                                         className: 'marker-cluster-custom',
@@ -508,7 +512,9 @@ class EventsPage extends Component {
     }
 }
 
-function MultiEventPopup({ events, navigate, initialEventId }) {
+{/* PopUp для сгрупированных событий */}
+
+function MultiEventPopup({events, navigate, initialEventId}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
     const [page, setPage] = React.useState(Math.max(0, initialIndex));
     const total = events.length;
@@ -532,8 +538,8 @@ function MultiEventPopup({ events, navigate, initialEventId }) {
                     <button className="popup-page-button"
                             onClick={() => setPage((p) => (p === 0 ? total - 1 : p - 1))}>{"<"}</button>
                     <span>
-                        {page + 1} / {total}
-                    </span>
+                            {page + 1} / {total}
+                        </span>
                     <button className="popup-page-button" onClick={() => setPage((p) => (p + 1) % total)}>{">"}</button>
                 </div>
             )}

@@ -13,7 +13,7 @@ import leaflet from "leaflet";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import offlineIconImg from "../../img/offline-marker.png";
 import onlineIconImg from "../../img/online-marker.png";
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+import {GeoSearchControl, OpenStreetMapProvider} from 'leaflet-geosearch';
 import {MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents} from "react-leaflet";
 // Иконки для маркеров
 const onlineIcon = new leaflet.Icon({
@@ -32,7 +32,7 @@ const offlineIcon = new leaflet.Icon({
 
 
 // Компонент для центрирования карты
-function CenterMap({ center, zoom }) {
+function CenterMap({center, zoom}) {
     const map = useMap();
     useEffect(() => {
         map.setView(center, zoom);
@@ -40,7 +40,7 @@ function CenterMap({ center, zoom }) {
     return null;
 }
 
-function MapClickHandler({ onClick }) {
+function MapClickHandler({onClick}) {
     const map = useMapEvents({
         click: (e) => {
             onClick(e.latlng);
@@ -91,12 +91,18 @@ class EventEdit extends React.Component {
             newTag: '',
             errors: {},
             isEditing: false,
+            isCreating: false,
             selectedFiles: [],
             uploadedFiles: [],
-            isSuccess : false,
-            mapKey: Date.now() // Для принудительного перерисовывания карты
+            isSuccess: false,
+            eventId: null,
+            mapKey: Date.now(),
+            image: null,
+            imagePreview: null,
+            imageFile: null
         };
         this.mapRef = React.createRef();
+        this.imageInputRef = React.createRef();
     }
 
 
@@ -135,6 +141,38 @@ class EventEdit extends React.Component {
     };
     sidebarRef = React.createRef();
 
+    handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.setState({
+                    imageFile: file,
+                    imagePreview: reader.result,
+                    image: reader.result.split(',')[1]
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    setPreviewImage = (file) => {
+        if (file) {
+            this.setState({
+                imagePreview: `data:image/jpeg;base64,${file}`,
+            });
+        }
+    };
+
+    handleRemoveImage = () => {
+        this.setState({
+            image: null,
+            imagePreview: null,
+            imageFile: null
+        });
+        this.imageInputRef.current.value = '';
+    };
+
     componentDidMount() {
         console.log('ok')
         const {eventId} = this.props.params;
@@ -157,10 +195,22 @@ class EventEdit extends React.Component {
                         endDateTime: formatDateForInput(data.endDateTime),
                         tags: data.tags || [],
                         files: data.files || [],
-                        isEditing: true
+                        isEditing: true,
+                        isCreating: false,
+                        imageFile: data.pictures,
                     });
+                    this.setPreviewImage(data.pictures);
                 })
                 .catch(err => console.error('Ошибка получения данных мероприятия:', err));
+        } else {
+            const {user} = this.context;
+            console.log(user);
+            this.setState({
+                isCreating: true,
+                isEditing: false,
+                location: user.organizerAddress,
+            });
+            this.geocodeAddress(user.organizerAddress);
         }
     }
 
@@ -169,7 +219,7 @@ class EventEdit extends React.Component {
     }
 
     handleChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
         if (name === 'format' && value === 'ONLINE') {
             this.setState({
@@ -189,7 +239,6 @@ class EventEdit extends React.Component {
                     [name]: null
                 }
             });
-
             // Если изменилось поле location и формат офлайн, пробуем геокодировать
             if (name === 'location' && this.state.format === 'OFFLINE' && value) {
                 this.geocodeAddress(value);
@@ -201,14 +250,14 @@ class EventEdit extends React.Component {
     geocodeAddress = async (address) => {
         try {
             const provider = new OpenStreetMapProvider();
-            const results = await provider.search({ query: address });
+            const results = await provider.search({query: address});
 
             if (results.length > 0) {
-                const { x: lng, y: lat } = results[0];
+                const {x: lng, y: lat} = results[0];
                 this.setState({
                     latitude: lat,
                     longitude: lng,
-                    mapKey: Date.now() // Обновляем ключ карты для перерисовки
+                    mapKey: Date.now()
                 });
             }
         } catch (err) {
@@ -220,7 +269,7 @@ class EventEdit extends React.Component {
     handleMapClick = async (latlng) => {
         if (this.state.format !== 'OFFLINE') return;
 
-        const { lat, lng } = latlng;
+        const {lat, lng} = latlng;
 
         try {
             const response = await fetch(
@@ -228,16 +277,14 @@ class EventEdit extends React.Component {
             );
             const data = await response.json();
 
-            let address = data.display_name;
-            if (!address) {
-                // Если полный адрес не доступен, формируем его из доступных частей
-                const parts = [];
-                if (data.address?.road) parts.push(data.address.road);
-                if (data.address?.house_number) parts.push(data.address.house_number);
-                if (data.address?.city) parts.push(data.address.city);
-                if (data.address?.country) parts.push(data.address.country);
-                address = parts.join(', ');
-            }
+            // формируем адрес
+            const parts = [];
+            if (data.address?.country) parts.push(data.address.country);
+            if (data.address?.city) parts.push(data.address.city);
+            if (data.address?.road) parts.push(data.address.road);
+            if (data.address?.house_number) parts.push(data.address.house_number);
+
+            let address = parts.join(', ');
 
             this.setState({
                 latitude: lat,
@@ -272,40 +319,56 @@ class EventEdit extends React.Component {
         this.setState({newTag: e.target.value});
     };
 
+    AddTags = (eventId) => {
+        const {newTag, tags} = this.state;
+        tags.map((tag, index) => {
+            this.sendAddTagRequest(tag, eventId);
+        })
+    }
+
+    sendAddTagRequest = async (tagName, eventId) => {
+        const response = await fetch(`${API_BASE_URL}/v1/tags/events/${eventId}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({name: tagName})
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка добавления тега');
+        }
+
+        const result = await response.json();
+
+        const addedTag = Array.isArray(result) ? result[0] : result;
+
+        this.setState(prevState => ({
+            tags: [...prevState.tags, addedTag],
+            newTag: ''
+        }));
+        console.log('Тег успешно добавлен: ', addedTag);
+    }
+
     handleAddTag = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         const {newTag, tags} = this.state;
         const {eventId} = this.props.params;
 
         if (newTag.trim() && !tags.some(t => t.name === newTag.trim())) {
             try {
-                const response = await fetch(`${API_BASE_URL}/v1/tags/events/${eventId}`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({name: newTag.trim()})
-                });
-
-                if (!response.ok) {
-                    throw new Error('Ошибка добавления тега');
+                if (!eventId) {
+                    this.setState(prevState => ({
+                        tags: [...prevState.tags, newTag.trim()],
+                        newTag: ''
+                    }));
+                    return;
                 }
-
-                const result = await response.json();
-
-                const addedTag = Array.isArray(result) ? result[0] : result;
-
-                this.setState(prevState => ({
-                    tags: [...prevState.tags, addedTag], // Добавляем тег с ID
-                    newTag: ''
-                }));
-
-                console.log('Тег успешно добавлен:', addedTag);
+                await this.sendAddTagRequest(newTag.trim(), eventId);
             } catch (err) {
                 console.error('Ошибка при добавлении тега:', err);
-                // Можно добавить отображение ошибки пользователю
                 this.setState({error: 'Не удалось добавить тег'});
             }
         }
@@ -376,47 +439,89 @@ class EventEdit extends React.Component {
         e.preventDefault();
         const {user} = this.context;
         const {navigate} = this.props;
-        const {eventId} = this.props.params;
+        const {eventId} = this.props.params || this.state.eventId;
+        const {isEditing, isCreating, image} = this.state;
+
+        const eventData = {
+            title: this.state.title,
+            description: this.state.description,
+            shortDescription: this.state.shortDescription,
+            location: this.state.location,
+            longitude: this.state.longitude,
+            latitude: this.state.latitude,
+            startDateTime: formatDateForBackend(this.state.startDateTime),
+            endDateTime: formatDateForBackend(this.state.endDateTime),
+            format: this.state.format,
+            organizerId: user.id,
+            pictures: image
+        };
 
         if (this.validate()) {
-            const eventData = {
-                title: this.state.title,
-                description: this.state.description,
-                shortDescription: this.state.shortDescription,
-                location: this.state.location,
-                longitude: this.state.longitude,
-                latitude: this.state.latitude,
-                startDateTime: formatDateForBackend(this.state.startDateTime),
-                endDateTime: formatDateForBackend(this.state.endDateTime),
-                format: this.state.format,
-                organizerId: user.id,
-                tags: this.state.tags
-            };
-
-            const method = this.state.isEditing ? 'PATCH' : 'POST';
-            const url = this.state.isEditing
-                ? `${API_BASE_URL}/v1/events/${eventId}`
-                : `${API_BASE_URL}/v1/events`;
-
-            fetch(url, {
-                method,
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(eventData)
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Ошибка при сохранении');
-                    this.setState({isSuccess : true})
-
+            if (isCreating) {
+                fetch(`${API_BASE_URL}/v1/events`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(eventData)
                 })
-                .catch(err => console.error('Ошибка сохранения:', err));
+                    .then(async response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        let event = await response.json();
+                        this.setState({eventId: event.id});
+
+                        await Promise.all([
+                            this.AddTags(event.id),
+                            this.uploadFiles(event.id, this.state.selectedFiles)
+                        ]);
+
+                        navigate('/my-events');
+                    })
+                    .catch(error => {
+                        console.error('Error saving event:', error);
+                        this.setState({
+                            showConfirmModal: true,
+                            mainText: "Ошибка при создании события"
+                        });
+                    });
+            } else {
+                const method = this.state.isEditing ? 'PATCH' : 'POST';
+                const url = this.state.isEditing
+                    ? `${API_BASE_URL}/v1/events/${eventId}`
+                    : `${API_BASE_URL}/v1/events`;
+
+                fetch(url, {
+                    method,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(eventData)
+                })
+                    .then(async res => {
+                        if (!res.ok) throw new Error('Ошибка при сохранении');
+
+                        // Если есть выбранные файлы - загружаем их
+                        if (this.state.selectedFiles.length > 0) {
+                            await this.uploadFiles(eventId, this.state.selectedFiles);
+                        }
+
+                        this.setState({isSuccess: true});
+                        document.scrollingElement.scrollTo(0, 0);
+                    })
+                    .catch(err => {
+                        console.error('Ошибка сохранения:', err);
+                        this.setState({
+                            showConfirmModal: true,
+                            mainText: "Ошибка при сохранении события"
+                        });
+                    });
+            }
         }
     };
-
-
     handleSelectFile = () => {
         this.fileInputRef.click();
     };
@@ -457,50 +562,7 @@ class EventEdit extends React.Component {
         }
 
         try {
-            const uploadPromises = selectedFiles.map(file => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = async () => {
-                        const fileContentBase64 = reader.result.split(',')[1];
-
-                        const eventFileDTO = {
-                            fileName: file.name,
-                            fileType: file.type,
-                            fileSize: file.size,
-                            fileContent: fileContentBase64
-                        };
-
-                        try {
-                            const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
-                                method: "POST",
-                                credentials: "include",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Accept": "application/json"
-                                },
-                                body: JSON.stringify(eventFileDTO)
-                            });
-
-                            if (!res.ok) throw new Error("Ошибка при загрузке файла");
-
-                            const fileId = await res.json();
-                            resolve({fileId, fileName: file.name});
-                        } catch (err) {
-                            reject(err);
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                });
-            });
-
-            const results = await Promise.all(uploadPromises);
-
-            this.setState(prev => ({
-                files: [...prev.files, ...results],
-                selectedFiles: [],
-                showConfirmModal: true,
-                mainText: `Успешно загружено ${results.length} файлов`
-            }));
+            await this.uploadFiles(eventId, selectedFiles);
 
         } catch (err) {
             console.error("Ошибка при загрузке файлов:", err);
@@ -509,6 +571,53 @@ class EventEdit extends React.Component {
                 mainText: "Не удалось загрузить некоторые файлы"
             });
         }
+    };
+
+    uploadFiles = async (eventId, selectedFiles) => {
+        const uploadPromises = selectedFiles.map(file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const fileContentBase64 = reader.result.split(',')[1];
+
+                    const eventFileDTO = {
+                        fileName: file.name,
+                        fileType: file.type,
+                        fileSize: file.size,
+                        fileContent: fileContentBase64
+                    };
+
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/v1/events/${eventId}/eventFiles`, {
+                            method: "POST",
+                            credentials: "include",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify(eventFileDTO)
+                        });
+
+                        if (!res.ok) throw new Error("Ошибка при загрузке файла");
+
+                        const fileId = await res.json();
+                        resolve({fileId, fileName: file.name});
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        const results = await Promise.all(uploadPromises);
+
+        this.setState(prev => ({
+            files: [...prev.files, ...results],
+            selectedFiles: [],
+            showConfirmModal: true,
+            mainText: `Успешно загружено ${results.length} файлов`
+        }));
     };
 
     handleBack = () => {
@@ -551,38 +660,76 @@ class EventEdit extends React.Component {
                 <div className={`sidebar-overlay ${this.state.sidebarOpen ? 'active' : ''}`}></div>
                 <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
 
-                <div className="event-edit-container">
+                <form onSubmit={this.handleSubmit} className="event-edit-container">
                     <div className={`msg ok_msg ${!isSuccess ? 'hidden' : ''}`}>
                         <div role="alert" className="msg_text">
                             <b>Изменения сохранены</b>
                         </div>
                     </div>
+
+                    <div className="event-image-section">
+                        <h3>Изображение события</h3>
+                        <div className="image-upload-container">
+                            {this.state.imagePreview ? (
+                                <div className="image-preview-wrapper">
+                                    <img
+                                        src={this.state.imagePreview}
+                                        alt="Предпросмотр"
+                                        className="image-preview"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="remove-image-button"
+                                        onClick={this.handleRemoveImage}
+                                    >
+                                        <i className="bi bi-trash"></i> Удалить
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    className="image-upload-placeholder"
+                                    onClick={() => this.imageInputRef.current.click()}
+                                >
+                                    <i className="bi bi-image"></i>
+                                    <p>Нажмите для загрузки изображения</p>
+                                    <small>Рекомендуемый размер: 1200x630px</small>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                ref={this.imageInputRef}
+                                onChange={this.handleImageChange}
+                                accept="image/*"
+                                style={{display: 'none'}}
+                            />
+                        </div>
+                    </div>
                     <div className="event-edit-card">
                         <label className="event-edit-label">
                             Название:
-                            <input className="event-edit-input" type="text" name="title" value={title}
+                            <input required className="event-edit-input" type="text" name="title" value={title}
                                    onChange={this.handleChange}/>
                         </label>
                         <label className="event-edit-label">
                             Описание:
-                            <textarea className="event-edit-input" name="description" value={description}
+                            <textarea required className="event-edit-input" name="description" value={description}
                                       onChange={this.handleChange}/>
                         </label>
                         <label className="event-edit-label">
                             Краткое описание:
-                            <input className="event-edit-input" type="text" name="shortDescription"
+                            <input required className="event-edit-input" type="text" name="shortDescription"
                                    value={shortDescription} onChange={this.handleChange}/>
                         </label>
 
                         <div className="event-edit-row">
                             <label className="event-label">
                                 Дата начала:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="startDateTime"
-                                    value={this.state.startDateTime}
-                                    onChange={this.handleChange}
+                                <input required
+                                       className="event-time-input"
+                                       type="datetime-local"
+                                       name="startDateTime"
+                                       value={this.state.startDateTime}
+                                       onChange={this.handleChange}
                                 />
                                 {errors.startDateTime &&
                                     <span className="error-message">{errors.startDateTime}</span>}
@@ -590,23 +737,23 @@ class EventEdit extends React.Component {
 
                             <label className="event-label">
                                 Дата окончания:
-                                <input
-                                    className="event-time-input"
-                                    type="datetime-local"
-                                    name="endDateTime"
-                                    value={this.state.endDateTime}
-                                    onChange={this.handleChange}
+                                <input required
+                                       className="event-time-input"
+                                       type="datetime-local"
+                                       name="endDateTime"
+                                       value={this.state.endDateTime}
+                                       onChange={this.handleChange}
                                 />
                                 {errors.endDateTime && <span className="error-message">{errors.endDateTime}</span>}
                             </label>
 
                             <label className="event-label">
                                 Тип мероприятия:
-                                <select
-                                    className="event-format-input"
-                                    name="format"
-                                    value={this.state.format}
-                                    onChange={this.handleChange}
+                                <select required
+                                        className="event-format-input"
+                                        name="format"
+                                        value={this.state.format}
+                                        onChange={this.handleChange}
                                 >
                                     <option value="OFFLINE">Офлайн</option>
                                     <option value="ONLINE">Онлайн</option>
@@ -618,12 +765,12 @@ class EventEdit extends React.Component {
                             <>
                                 <label className="event-edit-label">
                                     Место проведения:
-                                    <input
-                                        className="event-edit-input"
-                                        type="text"
-                                        name="location"
-                                        value={this.state.location}
-                                        onChange={this.handleChange}
+                                    <input required
+                                           className="event-edit-input"
+                                           type="text"
+                                           name="location"
+                                           value={this.state.location}
+                                           onChange={this.handleChange}
                                     />
                                 </label>
 
@@ -772,7 +919,7 @@ class EventEdit extends React.Component {
                                     ))}
                                     <button
                                         type="button"
-                                        className="event-edit-button upload-button"
+                                        className={`event-edit-button upload-button ${this.state.isCreating ? 'hidden' : ''}`}
                                         onClick={this.handleUploadFiles}
                                     >
                                         <i className="bi bi-upload"></i> Загрузить все файлы
@@ -786,12 +933,12 @@ class EventEdit extends React.Component {
                                 Отмена
                             </button>
 
-                            <button onClick={this.handleSubmit} className="event-edit-button save">
+                            <button type="submit" className="event-edit-button save">
                                 Сохранить
                             </button>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         );
     }

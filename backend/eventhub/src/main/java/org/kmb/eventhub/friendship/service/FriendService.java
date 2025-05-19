@@ -1,8 +1,11 @@
 package org.kmb.eventhub.friendship.service;
 
 import lombok.AllArgsConstructor;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.common.dto.ResponseList;
+import org.kmb.eventhub.friendship.dto.FriendCheckDTO;
 import org.kmb.eventhub.friendship.repository.FriendRequestRepository;
 import org.kmb.eventhub.friendship.dto.FriendRequestDTO;
 import org.kmb.eventhub.friendship.dto.RequesterDTO;
@@ -10,11 +13,15 @@ import org.kmb.eventhub.friendship.enums.FriendRequestStatusEnum;
 import org.kmb.eventhub.enums.FriendRequestStatusType;
 import org.kmb.eventhub.enums.RoleType;
 import org.kmb.eventhub.friendship.exception.FriendRequestException;
+import org.kmb.eventhub.tables.FriendRequest;
+import org.kmb.eventhub.tables.User;
+import org.kmb.eventhub.tables.records.FriendRequestRecord;
+import org.kmb.eventhub.user.dto.UserDTO;
+import org.kmb.eventhub.user.dto.UserResponseDTO;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.user.exception.UserSelfException;
 import org.kmb.eventhub.tables.daos.FriendRequestDao;
-import org.kmb.eventhub.tables.pojos.FriendRequest;
-import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.user.repository.UserRepository;
 import org.kmb.eventhub.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +31,13 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.jooq.impl.DSL.trueCondition;
+import static org.kmb.eventhub.Tables.*;
 
 @Service
 @AllArgsConstructor
 public class FriendService {
 
-    private final FriendRequestDao friendRequestDao;
+    /*private final FriendRequestDao friendRequestDao;
 
     private final FriendRequestRepository friendRequestRepository;
 
@@ -225,5 +233,185 @@ public class FriendService {
             });
             friendRequestRepository.deleteFriendRequestByIds(userIdTo, userIdFrom);
         }
+    }*/
+
+    private final UserRepository userRepository;
+
+    private final UserDetailsService userDetailsService;
+
+    private final DSLContext dsl;
+    private final User U = USER;
+    private final FriendRequest F = FRIEND_REQUEST;
+
+    public ResponseList<UserResponseDTO> getMemberList(Integer page, Integer pageSize, String search) {
+
+        ResponseList<UserResponseDTO> responseList = new ResponseList<>();
+
+        Condition condition = trueCondition().and(USER.ROLE.eq(RoleType.MEMBER));
+
+        if (Objects.nonNull(search) && !search.isEmpty()) {
+            condition = condition.and(USER.USERNAME.eq(search));
+        }
+
+        List<UserResponseDTO> list =  userRepository.fetchWithoutCurrentUser(condition, page, pageSize, userDetailsService.getAuthenticatedUser().getId());
+
+        responseList.setList(list);
+        responseList.setTotal(userRepository.count(condition) - 1);
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
+    }
+
+    public void sendRequest(Long senderId, Long receiverId) {
+        if (senderId.equals(receiverId)) {
+            throw new IllegalArgumentException("Нельзя добавить себя");
+        }
+
+        boolean exists = dsl.fetchExists(
+                dsl.selectFrom(F)
+                        .where(F.SENDER_ID.eq(senderId))
+                        .and(F.RECIPIENT_ID.eq(receiverId))
+        );
+
+        if (exists) {
+            throw new IllegalStateException("Запрос уже существует");
+        }
+
+        dsl.insertInto(F)
+                .set(F.SENDER_ID, senderId)
+                .set(F.RECIPIENT_ID, receiverId)
+                .set(F.STATUS, FriendRequestStatusType.PENDING)
+                .execute();
+    }
+
+    public void acceptRequest(Long senderId, Long currentUserId) {
+        int updated = dsl.update(F)
+                .set(F.STATUS, FriendRequestStatusType.ACCEPTED)
+                .where(F.SENDER_ID.eq(senderId))
+                .and(F.RECIPIENT_ID.eq(currentUserId))
+                .and(F.STATUS.eq(FriendRequestStatusType.PENDING))
+                .execute();
+
+        if (updated == 0) {
+            throw new IllegalStateException("Запрос не найден или уже обработан");
+        }
+    }
+
+    public void rejectRequest(Long senderId, Long currentUserId) {
+
+        int updated = dsl.update(F)
+                .set(F.STATUS, FriendRequestStatusType.REJECTED)
+                .where(F.SENDER_ID.eq(senderId))
+                .and(F.RECIPIENT_ID.eq(currentUserId))
+                .and(F.STATUS.eq(FriendRequestStatusType.PENDING))
+                .execute();
+
+        if (updated == 0) {
+            throw new IllegalStateException("Запрос не найден или уже обработан");
+        }
+    }
+
+    public void removeFriend(Long senderId, Long currentUserId) {
+
+        int updated = dsl.deleteFrom(FRIEND_REQUEST)
+                .where(
+                        (FRIEND_REQUEST.SENDER_ID.eq(senderId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(currentUserId)))
+                        .or(FRIEND_REQUEST.SENDER_ID.eq(currentUserId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(senderId)))
+                )
+                .and(FRIEND_REQUEST.STATUS.eq(FriendRequestStatusType.ACCEPTED))
+                .execute();
+
+        if (updated == 0) {
+            throw new IllegalStateException("Запрос не найден или уже обработан");
+        }
+    }
+
+    public FriendCheckDTO isFriend(Long senderId, Long currentUserId) {
+        FriendCheckDTO friendCheckDTO = new FriendCheckDTO();
+        Long count = dsl.selectCount()
+                .from(FRIEND_REQUEST)
+                .where(
+                        (FRIEND_REQUEST.SENDER_ID.eq(senderId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(currentUserId)))
+                        .or(FRIEND_REQUEST.SENDER_ID.eq(currentUserId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(senderId)))
+                )
+                .and(FRIEND_REQUEST.STATUS.eq(FriendRequestStatusType.ACCEPTED))
+                .fetchOneInto(Long.class);
+
+        if (count > 0L) {
+            friendCheckDTO.setFriendly(true);
+            return friendCheckDTO;
+        }
+        friendCheckDTO.setFriendly(false);
+        return friendCheckDTO;
+    }
+
+    public ResponseList<UserDTO> getFriends(Integer page, Integer pageSize, Long userId) {
+        Long count = dsl.selectCount()
+                .from(USER)
+                .where(USER.ID.ne(userId))
+                .andExists(
+                        dsl.selectOne()
+                                .from(FRIEND_REQUEST)
+                                .where(FRIEND_REQUEST.STATUS.eq(FriendRequestStatusType.ACCEPTED))
+                                .and(
+                                        FRIEND_REQUEST.SENDER_ID.eq(userId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(USER.ID))
+                                                .or(FRIEND_REQUEST.SENDER_ID.eq(USER.ID).and(FRIEND_REQUEST.RECIPIENT_ID.eq(userId)))
+                                )
+                ).fetchOneInto(Long.class);
+        List<UserDTO> list = dsl.selectFrom(USER)
+                .where(USER.ID.ne(userId))
+                .andExists(
+                        dsl.selectOne()
+                                .from(FRIEND_REQUEST)
+                                .where(FRIEND_REQUEST.STATUS.eq(FriendRequestStatusType.ACCEPTED))
+                                .and(
+                                        FRIEND_REQUEST.SENDER_ID.eq(userId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(USER.ID))
+                                                .or(FRIEND_REQUEST.SENDER_ID.eq(USER.ID).and(FRIEND_REQUEST.RECIPIENT_ID.eq(userId)))
+                                )
+                )
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchInto(UserDTO.class);
+
+        ResponseList<UserDTO> responseList = new ResponseList<>();
+        responseList.setList(list);
+        responseList.setTotal(count);
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
+    }
+
+    public List<UserDTO> getNonFriends(Long userId) {
+        return dsl.selectFrom(USER)
+                .where(USER.ID.ne(userId))
+                .and(USER.ROLE.eq(RoleType.MEMBER))// исключаем самого себя
+                .andNotExists(
+                        dsl.selectOne()
+                                .from(FRIEND_REQUEST)
+                                .where(
+                                        FRIEND_REQUEST.STATUS.in(FriendRequestStatusType.PENDING, FriendRequestStatusType.ACCEPTED)
+                                                .and(
+                                                        FRIEND_REQUEST.SENDER_ID.eq(userId).and(FRIEND_REQUEST.RECIPIENT_ID.eq(USER.ID))
+                                                                .or(FRIEND_REQUEST.SENDER_ID.eq(USER.ID).and(FRIEND_REQUEST.RECIPIENT_ID.eq(userId)))
+                                                )
+                                )
+                )
+                .fetchInto(UserDTO.class);
+    }
+
+    public List<UserDTO> getIncomingRequests(Long userId) {
+        return dsl.select(U.fields())
+                .from(F)
+                .join(U).on(F.RECIPIENT_ID.eq(userId).and(U.ID.eq(F.SENDER_ID)))
+                .where(F.STATUS.eq(FriendRequestStatusType.PENDING))
+                .fetchInto(UserDTO.class);
+    }
+
+    public List<UserDTO> getOutgoingRequests(Long userId) {
+        return dsl.select(U.fields())
+                .from(F)
+                .join(U).on(F.SENDER_ID.eq(userId).and(U.ID.eq(F.RECIPIENT_ID)))
+                .where(F.STATUS.eq(FriendRequestStatusType.PENDING))
+                .fetchInto(UserDTO.class);
     }
 }
