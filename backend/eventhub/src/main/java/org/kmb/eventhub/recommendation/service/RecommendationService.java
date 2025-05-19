@@ -88,6 +88,7 @@ public class RecommendationService {
 
         responseList.setList(eventDTOList);
         responseList.setTotal(eventRepository.count(condition));
+        responseList.setCurrentPage(page);
         responseList.setPageSize(pageSize);
         return responseList;
     }
