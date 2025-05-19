@@ -164,6 +164,10 @@ const EventDetailsPage = () => {
         }
     };
 
+    const handleOrgCLick = () => {
+        navigate(("/organizers/" + event.organizerId));
+    }
+
     const handleFileDownload = async (fileId, fileName) => {
         try {
             const response = await api.get(`/v1/events/file/download/${fileId}`, {
@@ -223,7 +227,7 @@ const EventDetailsPage = () => {
                         </div>
                     </div>
 
-                    <div className="event-description-header">Организатор:
+                    <div className="event-description-header" onClick={handleOrgCLick}>Организатор:
                         <div className="event-details-format">
                             {organizer.name}
                         </div>
