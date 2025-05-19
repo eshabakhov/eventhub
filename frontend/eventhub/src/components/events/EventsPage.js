@@ -112,6 +112,8 @@ class EventsPage extends Component {
             selectedTags: [],
             sidebarOpen: false,
             activeTab: "allEvents", // Новая вкладка для переключения
+            latitude: null,
+            longitude: null
         };
     }
 
@@ -120,9 +122,43 @@ class EventsPage extends Component {
     componentDidMount() {
         CurrentUser.fetchCurrentUser(this.context.setUser);
         this.loadEvents(1, this.state.search);
-        this.loadRecommendations(1, this.state.search);
+        //this.loadRecommendations(1, this.state.search);
         this.loadTags();
         document.addEventListener("mousedown", this.handleClickOutside);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    this.setState({
+                        latitude,
+                        longitude,
+                    }, () => {
+                        console.log(`Geolocation success: Latitude ${latitude}, Longitude ${longitude}`);
+                    });
+                },
+                (error) => {
+                    console.warn(`Geolocation error (${error.code}): ${error.message}`);
+                    this.setState({
+                        latitude: 55.75,
+                        longitude: 37.61,
+                    });
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            console.warn("Geolocation not supported by browser");
+            this.setState({
+                latitude: 55.75,
+                longitude: 37.61,
+            });
+        }
+
+
     }
 
     componentWillUnmount() {
@@ -227,51 +263,13 @@ class EventsPage extends Component {
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
 
-    // Загрузка рекомендаций
-    loadRecommendations1 = (page, search = "", searchTags = []) => {
-        const { eventsPerPage } = this.state;
-        const currentUser = this.context.user;
-        if (!currentUser) return;
-        const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-        const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        //const url = `${API_BASE_URL}/v1/recommendations/page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`;
-        //const url = `${API_BASE_URL}/v1/recommend?lat=57.577&lon=57.57&limit=10`;
-        const url = `${API_BASE_URL}/v1/recommend?lat=57.577&lon=57.57&page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`;
-        fetch(url, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                const loadedRecommendations = data.list.map((e) => ({
-                    id: e.id,
-                    title: e.title,
-                    shortDescription: e.shortDescription,
-                    description: e.description,
-                    format: e.format,
-                    date: formatDateRange(e.startDateTime, e.endDateTime),
-                    tags: e.tags?.map((tag) => tag.name) || [],
-                    position: [e.latitude, e.longitude],
-                    location: e.location,
-                }));
-                this.setState({
-                    recommendations: loadedRecommendations,
-                    currentPage: page,
-                    totalEvents: data.total || 0,
-                });
-            })
-            .catch((err) => console.error("Ошибка при загрузке рекомендаций:", err));
-    };
-
-
     loadRecommendations = (page, search = "", searchTags = []) => {
         const { eventsPerPage } = this.state;
         const currentUser = this.context.user;
         if (!currentUser) return;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        const url = `${API_BASE_URL}/v1/recommend?lat=57.577&lon=57.57&page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`;
+        const url = `${API_BASE_URL}/v1/recommend?lat=${this.state.latitude}&lon=${this.state.longitude}&page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`;
         fetch(url, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -337,10 +335,11 @@ class EventsPage extends Component {
     // Переключение вкладок
     handleTabChange = (tab) => {
         this.setState({ activeTab: tab, currentPage: 1 }, () => {
+            const { search, selectedTags } = this.state;
             if (tab === "allEvents") {
-                this.loadEvents(1, this.state.search, this.state.selectedTags);
+                this.loadEvents(1, search, selectedTags);
             } else {
-                this.loadRecommendations(1, this.state.search, this.state.selectedTags);
+                this.loadRecommendations(1, search, selectedTags);
             }
         });
     };
