@@ -44,6 +44,8 @@ public class SecurityConfig {
 
     private static final String V1_EVENTS = "/v1/events";
     private static final String V1_EVENTS_ID = "/v1/events/{id}";
+    private static final String V1_EVENTS_ORGANIZERS_ID = "/v1/events/organizers/{id}";
+
     private static final String V1_TAGS = "/v1/tags";
 
     private static final String V1_USERS_ORGANIZERS = "/v1/users/organizers";
@@ -130,6 +132,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_TAGS).permitAll()
                         .requestMatchers(HttpMethod.GET, V1_EVENTS_ID).permitAll()
+                        .requestMatchers(HttpMethod.GET, V1_EVENTS_ORGANIZERS_ID).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
