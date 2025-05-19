@@ -407,8 +407,8 @@
   stroke-width: 2;
 }
 
-.event-tag.favorite {
-  border: #ffd700 2px solid;
+.event-card.favorite {
+  border: #daa520 1px solid;
   padding: 0.1rem 0.4rem;
 }
 
