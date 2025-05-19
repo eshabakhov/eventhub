@@ -1,21 +1,23 @@
 package org.kmb.eventhub.recommendation.service;
 
 import lombok.AllArgsConstructor;
+import org.jooq.Condition;
 import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.dto.EventDTO;
+import org.kmb.eventhub.event.enums.EventFormat;
 import org.kmb.eventhub.event.mapper.EventMapper;
+import org.kmb.eventhub.event.repository.EventRepository;
 import org.kmb.eventhub.recommendation.repository.RecommendationRepository;
 import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.UserEventInteractions;
 import org.kmb.eventhub.tag.mapper.TagMapper;
 import org.kmb.eventhub.tag.repository.TagRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static org.jooq.impl.DSL.trueCondition;
 
 @Service
 @AllArgsConstructor
@@ -25,31 +27,55 @@ public class RecommendationService {
 
     private final RecommendationRepository recommendationRepository;
 
+    private final EventRepository eventRepository;
+
     private final TagRepository tagRepository;
 
     private final EventMapper eventMapper;
 
     private final TagMapper tagMapper;
 
+    private Condition getCommonListCondition(String search, List<String> tags) {
+        Condition condition = trueCondition();
 
-    public ResponseList<EventDTO> getRecommendedEvents(double lat, double lon, Integer limitRec) {
+        if (Objects.nonNull(search) && !search.trim().isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.TITLE.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.SHORT_DESCRIPTION.containsIgnoreCase(search));
+            condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.LOCATION.containsIgnoreCase(search));
+
+
+            Map<String, String> formatRuMap = Map.of(
+                    "ONLINE", "Онлайн",
+                    "OFFLINE", "Офлайн"
+            );
+
+            List<EventFormat> matchingFormats = formatRuMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().toLowerCase().contains(search.toLowerCase()))
+                    .map(entry -> EventFormat.valueOf(entry.getKey()))
+                    .toList();
+
+            if (!matchingFormats.isEmpty()) {
+                condition = condition.or(org.kmb.eventhub.tables.Event.EVENT.FORMAT.in(matchingFormats));
+            }
+
+        }
+        if (Objects.nonNull(tags) && !tags.isEmpty()) {
+            condition = condition.and(org.kmb.eventhub.tables.Event.EVENT.ID.in(recommendationRepository.fetchEventIdsBySelectedTags(tags)));
+        }
+
+        return condition;
+    }
+
+
+    public ResponseList<EventDTO> getRecommendedEvents(Integer page, Integer pageSize, String search, List<String> tags, double lat, double lon) {
 
         Long userId = UserDetailsService.getAuthenticatedUser().getId();
 
-        List<Event> userEventsWithTags = recommendationRepository.findEventsByLocationAndUserInterests(userId,lat,	lon);
+        Condition condition = getCommonListCondition(search, tags);
 
-        List<UserEventInteractions> interactions = recommendationRepository.findInteractionsByUserId(userId);
+        List<Event> recommendations = recommendationRepository.getRecommendedEventsCond(userId,lon,lat,page,pageSize,condition);
 
-        Set<Long> userTagIds = tagRepository.getUsedTagIdsForUser(userId);
-
-        record ScoredEvent(Event event, double score) {}
-
-        List<Event> recommendations = userEventsWithTags.stream()
-                .map(event -> new ScoredEvent(event, calculateScore(event, userId, userTagIds, interactions, lat, lon)))
-        .sorted(Comparator.comparingDouble(ScoredEvent::score).reversed())
-                .limit(limitRec)
-                .map(ScoredEvent::event)
-                .toList();
+        System.out.println(recommendations);
 
 
         ResponseList<EventDTO> responseList = new ResponseList<>();
@@ -61,59 +87,8 @@ public class RecommendationService {
         });
 
         responseList.setList(eventDTOList);
-        responseList.setTotal((long) eventDTOList.size());
-        responseList.setPageSize(limitRec);
+        responseList.setTotal(eventRepository.count(condition));
+        responseList.setPageSize(pageSize);
         return responseList;
-    }
-
-
-    private double calculateScore(Event event, Long userId, Set<Long> userTagIds , List<UserEventInteractions> interactions, double userLat, double userLon) {
-        Set<Long> eventTagIds = tagRepository.getUsedTagIdsForEvent(event.getId());
-
-        long totalTags = Stream.concat(userTagIds.stream(), eventTagIds.stream())
-                .distinct()
-                .count();
-
-        long commonTags = eventTagIds.stream()
-                .filter(userTagIds::contains)
-                .count();
-
-        double matchRatio = totalTags > 0 ? (2.0 * commonTags) / totalTags : 0.0;
-
-
-        double interactionScore = interactions.stream()
-                .filter(i -> i.getEventId().equals(event.getId()))
-                .mapToDouble(i -> switch (i.getInteractionType()) {
-                    case "VIEW" -> 0.1;
-                    case "FAVORITE" -> 1.0;
-                    default -> 0.0;
-                }).sum();
-
-        double distance = calculateDistance( userLat, userLon, event.getLatitude(), event.getLongitude());
-
-        double proximityScore = 1.0 / (1.0 + distance);
-
-        return 0.3 * matchRatio + 0.2 * interactionScore + 0.2 * proximityScore;
-    }
-
-    public static double calculateDistance(double lat1, double lon1, BigDecimal lat2, BigDecimal lon2) {
-        // Переводим градусы в радианы
-        double lat1Rad = Math.toRadians(lat1);
-        double lon1Rad = Math.toRadians(lon1);
-        double lat2Rad = Math.toRadians(lat2.doubleValue());
-        double lon2Rad = Math.toRadians(lon2.doubleValue());
-
-        // Разница координат
-        double deltaLat = lat2Rad - lat1Rad;
-        double deltaLon = lon2Rad - lon1Rad;
-
-        // Формула Haversine
-        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // Расстояние
-        return 6371 * c;
     }
 }

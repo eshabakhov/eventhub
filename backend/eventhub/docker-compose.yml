@@ -3,7 +3,7 @@ version: '3.9'
 services:
 
   postgres:
-    image: postgres:14-alpine
+    image: postgis/postgis:14-3.5-alpine
     container_name: eventhub_postgres
     hostname: eventhub_postgres
     expose:

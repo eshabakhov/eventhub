@@ -18,8 +18,11 @@ public class RecommendationController {
     public ResponseList<EventDTO> getRecommendations(
             @RequestParam(value = "lat") double latitude,
             @RequestParam(value = "lon") double longitude,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "tags", required = false) List<String> tags
             ) {
-        return recommendationService.getRecommendedEvents(latitude, longitude, limit);
+        return recommendationService.getRecommendedEvents(page, pageSize, search, tags, latitude, longitude);
     }
 }

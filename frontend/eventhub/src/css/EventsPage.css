@@ -498,3 +498,33 @@
 .file-tag:hover {
   background-color: #7a7f80;
 }
+
+.tabs-wrapper {
+  margin-bottom: 2px;
+}
+
+.tab-button {
+  background: transparent;
+  color: #333;
+  font-size: 16px;
+  padding: 8px 16px;
+  margin-right: 0;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: background-color 0.3s, font-weight 0.3s;
+  width: 50%; /* Each tab takes half the width */
+  text-align: center; /* Center the text within the tab */
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+  font-weight: 700;
+}
+
+.tab-button.active {
+  background: rgba(173, 216, 230, 0.2); /* Light blue background with opacity */
+  color: #1e90ff;
+  border-bottom: 2px solid #1e90ff; /* Blue border at the bottom */
+}
+
+.tab-button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+}
