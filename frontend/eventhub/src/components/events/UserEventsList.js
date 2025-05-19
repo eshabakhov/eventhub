@@ -16,6 +16,7 @@ import SideBar from "../common/SideBar";
 import Pagination from "../common/Pagination";
 import defaultEventImage from "../../img/image-512.png";
 import api from "../common/AxiosInstance";
+import ConfirmModal from "../common/ConfirmModal";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
@@ -86,6 +87,7 @@ class UserEventsList extends Component {
         this.markerRefs.current = {};
         this.state = {
             events: [],
+            eventsOpen: false,
             username: "",
             search: "",
             focusedEvent: null,
@@ -104,9 +106,6 @@ class UserEventsList extends Component {
 
     componentDidMount() {
         const memberId = this.props.params;
-        this.loadEvents(1, this.state.search);
-        this.loadTags();
-        document.addEventListener("mousedown", this.handleClickOutside);
         api.get(`${API_BASE_URL}/v1/users/${memberId.id}`, {
             withCredentials: true,
             headers: {
@@ -115,8 +114,28 @@ class UserEventsList extends Component {
         })
             .then((response) => {
                 const data = response.data;
-                console.log(data);
                 this.setState({ username: "Мероприятия " + data.username });
+            })
+            .catch((error) => {
+                console.error('Ошибка при загрузке профиля:', error);
+            });
+        api.get(`/v1/friends/${memberId.id}/isfriend`, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => {
+                const data = response.data;
+                if (data.privacy === 'PUBLIC' || data.privacy === 'ONLY_FRIENDS' && data.friendly === true) {
+                    this.setState({ eventsOpen: true });
+                    this.loadEvents(1, this.state.search);
+                    this.loadTags();
+                    document.addEventListener("mousedown", this.handleClickOutside);
+                } else {
+                    this.setState({ eventsOpen: false });
+                }
+                console.log(data);
             })
             .catch((error) => {
                 console.error('Ошибка при загрузке профиля:', error);
@@ -189,6 +208,26 @@ class UserEventsList extends Component {
             })
             .catch((err) => console.error("Ошибка при загрузке точек:", err));
     };
+
+    // Открытие модального окна для отказа от участия
+    handleDeclineClick = (event) => {
+        this.setState({
+            showConfirmModal: true,
+            selectedEvent: event
+        });
+    };
+    // Открытие модального окна удаления мероприятия
+    handleDeleteClick = (event) => {
+        this.setState({
+            showConfirmModal: true,
+            selectedEvent: event
+        });
+    }
+
+    // Переход к редактированию мероприятия
+    handleEditClick = (event) => {
+        this.props.navigate(`/event-edit/${event.id}`);
+    }
 
     // Открытие модального окна для отказа от участия
     handleDeclineClick = (event) => {
@@ -316,6 +355,34 @@ class UserEventsList extends Component {
 
         return (
             <div className="events-container">
+                {/* Модальное окно подтверждения */}
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    headerText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? "Подтверждение"
+                                : "Внимание!"
+                            : ""
+                    }
+                    mainText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? `Вы уверены, что хотите отказаться от участия в мероприятии "${selectedEvent.title}"?`
+                                : `Вы уверены, что хотите навсегда удалить мероприятие "${selectedEvent.title}"? Действие невозможно будет отменить!`
+                            : ""
+                    }
+                    cancelText="Отмена"
+                    confirmText={
+                        this.context.user && selectedEvent
+                            ? this.context.user.role === "MEMBER"
+                                ? "Подтвердить"
+                                : "Удалить"
+                            : ""
+                    }
+                    onClose={this.handleCloseModal}
+                    onConfirm={this.handleConfirmDecline}
+                />
                 <Header
                     onBurgerButtonClick={this.toggleSidebar}
                     title={username}

@@ -5,6 +5,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.kmb.eventhub.common.dto.ResponseList;
+import org.kmb.eventhub.enums.PrivacyType;
 import org.kmb.eventhub.friendship.dto.FriendCheckDTO;
 import org.kmb.eventhub.friendship.repository.FriendRequestRepository;
 import org.kmb.eventhub.friendship.dto.FriendRequestDTO;
@@ -15,9 +16,12 @@ import org.kmb.eventhub.enums.RoleType;
 import org.kmb.eventhub.friendship.exception.FriendRequestException;
 import org.kmb.eventhub.tables.FriendRequest;
 import org.kmb.eventhub.tables.User;
+import org.kmb.eventhub.tables.daos.MemberDao;
+import org.kmb.eventhub.tables.pojos.Member;
 import org.kmb.eventhub.tables.records.FriendRequestRecord;
 import org.kmb.eventhub.user.dto.UserDTO;
 import org.kmb.eventhub.user.dto.UserResponseDTO;
+import org.kmb.eventhub.user.enums.PrivacyEnum;
 import org.kmb.eventhub.user.exception.UserNotFoundException;
 import org.kmb.eventhub.user.exception.UserSelfException;
 import org.kmb.eventhub.tables.daos.FriendRequestDao;
@@ -31,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.user;
 import static org.kmb.eventhub.Tables.*;
 
 @Service
@@ -237,6 +242,8 @@ public class FriendService {
 
     private final UserRepository userRepository;
 
+    private final MemberDao memberDao;
+
     private final UserDetailsService userDetailsService;
 
     private final DSLContext dsl;
@@ -337,11 +344,19 @@ public class FriendService {
                 .and(FRIEND_REQUEST.STATUS.eq(FriendRequestStatusType.ACCEPTED))
                 .fetchOneInto(Long.class);
 
+        Member member = memberDao.fetchOneById(senderId);
+
         if (count > 0L) {
             friendCheckDTO.setFriendly(true);
             return friendCheckDTO;
         }
         friendCheckDTO.setFriendly(false);
+        if (member.getPrivacy().equals(PrivacyType.ONLY_FRIENDS))
+            friendCheckDTO.setPrivacy(PrivacyEnum.ONLY_FRIENDS);
+        if (member.getPrivacy().equals(PrivacyType.PRIVATE))
+            friendCheckDTO.setPrivacy(PrivacyEnum.PRIVATE);
+        if (member.getPrivacy().equals(PrivacyType.PUBLIC))
+            friendCheckDTO.setPrivacy(PrivacyEnum.PUBLIC);
         return friendCheckDTO;
     }
 

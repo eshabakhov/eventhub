@@ -33,7 +33,8 @@ class UserProfile extends Component {
         isDirty: false,
         loading: true,
         successMessage: '',
-        sidebarOpen: false
+        sidebarOpen: false,
+        eventsOpen: false,
     };
 
     sidebarRef = React.createRef();
@@ -56,7 +57,6 @@ class UserProfile extends Component {
                 })
                     .then((response) => {
                         const data = response.data;
-                        console.log(data);
                         this.setState({ username: data.username });
                     })
                     .catch((error) => {
@@ -77,6 +77,24 @@ class UserProfile extends Component {
             .catch((error) => {
                 console.error('Ошибка при загрузке профиля:', error);
                 this.setState({ loading: false });
+            });
+        api.get(`/v1/friends/${memberId.id}/isfriend`, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => {
+                const data = response.data;
+                if (data.privacy === 'PUBLIC' || data.privacy === 'ONLY_FRIENDS' && data.friendly === true) {
+                    this.setState({ eventsOpen: true });
+                } else {
+                    this.setState({ eventsOpen: false });
+                }
+                console.log(data);
+            })
+            .catch((error) => {
+                console.error('Ошибка при загрузке профиля:', error);
             });
     }
 
@@ -110,10 +128,10 @@ class UserProfile extends Component {
     render() {
         const {navigate} = this.props;
         const {user} = this.context;
-        const {formData, loading, successMessage, sidebarOpen, username} = this.state;
+        const {formData, loading, successMessage, sidebarOpen, username, eventsOpen} = this.state;
 
         if (loading) return <div className="profile-loading">Загрузка...</div>;
-
+        console.log(eventsOpen)
         return (
             <div className="profile-page">
                 <Header
@@ -159,7 +177,7 @@ class UserProfile extends Component {
                                     </label>
                                 </>
                                 <div className="button-wrapper">
-                                    <button type="button" className="user-profile-button" onClick={this.handleUserEvents}>
+                                    <button type="button" className={`${!eventsOpen ? 'no-hover' : 'user-profile-button'}`} onClick={this.handleUserEvents} disabled={!eventsOpen}>
                                         Мероприятия пользователя
                                     </button>
                                 </div>
