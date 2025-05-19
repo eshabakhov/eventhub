@@ -3,19 +3,10 @@ import React, { Component } from 'react'
 const UserContext = React.createContext()
 
 class UserProvider extends Component {
-  // Context state
-  // state = {
-  //   user: {},
-  // }
-
   // Подбираем контекст юзера из локального хранилища
   state = {
     user: JSON.parse(localStorage.getItem('user')) || {}
   }
-  // Method to update state
-  // setUser = (user) => {
-  //   this.setState((prevState) => ({ user }))
-  // }
 
   // задаем контекст, сохраняем в локальном хранилище
   setUser = (user) => {

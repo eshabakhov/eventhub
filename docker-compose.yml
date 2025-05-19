@@ -5,8 +5,6 @@ services:
     image: postgres:14-alpine
     container_name: eventhub_postgres
     hostname: eventhub_postgres
-    expose:
-      - 5432
     ports:
       - 5432:5432
     environment:
@@ -41,6 +39,20 @@ services:
     container_name: frontend_backend
     depends_on:
       - backend
+    networks:
+      eventhub_network:
+
+  haproxy:
+    build:
+      context: ./haproxy
+    container_name: eventhub_haproxy
+    ports:
+      - "443:443"
+      - "8080:8080"
+      - "8404:8404"
+    depends_on:
+      - backend
+    restart: unless-stopped
     networks:
       eventhub_network:
 

@@ -141,25 +141,42 @@
   }
 
   .event-card {
-    position: relative;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
+    display: flex;
+    flex-direction: row; /* Важный момент: обычный порядок */
+    justify-content: space-between;
+    align-items: stretch;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .event-info {
+    flex: 1; /* Занимает всё оставшееся пространство */
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .event-image {
+    width: 25%; /* Фиксированная ширина картинки */
+    height: auto;
+    object-fit: cover;
   }
 
   .event-card:hover {
     transform: scale(1.02);
   }
 
+  .event-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .event-date {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
     font-size: 0.75rem;
     color: #888;
+    margin-bottom: 32px
   }
 
   .event-title {
@@ -290,13 +307,15 @@
     padding: 16px;
     background-color: #f9f9f9;
     border-bottom: 1px solid #e5e7eb;
-    height: 5vh;
+    box-sizing: border-box;
+    height: 8%;
   }
 
   .content-panels {
     display: flex;
     height: 90vh;
   }
+
   .pagination-controls {
     display: flex;
     justify-content: left;
@@ -305,7 +324,7 @@
     margin-bottom: 20px;
   }
 
-  .pagination-controls button {
+  .page-button {
     background-color: transparent;
     color: black;
     border: transparent 1px solid;
@@ -313,13 +332,33 @@
     border-radius: 8px;
     font-weight: bold;
     transition: background-color 0.2s ease;
-
   }
-  .pagination-controls button:hover {
+
+  .back-forward {
+    background-color: transparent;
+    color: black;
+    border: transparent 1px solid;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  .back-forward:hover {
+    background-color: lightgray;
+    cursor: pointer;
+  }
+  .back-forward:disabled {
+    cursor: auto;
+    border: #007bff 0px solid;
+    color: lightgray;
+    background-color: transparent;
+  }
+
+  .page-button:hover {
     border: #007bff 1px solid;
     cursor: pointer;
   }
-  .pagination-controls button:disabled {
+  .page-button:disabled {
     background-color: #007bff;
     cursor: not-allowed;
     color: white;
@@ -337,7 +376,11 @@
 }
 
 .tag-button {
-  padding: 6px 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
   font-size: 14px;
   border-radius: 20px;
   border: 1px solid #ccc;
@@ -346,12 +389,33 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
-.tag-button {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+
+.star-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: all 0.2s ease;
 }
+.star-icon:hover{
+  fill: #ffd700;
+}
+
+.star-icon.favorite {
+  fill: #ffd700;
+  stroke-width: 2;
+}
+
+.event-card.favorite {
+  border: #daa520 1px solid;
+  padding: 0.1rem 0.4rem;
+}
+
+.star-icon.favorite:hover {
+  fill: none;
+}
+
 
 .remove-icon {
   font-weight: bold;
@@ -449,6 +513,66 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.marker-cluster-custom {
+  background: #3b82f6;
+  border: 3px solid #ededed;
+  border-radius: 50%;
+  color: #ededed;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  width: 30px;
+  font-weight: bold;
+}
 
+.event-files {
+  margin-bottom: 24px; /* увеличен отступ между тегами и кнопкой */
+}
 
+.file-tag {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: #eee;
+  border-radius: 0.25rem;
+  margin-bottom: 6px;
+}
 
+.file-tag:hover {
+  background-color: #7a7f80;
+}
+.event-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.tabs-wrapper {
+  margin-bottom: 2px;
+}
+
+.tab-button {
+  background: transparent;
+  color: #333;
+  font-size: 16px;
+  padding: 8px 16px;
+  margin-right: 0;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: background-color 0.3s, font-weight 0.3s;
+  width: 50%;
+  text-align: center;
+  box-sizing: border-box;
+  font-weight: 700;
+}
+
+.tab-button.active {
+  background: rgba(173, 216, 230, 0.2);
+  color: #1e90ff;
+  border-bottom: 2px solid #1e90ff;
+}
+
+.tab-button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+}

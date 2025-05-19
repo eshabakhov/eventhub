@@ -32,11 +32,18 @@
             ('ORGANIZER', 'organizer19@eventhub.ru', 'organizer-test-20', 'Мобайл Клуб', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
             ('MODERATOR', 'moderator1@test.ru', 'moderator-test-1', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
             ('MODERATOR', 'moderator2@test.ru', 'moderator-test-2', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member1@test.ru', 'member-test-1', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member2@test.ru', 'member-test-2', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member3@test.ru', 'member-test-3', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member4@test.ru', 'member-test-4', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member5@test.ru', 'member-test-5', 'Тестовый участник', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true')
+            ('MEMBER', 'member1@test.ru', 'member-test-1', 'Тестовый участник 1', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member2@test.ru', 'member-test-2', 'Тестовый участник 2', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member3@test.ru', 'member-test-3', 'Тестовый участник 3', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member4@test.ru', 'member-test-4', 'Тестовый участник 4', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member5@test.ru', 'member-test-5', 'Тестовый участник 5', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member6@test.ru', 'member-test-6', 'Тестовый участник 6', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member7@test.ru', 'member-test-7', 'Тестовый участник 7', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member8@test.ru', 'member-test-8', 'Тестовый участник 8', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member9@test.ru', 'member-test-9', 'Тестовый участник 9', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member10@test.ru', 'member-test-10', 'Тестовый участник 10', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member11@test.ru', 'member-test-11', 'Тестовый участник 11', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
+            ('MEMBER', 'member12@test.ru', 'member-test-12', 'Тестовый участник 12', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true')
             ]]>
         </sql>
     </changeSet>
@@ -82,7 +89,14 @@
             (24, 'Петров', 'Петр', 'Петрович', '1999-01-01', 'Санкт-Петербург', 'PUBLIC'),
             (25, 'Сидоров', 'Сидор', 'Сидорович', '1999-01-01', 'Казань', 'ONLY_FRIENDS'),
             (26, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (27, 'Сергеев', 'Сергей', 'Сергеевич', '1999-01-01', 'Воронеж', 'ONLY_FRIENDS');
+            (27, 'Сергеев', 'Сергей', 'Сергеевич', '1999-01-01', 'Воронеж', 'ONLY_FRIENDS'),
+            (28, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (29, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (30, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (31, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (32, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (33, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
+            (34, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC');
             ]]>
         </sql>
     </changeSet>

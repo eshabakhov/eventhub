@@ -13,26 +13,17 @@ import AccreditationPage from "./components/accreditation/AccreditationPage";
 import EventDetailsPage from "./components/events/EventDetailsPage";
 import EventEditForm from "./components/eventForm/EventEdit";
 import ModeratorsPage from "./components/ModeratorManagement/ModeratorManagement";
-import ModeratorManagement from "./components/ModeratorManagement/ModeratorManagement";
 import ModeratorCreate from "./components/ModeratorManagement/ModeratorCreate";
+import UserProfile from "./components/profile/UserProfile";
+import UserEventsList from "./components/events/UserEventsList";
 
-const user = { name: 'Tania', loggedIn: true }
 class App extends React.Component {
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-        
-    }
-
-  }
   
   render() {
     return (
       <div>
         <Router>
-          <UserProvider value={{ user: user}}>
+          <UserProvider>
             <Routes>
               <Route path="/" element={<Navigate to="/events" />} />
               <Route path='/login' exact={true} element={<LoginForm/>}/>
@@ -40,47 +31,24 @@ class App extends React.Component {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="/my-events" element={<MyEventsList />} />
-              <Route path='/create-event' exact={true} element={<EventForm/>}/>
+              <Route path='/create-event' exact={true} element={<EventEditForm/>}/>
               <Route path="/accreditation" element={<AccreditationPage />} />
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
               <Route path="/event-edit/:eventId" element={<EventEditForm />} />
               <Route path="/moderator-management" element={<ModeratorsPage />} />
               <Route path="/moderators/create" element={<ModeratorCreate/>}/>
+              <Route path="/moderators/edit/:moderatorId" element={<ModeratorCreate/>}/>
+              <Route path="/users/:id" element={<UserProfile/>}/>
+              <Route path="/users/:id/events" element={<UserEventsList/>}/>
+              <Route path="/organizers/:id" element={<UserProfile/>}/>
+              <Route path="/organizers/:id/events" element={<UserEventsList/>}/>
+
             </Routes>
           </UserProvider>
         </Router>
       </div>
     )
-  }
-
-  deleteUser(id) {
-    this.setState({
-      users: this.state.users.filter((el) => el.id !== id)
-    })
-  }
-
-  editUser(user) {
-    let allUsers = this.state.users
-    allUsers[user.id - 1] = user
-
-    this.setState({ users: [] }, () => {
-      this.setState({ users: [...allUsers] })
-    })
-  }
-
-  addUser(user) {
-    const id = this.state.users.length + 1
-    this.setState({ 
-      users: [...this.state.users, {id, ...user}]
-    })
-  }
-
-  mapStateToProps(state) {
-    const {userReducer} = state;
-    return {
-        users: userReducer.users
-    }
   }
 }
 

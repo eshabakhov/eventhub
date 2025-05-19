@@ -4,9 +4,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.kmb.eventhub.service.CustomUserDetailsService;
+import org.kmb.eventhub.auth.service.UserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Component
@@ -23,7 +25,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private JwtUtil jwtUtil;
 
-    private CustomUserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
@@ -41,17 +43,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (Objects.nonNull(authHeader) && authHeader.startsWith(BEARER)) {
             jwt = authHeader.substring(7);
         }
-        // если токен не передан в заголовке, то ищем его в куках
-        if (Objects.isNull(jwt) && request.getCookies() != null) {
-            for (var cookie : request.getCookies()) {
-                if (cookie.getName().equals("token")) {
-                    jwt = cookie.getValue();
-                    break;
-                }
-            }
+
+        if (Objects.isNull(jwt) && Objects.nonNull(request.getCookies())) {
+            jwt = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "access".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
         }
 
-        if (jwt != null) {
+        if (Objects.nonNull(jwt)) {
             username = jwtUtil.extractUsername(jwt);
         }
 
@@ -74,13 +76,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-
-        // пути, которые не требуют авторизации вообще
-        return path.startsWith("/auth/login")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/swagger-ui.html")
-                || path.startsWith("/api-docs"); // можешь добавить свои публичные ручки
+        return path.startsWith("/auth/login");
     }
 }

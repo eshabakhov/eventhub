@@ -1,42 +1,18 @@
-﻿import React, {Component} from "react";
+import React, {Component} from "react";
 import {motion} from "framer-motion";
-import EventHubLogo from "../../img/eventhub.png";
-import ProfileDropdown from "../profile/ProfileDropdown";
 import EditIcon from "../../img/edit.png";
 import DeleteIcon from "../../img/delete.png";
-import "../../css/Accreditation.css";
+import "../../css/ModeratorManagement.css";
 import {useNavigate} from "react-router-dom";
 import UserContext from "../../UserContext";
-import API_BASE_URL from "../../config";
+import Header from "../common/Header";
+import SideBar from "../common/SideBar";
+import ConfirmModal from "../common/ConfirmModal";
+import api from "../common/AxiosInstance";
 
 export const withNavigation = (WrappedComponent) => {
     return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
 }
-
-const ConfirmModal = ({isOpen, onClose, onConfirm, mod}) => {
-    if (!isOpen) return null;
-    return (
-        <div className="modal-overlay">
-            <motion.div
-                className="modal-content"
-                initial={{scale: 0.9, opacity: 0}}
-                animate={{scale: 1, opacity: 1}}
-                exit={{scale: 0.9, opacity: 0}}
-            >
-                <h3>Подтверждение</h3>
-                <p>Удалить модератора "{mod.displayName}"?</p>
-                <div className="modal-buttons">
-                    <button className="modal-button cancel" onClick={onClose}>
-                        Отмена
-                    </button>
-                    <button className="modal-button confirm" onClick={onConfirm}>
-                        Удалить
-                    </button>
-                </div>
-            </motion.div>
-        </div>
-    );
-};
 
 class ModeratorsPage extends Component {
     static contextType = UserContext;
@@ -50,27 +26,47 @@ class ModeratorsPage extends Component {
         };
     }
 
+    sidebarRef = React.createRef();
+
     componentDidMount() {
         this.loadModerators();
+        document.addEventListener("mousedown", this.handleClickOutside);
     }
 
-    loadModerators = () => {
-        fetch(`${API_BASE_URL}/v1/users/moderators`, {
-            method: "GET",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-        })
-            .then(res => res.json())
-            .then(data => {
-                const loadedModerators = data.list.map((e) => ({
-                    id: e.id,
-                    displayName: e.displayName,
-                    email: e.email,
-                    userName: e.username
-                }))
-                this.setState({moderators: loadedModerators});
-            })
-            .catch(err => console.error("Ошибка загрузки модераторов:", err));
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
+
+    loadModerators = async () => {
+        try {
+            const response = await api.get(`/v1/users/moderators`);
+            const data = response.data;
+
+            const loadedModerators = data.list.map((e) => ({
+                id: e.id,
+                displayName: e.displayName,
+                email: e.email,
+                userName: e.username
+            }))
+
+            this.setState({moderators: loadedModerators});
+        }  catch (err) {
+            console.error("Ошибка загрузки модераторов:", err);
+        }
     };
 
     handleEdit = (moderatorId) => {
@@ -86,19 +82,19 @@ class ModeratorsPage extends Component {
         });
     };
 
-    handleDelete = (moderatorId) => {
-        fetch(`${API_BASE_URL}/v1/users/${moderatorId}`, {
-            method: "DELETE",
-            credentials: "include",
-        })
-            .then(res => {
-                if (res.ok) this.loadModerators();
-                else alert("Ошибка удаления модератора");
-            })
-            .catch(err => console.error("Ошибка удаления модератора:", err))
-            .finally(()=>{
-                this.handleCloseModal();
-            });
+    handleDelete = async (moderatorId) => {
+        try {
+            const response = await api.delete(`/v1/users/${moderatorId}`);
+            if (response.status === 204) {
+                await this.loadModerators();
+            } else {
+                alert("Ошибка удаления модератора");
+            }
+        } catch (error) {
+            console.error("Ошибка удаления модератора:", error)
+        } finally {
+            this.handleCloseModal();
+        }
     };
 
     handleCreate = () => {
@@ -107,8 +103,8 @@ class ModeratorsPage extends Component {
 
     // Подтверждение
     handleConfirm = () => {
-        const { selectedModer } = this.state;
-        const { user } = this.context;
+        const {selectedModer} = this.state;
+        const {user} = this.context;
         if (!selectedModer || !user) {
             this.handleCloseModal();
             return;
@@ -133,20 +129,23 @@ class ModeratorsPage extends Component {
             <div className="orgs-container">
                 <ConfirmModal
                     isOpen={showConfirmModal}
+                    headerText="Подтверждение"
+                    mainText={`Удалить модератора "${selectedModer && selectedModer.displayName}"?`}
+                    confirmText="Удалить"
+                    cancelText="Отмена"
                     onClose={this.handleCloseModal}
                     onConfirm={this.handleConfirm}
-                    mod={selectedModer}
-                    user={this.context.user}
                 />
-                <div className="header">
-                    <div className="top-logo" onClick={() => navigate("/events")} style={{cursor: "pointer"}}>
-                        <img src={EventHubLogo} alt="Logo" className="logo"/>
-                    </div>
-                    <h1 className="panel-title">Управление модераторами</h1>
-                    <div className="login-button-container">
-                        <ProfileDropdown navigate={navigate}/>
-                    </div>
-                </div>
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Управление модераторами"
+                    user={this.context.user}
+                    navigate={navigate}
+                />
+
+                <div className={`sidebar-overlay ${this.state.sidebarOpen ? 'active' : ''}`}></div>
+
+                <SideBar user={this.context.user} sidebarRef={this.sidebarRef} sidebarOpen={this.state.sidebarOpen}/>
 
                 <div className="content-panel">
                     <motion.div initial={{opacity: 0, x: -50}} animate={{opacity: 1, x: 0}}
@@ -157,7 +156,7 @@ class ModeratorsPage extends Component {
                         </div>
 
                         {moderators.map((mod) => (
-                            <motion.div key={mod.id} className="event-card" whileHover={{scale: 1.02}}>
+                            <motion.div key={mod.id} className="moderator-card" whileHover={{scale: 1.02}}>
                                 <div className="buttons">
                                     <h3 className="org-title">{mod.displayName || mod.username}</h3>
                                     <div>
