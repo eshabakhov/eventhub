@@ -389,6 +389,7 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
+
 .star-icon {
   width: 16px;
   height: 16px;
@@ -397,10 +398,21 @@
   stroke-width: 2;
   transition: all 0.2s ease;
 }
+.star-icon:hover{
+  fill: #ffd700;
+}
 
 .star-icon.favorite {
   fill: #ffd700;
-  stroke: #ffd700;
+  stroke-width: 2;
+}
+
+/*.event-tag.favorite {*/
+/*  background-color: #ffd700;*/
+/*}*/
+
+.star-icon.favorite:hover {
+  fill: none;
 }
 
 

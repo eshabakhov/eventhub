@@ -482,7 +482,7 @@ class EventsPage extends Component {
                                     <p className="event-location">{event.location}</p>
                                     <div className="event-tags">
                                         {event.tags.map((tag, idx) => (
-                                            <span key={idx} className="event-tag">{tag}</span>
+                                            <span key={idx} className={`event-tag ${this.state.tags.find((element) => element.name === tag).isFavorite ? 'favorite' : ''}`}>{tag}</span>
                                         ))}
                                     </div>
                                     <div className="card-buttons">
