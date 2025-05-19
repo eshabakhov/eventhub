@@ -97,6 +97,7 @@ const EventDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
+    const [organizer, setOrganizer] = useState(null);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -106,6 +107,13 @@ const EventDetailsPage = () => {
                 });
 
                 const data = res.data;
+                if (data.organizerId) {
+                    let orgId = data.organizerId;
+                    const res = await api.get(`/v1/users/organizers/${orgId}`, {
+                        credentials: "include",
+                    });
+                    setOrganizer(res.data);
+                }
                 setEvent(data);
                 setLoading(false);
 
@@ -213,9 +221,13 @@ const EventDetailsPage = () => {
                                 alt={event.title}
                             />
                         </div>
-
                     </div>
 
+                    <div className="event-description-header">Организатор:
+                        <div className="event-details-format">
+                            {organizer.name}
+                        </div>
+                    </div>
 
                     <div className="event-description-header">Формат:
                         <div className="event-details-format">

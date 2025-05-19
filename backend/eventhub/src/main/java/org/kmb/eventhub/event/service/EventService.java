@@ -169,8 +169,17 @@ public class EventService {
     }
 
     public EventDTO get(Long id) {
+        Long userId = userDetailsService.getAuthenticatedUser() != null
+                ? userDetailsService.getAuthenticatedUser().getId()
+                : null;
+
         EventDTO eventDTO = eventMapper.toDto(eventDao.fetchOptionalById(id)
                 .orElseThrow(() -> new EventNotFoundException(id)));
+
+        if (userId != null) {
+            eventRepository.recordView(userId, id);
+        }
+
         eventDTO.setFiles(eventFileDao.fetchByEventId(id).stream().map(eventFileMapper::toDto).collect(Collectors.toSet()));
         eventDTO.setTags(tagRepository.fetch(id).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
         return eventDTO;
