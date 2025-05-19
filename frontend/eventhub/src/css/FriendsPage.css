@@ -105,7 +105,8 @@
     font-size: 18px;
     margin-bottom: 10px;
   }
-  
+
+  .view-profile-button,
   .add-button,
   .accept-frineds-button,
   .remove-button {
@@ -117,8 +118,17 @@
     cursor: pointer;
     transition: background-color 0.2s;
     font-size: 14px;
+    width: 30%;
   }
-  
+
+  .view-profile-button {
+    background-color: #82aef5;
+  }
+
+  .view-profile-button:hover {
+    background-color: #36568a;
+  }
+
   .add-button:hover,
   .accept-frineds-button:hover {
     background-color: #218838;

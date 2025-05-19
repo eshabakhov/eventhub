@@ -14,6 +14,8 @@ import EventDetailsPage from "./components/events/EventDetailsPage";
 import EventEditForm from "./components/eventForm/EventEdit";
 import ModeratorsPage from "./components/ModeratorManagement/ModeratorManagement";
 import ModeratorCreate from "./components/ModeratorManagement/ModeratorCreate";
+import UserProfile from "./components/profile/UserProfile";
+import UserEventsList from "./components/events/UserEventsList";
 
 class App extends React.Component {
   
@@ -37,6 +39,8 @@ class App extends React.Component {
               <Route path="/moderator-management" element={<ModeratorsPage />} />
               <Route path="/moderators/create" element={<ModeratorCreate/>}/>
               <Route path="/moderators/edit/:moderatorId" element={<ModeratorCreate/>}/>
+              <Route path="/users/:id" element={<UserProfile/>}/>
+              <Route path="/users/:id/events" element={<UserEventsList/>}/>
             </Routes>
           </UserProvider>
         </Router>

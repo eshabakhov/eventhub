@@ -211,6 +211,10 @@ class FriendsPage extends Component {
         });
     };
 
+    handleViewProfile = (userId) => {
+        this.props.navigate(`/users/${userId}`);
+    }
+
     render() {
         const {navigate} = this.props;
         const {
@@ -300,9 +304,14 @@ class FriendsPage extends Component {
                                             ) : incomingRequests.some(req => req.id === user.id) ? (
                                                 <button className="accept-frineds-button" onClick={() => this.handleAcceptRequest(user.id)}>Принять</button>
                                             ) : (
-                                                <button className="add-button" onClick={() => this.handleAddFriend(user.id)}>
-                                                    Добавить в друзья
-                                                </button>
+                                                <>
+                                                    <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>
+                                                        Профиль
+                                                    </button>
+                                                    <button className="add-button" onClick={() => this.handleAddFriend(user.id)}>
+                                                        Добавить в друзья
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                     ))

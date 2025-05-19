@@ -88,7 +88,7 @@ textarea.profile-input {
   margin-top: 20px; /* Отступ сверху для блока с кнопками */
 }
 
-.profile-button, .cancel-button {
+.profile-button, .cancel-button, .user-profile-button {
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 6px;
@@ -107,7 +107,6 @@ textarea.profile-input {
   background-color: #dc2626;
 }
 
-
 .cancel-button:hover {
   background-color: #d1d5db;
 }
@@ -116,6 +115,17 @@ textarea.profile-input {
   background-color: #e0e0e0;
   color: #333;
   border: 1px solid #ccc;
+}
+
+.user-profile-button:hover {
+  background-color: #d1d5db;
+}
+
+.user-profile-button {
+  background-color: #e0e0e0;
+  color: #333;
+  border: 1px solid #ccc;
+  width: 100%;
 }
 
 .profile-button:hover {
