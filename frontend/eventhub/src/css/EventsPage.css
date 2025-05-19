@@ -407,9 +407,10 @@
   stroke-width: 2;
 }
 
-/*.event-tag.favorite {*/
-/*  background-color: #ffd700;*/
-/*}*/
+.event-tag.favorite {
+  border: #ffd700 2px solid;
+  padding: 0.1rem 0.4rem;
+}
 
 .star-icon.favorite:hover {
   fill: none;

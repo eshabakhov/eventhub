@@ -567,7 +567,7 @@ class EventsPage extends Component {
                                             }}
                                         >
                                             <Popup>
-                                                <MultiEventPopup events={group} navigate={navigate}
+                                                <MultiEventPopup events={group} navigate={navigate} favouriteTags={this.state.tags.filter((tag)=> tag.isFavorite)}
                                                                  initialEventId={initialEventId}/>
                                             </Popup>
                                         </Marker>
@@ -584,7 +584,7 @@ class EventsPage extends Component {
 
 {/* PopUp для сгрупированных событий */}
 
-function MultiEventPopup({events, navigate, initialEventId}) {
+function MultiEventPopup({events, navigate, initialEventId, favouriteTags}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
     const [page, setPage] = React.useState(Math.max(0, initialIndex));
     const total = events.length;
@@ -600,6 +600,9 @@ function MultiEventPopup({events, navigate, initialEventId}) {
             <strong>{event.title}</strong>
             <p>{event.shortDescription}</p>
             <p>{event.date}</p>
+            {favouriteTags && event.tags.some((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)) && (
+                <p>Избранные теги: {event.tags.filter((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)).join(", ")}</p>
+            )}
             <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                 Подробнее
             </button>
