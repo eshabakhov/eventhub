@@ -289,6 +289,7 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
                     recommendations: loadedRecommendations,
@@ -366,9 +367,10 @@ class EventsPage extends Component {
 
     render() {
         const {navigate} = this.props;
-        const {events, tags, search, currentPage, eventsPerPage, totalEvents, sidebarOpen, activeTab} = this.state;
+        const {events, recommendations, tags, search, currentPage, eventsPerPage, totalEvents, sidebarOpen, activeTab} = this.state;
         const totalPages = Math.ceil(totalEvents / eventsPerPage);
-        const groupedEvents = this.groupEventsByLocation(events);
+        const displayEvents = activeTab === "allEvents" ? events : recommendations;
+        const groupedEvents = this.groupEventsByLocation(displayEvents);
 
         console.log(this.context.user);
 
@@ -466,7 +468,7 @@ class EventsPage extends Component {
                                     handlePageClick={this.handlePageClick}/>
 
                         {/* Карточки событий */}
-                        {events.map((event) => (
+                        {displayEvents.map((event) => (
                             <motion.div key={event.id} className="event-card">
                                 <img
                                     src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
@@ -521,7 +523,7 @@ class EventsPage extends Component {
                                       maxBounds={[[-90, -180], [90, 180]]}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                        attribution="&copy; OpenStreetMap contributors" maxZoom={18}/>
-                            {events.length > 0 && <FitToAllMarkers events={events}/>}
+                            {events.length > 0 && <FitToAllMarkers events={displayEvents}/>}
                             {this.state.focusedEvent && this.state.focusedMarkerId && (
                                 <FlyToLocation
                                     position={this.state.focusedEvent.position}
