@@ -7,6 +7,7 @@ import org.jooq.impl.DSL;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.kmb.eventhub.Tables.*;
@@ -57,5 +58,25 @@ public class EventRepository {
         return dslContext
                 .selectFrom(EVENT)
                 .fetchInto(Event.class);
+    }
+
+    public void recordView(Long userId, Long eventId) {
+        boolean exists = dslContext.fetchExists(
+                dslContext.selectOne()
+                        .from(USER_EVENT_INTERACTIONS)
+                        .where(USER_EVENT_INTERACTIONS.USER_ID.eq(userId))
+                        .and(USER_EVENT_INTERACTIONS.EVENT_ID.eq(eventId))
+                        .and(USER_EVENT_INTERACTIONS.INTERACTION_TYPE.eq("VIEW"))
+        );
+
+        if (!exists) {
+            dslContext.insertInto(USER_EVENT_INTERACTIONS)
+                    .set(USER_EVENT_INTERACTIONS.USER_ID, userId)
+                    .set(USER_EVENT_INTERACTIONS.EVENT_ID, eventId)
+                    .set(USER_EVENT_INTERACTIONS.INTERACTION_TYPE, "VIEW")
+                    .set(USER_EVENT_INTERACTIONS.CREATED_AT, LocalDateTime.now())
+                    .execute();
+        }
+
     }
 }
