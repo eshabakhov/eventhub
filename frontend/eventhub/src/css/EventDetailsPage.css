@@ -53,6 +53,15 @@
     margin-left: 10px;
 }
 
+.event-details-format-organizer {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    margin-left: 10px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .event-description {
     font-size: 16px;
     line-height: 1.6;

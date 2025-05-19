@@ -213,23 +213,25 @@ class EventsPage extends Component {
     // Загрузка избранных тегов
     loadFavouriteTags = () => {
         const currentUser = this.context.user;
-        const userId = currentUser.id;
-        fetch(`${API_BASE_URL}/v1/tags/${userId}`, {
+        if (!currentUser) return;
+
+        fetch(`${API_BASE_URL}/v1/tags/${currentUser.id}`, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
             credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {
-                console.log(data);
-                data.list.map((favouriteTag)=>{
-                    this.state.tags.map((tag)=>{
-                        if (tag.id === favouriteTag.id) tag.isFavorite = true;
-                    })
-                })
+                this.setState(prevState => ({
+                    tags: prevState.tags.map(tag => ({
+                        ...tag,
+                        isFavorite: data.list.some(favTag => favTag.id === tag.id)
+                    }))
+                }));
             })
             .catch((err) => console.error("Ошибка при загрузке избранных тегов:", err));
     };
+
     // Добавление/удаление тега в избранное
     toggleFavorite = async (tagId, userId, isFavorite) => {
         try {
@@ -389,7 +391,7 @@ class EventsPage extends Component {
         const displayEvents = activeTab === "allEvents" ? events : recommendations;
         const groupedEvents = this.groupEventsByLocation(displayEvents);
 
-        console.log(this.context.user);
+        //console.log(this.context.user);
 
         return (
             <div className="events-container">
@@ -466,7 +468,7 @@ class EventsPage extends Component {
                                         onClick={() => this.toggleTag(tag.name)}
                                         className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
-                                        {this.context.user && (
+                                        {this.context.user.id && this.context.user.role === "MEMBER"  && (
                                             <FavoriteStar
                                                 tag={tag}
                                                 userId={this.context.user.id}
@@ -572,7 +574,7 @@ class EventsPage extends Component {
                                     let icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon;
                                     if (hasFavoriteTag)
                                         icon = group[0].format === "ONLINE" ? onlineIconStar : offlineIconStar;
-                                        console.log(group[0].title)
+                                        //console.log(group[0].title)
                                     const initialEventId = this.state.focusedEvent?.id;
                                     return (
                                         <Marker

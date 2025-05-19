@@ -228,7 +228,7 @@ const EventDetailsPage = () => {
                     </div>
 
                     <div className="event-description-header" onClick={handleOrgCLick}>Организатор:
-                        <div className="event-details-format">
+                        <div className="event-details-format-organizer">
                             {organizer.name}
                         </div>
                     </div>
