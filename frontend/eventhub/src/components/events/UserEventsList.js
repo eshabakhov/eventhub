@@ -98,48 +98,75 @@ class UserEventsList extends Component {
             selectedTags: [],
             showConfirmModal: false,
             selectedEvent: null,
-            sidebarOpen: false
+            sidebarOpen: false,
+            isOrganizersPath: false,
+            isMembersPath: false
         };
     }
 
     sidebarRef = React.createRef();
 
     componentDidMount() {
-        const memberId = this.props.params;
-        api.get(`${API_BASE_URL}/v1/users/${memberId.id}`, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then((response) => {
-                const data = response.data;
-                this.setState({ username: "Мероприятия " + data.username });
+        const currentUrl = window.location.href;
+        const isOrganizersPath = currentUrl.includes('/organizers/');
+        const isMembersPath = currentUrl.includes('/members/');
+        this.setState({isOrganizersPath, isMembersPath});
+        if (isMembersPath) {
+            const memberId = this.props.params;
+            api.get(`${API_BASE_URL}/v1/users/${memberId.id}`, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
-            .catch((error) => {
-                console.error('Ошибка при загрузке профиля:', error);
-            });
-        api.get(`/v1/friends/${memberId.id}/isfriend`, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then((response) => {
-                const data = response.data;
-                if (data.privacy === 'PUBLIC' || data.privacy === 'ONLY_FRIENDS' && data.friendly === true) {
-                    this.setState({ eventsOpen: true });
+                .then((response) => {
+                    const data = response.data;
+                    this.setState({username: "Мероприятия " + data.username});
+                })
+                .catch((error) => {
+                    console.error('Ошибка при загрузке профиля:', error);
+                });
+            api.get(`/v1/friends/${memberId.id}/isfriend`, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then((response) => {
+                    const data = response.data;
+                    if (data.privacy === 'PUBLIC' || data.privacy === 'ONLY_FRIENDS' && data.friendly === true) {
+                        this.setState({eventsOpen: true});
+                        this.loadEvents(1, this.state.search);
+                        this.loadTags();
+                        document.addEventListener("mousedown", this.handleClickOutside);
+                    } else {
+                        this.setState({eventsOpen: false});
+                    }
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error('Ошибка при загрузке профиля:', error);
+                });
+        } else {
+            const organizerId = this.props.params;
+            api.get(`${API_BASE_URL}/v1/users/organizers/${organizerId.id}`, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then((response) => {
+                    const data = response.data;
+                    this.setState({username: "Мероприятия " + data.name});
+                    this.setState({eventsOpen: true});
                     this.loadEvents(1, this.state.search);
                     this.loadTags();
                     document.addEventListener("mousedown", this.handleClickOutside);
-                } else {
-                    this.setState({ eventsOpen: false });
-                }
-                console.log(data);
-            })
-            .catch((error) => {
-                console.error('Ошибка при загрузке профиля:', error);
-            });
+                })
+                .catch((error) => {
+                    console.error('Ошибка при загрузке профиля:', error);
+                });
+        }
     }
 
     componentWillUnmount() {
@@ -179,8 +206,15 @@ class UserEventsList extends Component {
         const {eventsPerPage} = this.state;
         const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
         const searchTagsParam = searchTags.length > 0 ? `&tags=${searchTags.join(",")}` : "";
-        const memberId = this.props.params
-        let url = `${API_BASE_URL}/v1/members/${memberId.id}/events?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`
+
+        let url = '';
+        if (this.state.isMembersPath) {
+            const memberId = this.props.params
+            url = `${API_BASE_URL}/v1/members/${memberId.id}/events?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`
+        } else {
+            const organizerId = this.props.params
+            url = `${API_BASE_URL}/v1/events/organizers/${organizerId.id}?page=${page}&pageSize=${eventsPerPage}${searchParam}${searchTagsParam}`
+        }
         fetch(url, {
             method: "GET",
             headers: {"Content-Type": "application/json"},

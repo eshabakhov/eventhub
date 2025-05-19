@@ -41,6 +41,9 @@ class App extends React.Component {
               <Route path="/moderators/edit/:moderatorId" element={<ModeratorCreate/>}/>
               <Route path="/users/:id" element={<UserProfile/>}/>
               <Route path="/users/:id/events" element={<UserEventsList/>}/>
+              <Route path="/organizers/:id" element={<UserProfile/>}/>
+              <Route path="/organizers/:id/events" element={<UserEventsList/>}/>
+
             </Routes>
           </UserProvider>
         </Router>
