@@ -106,7 +106,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.PUT, V1_USERS_MODERATORS_ID).hasRole(RoleEnum.MODERATOR.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
-                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
+                        .requestMatchers(HttpMethod.GET, V1_USERS_ORGANIZERS_ID).permitAll()
+
                         .requestMatchers(HttpMethod.PUT, V1_USERS_ORGANIZERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.ORGANIZER.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_USERS_MEMBERS_ID).hasAnyRole(RoleEnum.MODERATOR.name(), RoleEnum.MEMBER.name())
@@ -119,6 +120,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.POST, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
+
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
