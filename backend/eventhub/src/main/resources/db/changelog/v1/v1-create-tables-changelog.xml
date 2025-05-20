@@ -241,4 +241,24 @@ CREATE INDEX idx_user_event_interactions_user_id ON user_event_interactions(user
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="eventhub-tables/v1/20-05-2025" author="Timokhov_Evgeniy">
+        <sql>
+            <![CDATA[
+                CREATE TABLE public.member_organizer (
+                    member_id bigint NOT NULL,
+                    organizer_id bigint NOT NULL,
+                    CONSTRAINT fk_member_id
+                        FOREIGN KEY (member_id)
+                            REFERENCES public.member(id)
+                            ON DELETE RESTRICT
+                            ON UPDATE CASCADE,
+                    CONSTRAINT fk_organizer_id
+                        FOREIGN KEY (organizer_id)
+                            REFERENCES public.organizer(id)
+                            ON DELETE RESTRICT
+                            ON UPDATE CASCADE,
+                    PRIMARY KEY (member_id, organizer_id))
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

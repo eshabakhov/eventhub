@@ -97,4 +97,34 @@ public class SubscribeController {
     public EventMemberDTO getEventIfSubscribed(@PathVariable Long eventId, @PathVariable Long memberId) {
         return subscribeService.checkSubscription(eventId, memberId);
     }
+
+    @Operation(summary = "Подписаться на организатора.",
+            description = "Добавить организатора в избранное.")
+    @ApiResponse(responseCode = "201",
+            description = "Организатор добавлен в избранное",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PostMapping(value = "/organizers/{organizerId}")
+    public void subscribeToOrganizer(@PathVariable Long organizerId, @PathVariable Long memberId) {
+        subscribeService.subscribeToOrganizer(organizerId, memberId);
+    }
+
+    @Operation(summary = "Отписаться от организатора.",
+            description = "Удалить организатора из избранного.")
+    @ApiResponse(responseCode = "201",
+            description = "Организатор успешно удален из избранного",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @DeleteMapping(value = "/organizers/{organizerId}")
+    public void unsubscribeFromOrganizer(@PathVariable Long organizerId, @PathVariable Long memberId) {
+        subscribeService.unsubscribeFromOrganizer(organizerId, memberId);
+    }
 }

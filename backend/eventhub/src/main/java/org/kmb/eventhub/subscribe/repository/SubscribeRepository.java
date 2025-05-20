@@ -2,6 +2,7 @@ package org.kmb.eventhub.subscribe.repository;
 
 import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
+import org.kmb.eventhub.tables.pojos.MemberOrganizer;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.EventMembers;
 import org.kmb.eventhub.tables.pojos.Member;
@@ -25,6 +26,16 @@ public class SubscribeRepository {
                 .limit(pageSize)
                 .offset((page - 1) * pageSize)
                 .fetchOneInto(EventMembers.class);
+    }
+
+    public MemberOrganizer fetchOptionalByMemberIdAndOrganizerId(Long memberId, Long organizerId, Integer page, Integer pageSize) {
+        return dslContext
+                .selectFrom(MEMBER_ORGANIZER)
+                .where(MEMBER_ORGANIZER.MEMBER_ID.eq(memberId))
+                .and(MEMBER_ORGANIZER.ORGANIZER_ID.eq(organizerId))
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .fetchOneInto(MemberOrganizer.class);
     }
 
     public List<Member> fetchMembersByEventId(Long eventId, Integer page, Integer pageSize) {
