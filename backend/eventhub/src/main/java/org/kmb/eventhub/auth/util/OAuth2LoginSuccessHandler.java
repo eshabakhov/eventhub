@@ -50,6 +50,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Map<String, ResponseCookie> cookieMap = jwtUtil.generateTokenCookies(userDetails);
         response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("access").toString());
         response.addHeader(HttpHeaders.SET_COOKIE, cookieMap.get("refresh").toString());
-        response.sendRedirect(frontendProperties.getAddress());
+        response.sendRedirect("http://localhost:3000/");
     }
 }

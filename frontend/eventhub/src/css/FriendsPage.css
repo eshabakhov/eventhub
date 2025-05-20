@@ -108,7 +108,7 @@
 
   .view-profile-button,
   .add-button,
-  .accept-frineds-button,
+  .accept-friends-button,
   .remove-button {
     padding: 6px 12px;
     background-color: #28a745;
@@ -121,6 +121,10 @@
     width: 30%;
   }
 
+  .accept-friends-button {
+    background-color: #f87737;
+  }
+
   .view-profile-button {
     background-color: #82aef5;
   }
@@ -129,10 +133,13 @@
     background-color: #36568a;
   }
 
-  .add-button:hover,
-  .accept-frineds-button:hover {
+  .add-button:hover {
     background-color: #218838;
   }
+
+.accept-friends-button:hover {
+  background-color: #da4108;
+}
   
   .remove-button {
     background-color: #dc3545;
@@ -146,6 +153,8 @@
     color: #888;
     font-style: italic;
     font-size: 14px;
+    width: 30%;
+    text-align: center;
   }
 
   .user-list {

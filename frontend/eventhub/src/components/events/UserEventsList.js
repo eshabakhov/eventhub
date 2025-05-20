@@ -109,7 +109,7 @@ class UserEventsList extends Component {
     componentDidMount() {
         const currentUrl = window.location.href;
         const isOrganizersPath = currentUrl.includes('/organizers/');
-        const isMembersPath = currentUrl.includes('/members/');
+        const isMembersPath = currentUrl.includes('/users/');
         this.setState({isOrganizersPath, isMembersPath});
         if (isMembersPath) {
             const memberId = this.props.params;

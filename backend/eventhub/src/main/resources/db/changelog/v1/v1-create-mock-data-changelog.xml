@@ -195,4 +195,11 @@
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="eventhub-data/v1/20-05-2025/1" author="Lebedev Danil">
+        <sql>
+            <![CDATA[
+            CREATE EXTENSION IF NOT EXISTS postgis;
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -49,7 +49,7 @@ public class RecommendationRepository {
         Field<Integer> interactionScore = DSL.select(DSL.inline(1))
                 .from(USER_EVENT_INTERACTIONS)
                 .where(USER_EVENT_INTERACTIONS.EVENT_ID.eq(EVENT.ID))
-                .and(USER_EVENT_INTERACTIONS.USER_ID.eq(userId))
+                //.and(USER_EVENT_INTERACTIONS.USER_ID.eq(userId))
                 .asField();
 
         /*Field<BigDecimal> tagScore = DSL.select(
@@ -88,6 +88,7 @@ public class RecommendationRepository {
                         EVENT.LATITUDE,
                         EVENT.LONGITUDE,
                         EVENT.ORGANIZER_ID,
+                        EVENT.PICTURES,
                         totalScore.as("score")
                 )
                 .from(EVENT)

@@ -44,7 +44,7 @@ class UserProfile extends Component {
     componentDidMount() {
         const currentUrl = window.location.href;
         const isOrganizersPath = currentUrl.includes('/organizers/');
-        const isMembersPath = currentUrl.includes('/members/');
+        const isMembersPath = currentUrl.includes('/users/');
         this.setState({isOrganizersPath, isMembersPath});
         if (isMembersPath) {
             const memberId = this.props.params;
@@ -164,6 +164,9 @@ class UserProfile extends Component {
         // const memberId = this.props.params;
         // this.props.navigate(`/users/${memberId.id}/events`);
     };
+    handleAddEventToFavourites = () => {
+
+    }
 
     render() {
         const {navigate} = this.props;
@@ -261,6 +264,11 @@ class UserProfile extends Component {
                                     <button type="button" className={`${!eventsOpen ? 'no-hover' : 'user-profile-button'}`} onClick={this.handleUserEvents} disabled={!eventsOpen}>
                                         {`Мероприятия ${isMembersPath ? 'пользователя' : 'организации'}`}
                                     </button>
+                                    {isOrganizersPath ? (
+                                        <button type="button" className={`${!eventsOpen ? 'no-hover' : 'user-profile-button'}`} onClick={this.handleUserEvents}>
+                                    Добавить организацию в избранное
+                                        </button>) : ''}
+
                                 </div>
                             </form>
                         </div>
