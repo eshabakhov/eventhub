@@ -213,7 +213,7 @@ class EventsPage extends Component {
     // Загрузка избранных тегов
     loadFavouriteTags = () => {
         const currentUser = this.context.user;
-        if (!currentUser) return;
+        if (!currentUser || !currentUser.id) return;
 
         fetch(`${API_BASE_URL}/v1/tags/${currentUser.id}`, {
             method: "GET",
@@ -488,7 +488,7 @@ class EventsPage extends Component {
 
                         {/* Карточки событий */}
                         {displayEvents.map((event) => (
-                            <motion.div key={event.id} className={`event-card ${event.tags.find((tag) => this.state.tags.find((element) => element.name === tag).isFavorite) ? 'favorite' : ''}`}
+                            <motion.div key={event.id} className={`event-card ${event.tags.some((tag) => this.state.tags.some((element) => element.name === tag && element.isFavorite)) ? 'favorite' : ''}`}
                             >
                                 <img
                                     src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
