@@ -184,15 +184,20 @@
 							<goal>execute</goal>
 						</goals>
 						<configuration>
-							<source>import org.testcontainers.containers.PostgreSQLContainer
+							<source>
+								import org.testcontainers.containers.PostgreSQLContainer
+								import org.testcontainers.utility.DockerImageName
 
-							db = new PostgreSQLContainer(
-									"postgres:15")
-									.withDatabaseName("${db.name}")
-									.withUsername("${db.username}")
-									.withPassword("${db.password}")
-							db.start()
-							project.properties.setProperty('db.url', db.getJdbcUrl())
+								def image = DockerImageName.parse("postgis/postgis:14-3.5-alpine")
+										.asCompatibleSubstituteFor("postgres")
+
+								def db = new PostgreSQLContainer(image)
+										.withDatabaseName("${db.name}")
+										.withUsername("${db.username}")
+										.withPassword("${db.password}")
+
+								db.start()
+								project.properties.setProperty('db.url', db.getJdbcUrl())
 							</source>
 						</configuration>
 					</execution>
