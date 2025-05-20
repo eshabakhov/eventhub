@@ -488,7 +488,7 @@ class EventsPage extends Component {
 
                         {/* Карточки событий */}
                         {displayEvents.map((event) => (
-                            <motion.div key={event.id} className={`event-card ${event.tags.find((tag) => this.state.tags.find((element) => element.name === tag).isFavorite) ? 'favorite' : ''}`}
+                            <motion.div key={event.id} className={`event-card ${event.tags.some((tag) => this.state.tags.some((element) => element.name === tag && element.isFavorite)) ? 'favorite' : ''}`}
                             >
                                 <img
                                     src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
