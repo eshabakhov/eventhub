@@ -213,7 +213,7 @@ class EventsPage extends Component {
     // Загрузка избранных тегов
     loadFavouriteTags = () => {
         const currentUser = this.context.user;
-        if (!currentUser) return;
+        if (!currentUser || !currentUser.id) return;
 
         fetch(`${API_BASE_URL}/v1/tags/${currentUser.id}`, {
             method: "GET",
