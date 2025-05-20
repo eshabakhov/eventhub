@@ -13,6 +13,7 @@ import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.subscribe.service.SubscribeService;
 import org.kmb.eventhub.tables.pojos.Event;
 import org.kmb.eventhub.tables.pojos.Member;
+import org.kmb.eventhub.tables.pojos.MemberOrganizer;
 import org.kmb.eventhub.tables.pojos.User;
 import org.kmb.eventhub.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -126,5 +127,20 @@ public class SubscribeController {
     @DeleteMapping(value = "/organizers/{organizerId}")
     public void unsubscribeFromOrganizer(@PathVariable Long organizerId, @PathVariable Long memberId) {
         subscribeService.unsubscribeFromOrganizer(organizerId, memberId);
+    }
+
+    @Operation(summary = "Проверить подписку на организатора.",
+            description = "Проверить подписку на организатора.")
+    @ApiResponse(responseCode = "201",
+            description = "Участник подписан на организатора",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/organizers/{organizerId}")
+    public MemberOrganizer checkOrganizerSubscribe (@PathVariable Long organizerId, @PathVariable Long memberId) {
+        return subscribeService.checkSubscriptionToOrganizer(organizerId, memberId);
     }
 }

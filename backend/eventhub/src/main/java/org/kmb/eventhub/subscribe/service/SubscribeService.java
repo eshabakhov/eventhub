@@ -74,10 +74,12 @@ public class SubscribeService {
     }
 
     public void subscribeToOrganizer(Long organizerId, Long memberId) {
-        MemberOrganizer memberOrganizer = new MemberOrganizer();
-        memberOrganizer.setMemberId(memberId);
-        memberOrganizer.setOrganizerId(organizerId);
-        memberOrganizerDao.insert(memberOrganizer);
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            MemberOrganizer memberOrganizer = new MemberOrganizer();
+            memberOrganizer.setMemberId(memberId);
+            memberOrganizer.setOrganizerId(organizerId);
+            memberOrganizerDao.insert(memberOrganizer);
+        }
     }
 
     public void unsubscribeFromOrganizer(Long organizerId, Long memberId) {
@@ -85,6 +87,13 @@ public class SubscribeService {
             MemberOrganizer memberOrganizer = subscribeRepository.fetchOptionalByMemberIdAndOrganizerId(memberId, organizerId, 1, 1);
             memberOrganizerDao.delete(memberOrganizer);
         }
+    }
+
+    public MemberOrganizer checkSubscriptionToOrganizer(Long organizerId, Long memberId) {
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            return subscribeRepository.fetchOptionalByMemberIdAndOrganizerId(memberId, organizerId, 1, 1);
+        }
+        return null;
     }
 
     public ResponseList<Event> getEventsByMemberId(Long memberId, Integer page, Integer pageSize) {
