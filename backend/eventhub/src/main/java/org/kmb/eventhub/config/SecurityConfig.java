@@ -133,6 +133,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers("/auth/refresh").permitAll()
+                        .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/auth/login").permitAll()
 
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()

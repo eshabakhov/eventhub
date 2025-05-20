@@ -30,7 +30,6 @@ public class UserSecurityService {
             }
         }
 
-        return authenticatedUser.getId().equals(userId) &&
-                RoleEnum.MEMBER.name().equals(authenticatedUser.getRole().getLiteral());
+        return authenticatedUser.getId().equals(userId);
     }
 }
