@@ -272,6 +272,7 @@ public class  UserService {
     public Organizer getOrganizer(Long id) {
         return organizerDao.fetchOptionalById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
+
     }
 
     public Moderator getModerator(Long id) {
