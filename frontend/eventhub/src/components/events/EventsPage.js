@@ -175,8 +175,6 @@ class EventsPage extends Component {
                 longitude: 37.61,
             });
         }
-
-
     }
 
     componentWillUnmount() {
@@ -509,10 +507,12 @@ class EventsPage extends Component {
                                             <div className="event-date">{event.date}</div>
                                             <div className="event-views-subscribers">
                                                 <div className="event-views">
-                                                    {`👁 ${event.views}`}
+                                                    <i className="bi bi-eye-fill"></i>
+                                                    {` ${event.views}`}
                                                 </div>
                                                 <div className="event-views">
-                                                    {`☺︎ ${event.subscribers}`}
+                                                    <i className="bi bi-person-fill-check"></i>
+                                                    {` ${event.subscribers}`}
                                                 </div>
                                             </div>
                                         </div>
