@@ -206,12 +206,12 @@ class EventsPage extends Component {
             .then((res) => res.json())
             .then((data) => {
                 this.setState({tags: data.list});
-                this.loadFavouriteTags();
+                this.loadFavoriteTags();
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
     };
     // Загрузка избранных тегов
-    loadFavouriteTags = () => {
+    loadFavoriteTags = () => {
         const currentUser = this.context.user;
         if (!currentUser || !currentUser.id) return;
 
@@ -593,7 +593,7 @@ class EventsPage extends Component {
                                             }}
                                         >
                                             <Popup>
-                                                <MultiEventPopup events={group} navigate={navigate} favouriteTags={this.state.tags.filter((tag)=> tag.isFavorite)}
+                                                <MultiEventPopup events={group} navigate={navigate} favoriteTags={this.state.tags.filter((tag)=> tag.isFavorite)}
                                                                  initialEventId={initialEventId}/>
                                             </Popup>
                                         </Marker>
@@ -610,7 +610,7 @@ class EventsPage extends Component {
 
 {/* PopUp для сгрупированных событий */}
 
-function MultiEventPopup({events, navigate, initialEventId, favouriteTags}) {
+function MultiEventPopup({events, navigate, initialEventId, favoriteTags}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
     const [page, setPage] = React.useState(Math.max(0, initialIndex));
     const total = events.length;
@@ -626,8 +626,8 @@ function MultiEventPopup({events, navigate, initialEventId, favouriteTags}) {
             <strong>{event.title}</strong>
             <p>{event.shortDescription}</p>
             <p>{event.date}</p>
-            {favouriteTags && event.tags.some((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)) && (
-                <p>Избранные теги: {event.tags.filter((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)).join(", ")}</p>
+            {favoriteTags && event.tags.some((tag) => favoriteTags.find((favoriteTag) => favoriteTag.name === tag)) && (
+                <p>Избранные теги: {event.tags.filter((tag) => favoriteTags.find((favoriteTag) => favoriteTag.name === tag)).join(", ")}</p>
             )}
             <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                 Подробнее

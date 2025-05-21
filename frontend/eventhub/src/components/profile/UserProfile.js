@@ -169,7 +169,7 @@ class UserProfile extends Component {
         // this.props.navigate(`/users/${memberId.id}/events`);
     };
 
-    handleAddOrgToFavourites = async () => {
+    handleAddOrgToFavorites = async () => {
         try {
             const organizer = this.props.params;
             const isFavorite = this.state.isFavorite;
@@ -304,7 +304,7 @@ class UserProfile extends Component {
                                         {`Мероприятия ${isMembersPath ? 'пользователя' : 'организации'}`}
                                     </button>
                                     {isOrganizersPath && user.role === 'MEMBER' ? (
-                                        <button type="button" className={`${!eventsOpen ? 'no-hover' : `user-profile-button add-to-favorites-button ${isFavorite ? 'favorite' : ''}`}`} onClick={this.handleAddOrgToFavourites}>
+                                        <button type="button" className={`${!eventsOpen ? 'no-hover' : `user-profile-button add-to-favorites-button ${isFavorite ? 'favorite' : ''}`}`} onClick={this.handleAddOrgToFavorites}>
 
                                             <div className="star-container">
                                                 <svg
