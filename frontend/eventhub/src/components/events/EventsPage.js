@@ -272,6 +272,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -307,6 +309,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -391,7 +395,7 @@ class EventsPage extends Component {
         const displayEvents = activeTab === "allEvents" ? events : recommendations;
         const groupedEvents = this.groupEventsByLocation(displayEvents);
 
-        //console.log(this.context.user);
+
 
         return (
             <div className="events-container">
@@ -461,14 +465,14 @@ class EventsPage extends Component {
                         {/* Фильтр по тегам */}
                         <div className="tags-filter-wrapper">
                             {tags.map((tag) => {
-                                const isSelected = this.state.selectedTags.includes(tag.name);
+                                const isSelected = this.state.selectedTags && this.state.selectedTags.includes(tag.name);
                                 return (
                                     <button
                                         key={tag.name}
                                         onClick={() => this.toggleTag(tag.name)}
                                         className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
-                                        {this.context.user.id && this.context.user.role === "MEMBER"  && (
+                                        {this.context.user && this.context.user.id && this.context.user.role === "MEMBER"  && (
                                             <FavoriteStar
                                                 tag={tag}
                                                 userId={this.context.user.id}
@@ -499,6 +503,14 @@ class EventsPage extends Component {
                                     <div className="event-title-container">
                                         <div className="event-title">{event.title}</div>
                                         <div className="event-date">{event.date}</div>
+                                        <div className="event-views-subscribers">
+                                            <div className="event-views">
+                                                {`Просмотры ${event.views}`}
+                                            </div>
+                                            <div className="event-views">
+                                                {`Участники ${event.subscribers}`}
+                                            </div>
+                                        </div>
                                     </div>
                                     <p className="event-short-description">{event.shortDescription}</p>
                                     <p className="event-location">{event.location}</p>
@@ -526,7 +538,8 @@ class EventsPage extends Component {
                                             </button>
                                         </div>
                                         <div
-                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
+                                        </div>
                                     </div>
                                 </div>
 
