@@ -264,8 +264,8 @@ class FriendsPage extends Component {
                             {friends.length > 0 ? (
                                 <ul className="friends-list">
                                     {friends.map(friend => (
-                                        <li key={friend.id} className="friends-item">
-                                            <span>{friend.displayName || friend.username}</span>
+                                        <li key={friend.id} className="friends-items">
+                                            <span className="friends-item">{friend.displayName || friend.username}</span>
                                             <button className="view-profile-button" onClick={() => this.handleViewProfile(friend.id)}>
                                                 Профиль
                                             </button>
@@ -298,8 +298,8 @@ class FriendsPage extends Component {
                                     <p className="no-results-message">Пользователи не найдены</p>
                                 ) : (
                                     searchResults.map(user => (
-                                        <div key={user.id} className="search-result-item">
-                                            <span>{user.displayName || user.username}</span>
+                                        <div key={user.id} className="search-result-items">
+                                            <span className="search-result-item">{user.displayName || user.username}</span>
                                             {sentRequests.some(req => req.id === user.id) ? (
                                                 <>
                                                     <button className="view-profile-button" onClick={() => this.handleViewProfile(user.id)}>

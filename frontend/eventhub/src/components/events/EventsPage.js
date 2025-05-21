@@ -391,7 +391,7 @@ class EventsPage extends Component {
         const displayEvents = activeTab === "allEvents" ? events : recommendations;
         const groupedEvents = this.groupEventsByLocation(displayEvents);
 
-        //console.log(this.context.user);
+
 
         return (
             <div className="events-container">
@@ -468,7 +468,7 @@ class EventsPage extends Component {
                                         onClick={() => this.toggleTag(tag.name)}
                                         className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
-                                        {this.context.user.id && this.context.user.role === "MEMBER"  && (
+                                        {this.context.user && this.context.user.id && this.context.user.role === "MEMBER"  && (
                                             <FavoriteStar
                                                 tag={tag}
                                                 userId={this.context.user.id}
