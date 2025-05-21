@@ -11,9 +11,7 @@ import org.kmb.eventhub.event.dto.EventDTO;
 import org.kmb.eventhub.event.dto.EventMemberDTO;
 import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.subscribe.service.SubscribeService;
-import org.kmb.eventhub.tables.pojos.Event;
-import org.kmb.eventhub.tables.pojos.Member;
-import org.kmb.eventhub.tables.pojos.User;
+import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +36,7 @@ public class SubscribeController {
     @ApiResponse(responseCode = "400",
             description = "Ошибка валидации",
             content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ResponseDTO.class)))
+                    schema = @Schema(implementation = ResponseDTO.class)))
     @ResponseStatus(value = HttpStatus.OK)
     @PostMapping(value = "/subscribe/{eventId}")
     public void subscribeToEvent(
@@ -96,5 +94,69 @@ public class SubscribeController {
     @GetMapping(value = "/subscribe/{eventId}")
     public EventMemberDTO getEventIfSubscribed(@PathVariable Long eventId, @PathVariable Long memberId) {
         return subscribeService.checkSubscription(eventId, memberId);
+    }
+
+    @Operation(summary = "Подписаться на организатора.",
+            description = "Добавить организатора в избранное.")
+    @ApiResponse(responseCode = "201",
+            description = "Организатор добавлен в избранное",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @PostMapping(value = "/organizers/{organizerId}")
+    public void subscribeToOrganizer(@PathVariable Long organizerId, @PathVariable Long memberId) {
+        subscribeService.subscribeToOrganizer(organizerId, memberId);
+    }
+
+    @Operation(summary = "Отписаться от организатора.",
+            description = "Удалить организатора из избранного.")
+    @ApiResponse(responseCode = "201",
+            description = "Организатор успешно удален из избранного",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @DeleteMapping(value = "/organizers/{organizerId}")
+    public void unsubscribeFromOrganizer(@PathVariable Long organizerId, @PathVariable Long memberId) {
+        subscribeService.unsubscribeFromOrganizer(organizerId, memberId);
+    }
+
+    @Operation(summary = "Проверить подписку на организатора.",
+            description = "Проверить подписку на организатора.")
+    @ApiResponse(responseCode = "201",
+            description = "Участник подписан на организатора",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+
+    @GetMapping(value = "/organizers/{organizerId}")
+    public MemberOrganizer checkOrganizerSubscribe(@PathVariable Long organizerId, @PathVariable Long memberId) {
+        return subscribeService.checkSubscriptionToOrganizer(organizerId, memberId);
+    }
+
+    @Operation(summary = "Получить список избранных организаторов.",
+            description = "Получить список избранных организаторов пользователя.")
+    @ApiResponse(responseCode = "201",
+            description = "Список избранных организаторов",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400",
+            description = "Ошибка валидации",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ResponseDTO.class)))
+    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping(value = "/favorite-organizers")
+    public ResponseList<Organizer> getFavoriteOrganizers(
+            @PathVariable Long memberId,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        return subscribeService.getFavoriteOrganizersList(memberId, page, pageSize);
     }
 }

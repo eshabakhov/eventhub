@@ -35,7 +35,7 @@ public class TagRepository {
                 .fetchInto(Tag.class);
     }
 
-    public List<Tag> fetchFavourites(Long userId) {
+    public List<Tag> fetchFavorites(Long userId) {
         return dslContext
                 .select(TAG.fields())
                 .from(TAG)

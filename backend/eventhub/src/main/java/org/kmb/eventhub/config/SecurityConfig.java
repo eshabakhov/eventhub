@@ -63,6 +63,9 @@ public class SecurityConfig {
 
     private static final String V1_MEMBERS_ID_SUBSCRIBE = "/v1/members/{memberId}/subscribe/{eventId}";
 
+    private static final String V1_MEMBERS_ID_ORGANIZERS = "/v1/members/{memberId}/organizers/{organizerId}";
+
+
     private JwtRequestFilter jwtRequestFilter;
 
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -123,10 +126,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, V1_MEMBERS_ID_SUBSCRIBE).hasRole(RoleEnum.MEMBER.name())
                         .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_EVENTS).hasRole(RoleEnum.MEMBER.name())
 
+                        .requestMatchers(HttpMethod.GET, V1_MEMBERS_ID_ORGANIZERS).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.DELETE, V1_MEMBERS_ID_ORGANIZERS).hasRole(RoleEnum.MEMBER.name())
+                        .requestMatchers(HttpMethod.POST, V1_MEMBERS_ID_ORGANIZERS).hasRole(RoleEnum.MEMBER.name())
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers("/auth/refresh").permitAll()
+                        .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/auth/login").permitAll()
 
                         .requestMatchers(HttpMethod.GET, V1_EVENTS).permitAll()

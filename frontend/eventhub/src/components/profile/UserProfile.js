@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import UserContext from '../../UserContext';
 import {useNavigate, useParams} from 'react-router-dom';
 import "../../css/ProfilePage.css";
+import "../../css/UserProfile.css";
 import API_BASE_URL from "../../config";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Header from "../common/Header";
@@ -122,6 +123,9 @@ class UserProfile extends Component {
                     isAccredited: data.isAccredited || '',
                 };
                 this.setState({formData, originalData: formData, isDirty: false, loading: false, eventsOpen: true});
+                if (this.context.user.role === 'MEMBER') {
+                    this.checkIsFavorite();
+                }
             })
                 .catch((error) => {
                     console.error('Ошибка при загрузке профиля:', error);
@@ -165,10 +169,48 @@ class UserProfile extends Component {
         // this.props.navigate(`/users/${memberId.id}/events`);
     };
 
+    handleAddOrgToFavorites = async () => {
+        try {
+            const organizer = this.props.params;
+            const isFavorite = this.state.isFavorite;
+            const member = this.context.user;
+            const request = isFavorite
+                ? await api.delete(`/v1/members/${member.id}/organizers/${organizer.id}`, {credentials: "include"})
+                : await api.post(`/v1/members/${member.id}/organizers/${organizer.id}`, {credentials: "include"});
+
+            this.setState({isFavorite : !isFavorite})
+        }
+        catch (err) {
+
+        }
+        finally {
+
+        }
+    }
+
+    checkIsFavorite = async () => {
+        try {
+            const organizer = this.props.params;
+            const member = this.context.user;
+            const response = await api.get(`/v1/members/${member.id}/organizers/${organizer.id}`, {credentials: "include"});
+            if (response.status === 200) {
+                if (response.data)
+                    this.setState({isFavorite: true})
+            }
+        }
+        catch {
+
+        }
+        finally {
+
+        }
+    }
+
     render() {
         const {navigate} = this.props;
         const {user} = this.context;
-        const {formData, loading, successMessage, sidebarOpen, username, eventsOpen, isMembersPath, isOrganizersPath} = this.state;
+        const {formData, loading, successMessage, sidebarOpen, username, eventsOpen,
+            isMembersPath, isOrganizersPath, isFavorite} = this.state;
 
         if (loading) return <div className="profile-loading">Загрузка...</div>;
         console.log(eventsOpen)
@@ -257,10 +299,27 @@ class UserProfile extends Component {
                                         </>
                                     )}
                                 </>
-                                <div className="button-wrapper">
+                                <div className={`button-wrapper ${isOrganizersPath ? 'two-buttons' : ''}`}>
                                     <button type="button" className={`${!eventsOpen ? 'no-hover' : 'user-profile-button'}`} onClick={this.handleUserEvents} disabled={!eventsOpen}>
                                         {`Мероприятия ${isMembersPath ? 'пользователя' : 'организации'}`}
                                     </button>
+                                    {isOrganizersPath && user.role === 'MEMBER' ? (
+                                        <button type="button" className={`${!eventsOpen ? 'no-hover' : `user-profile-button add-to-favorites-button ${isFavorite ? 'favorite' : ''}`}`} onClick={this.handleAddOrgToFavorites}>
+
+                                            <div className="star-container">
+                                                <svg
+                                                    className={`star-icon ${isFavorite ? 'favorite' : ''}`}
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                                                    />
+                                                </svg>
+                                            </div>
+
+                                            {isFavorite ? `Удалить из избранного` : `Добавить в избранное`}
+                                        </button>) : ''}
+
                                 </div>
                             </form>
                         </div>

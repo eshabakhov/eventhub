@@ -29,4 +29,23 @@ public class UserEventStatsController {
     public int getViewsByUserForEvent(@PathVariable Long eventId, @PathVariable Long userId) {
         return statsService.getViewsByUserForEvent(userId, eventId);
     }
+
+    @GetMapping("/organizers/{organizerId}/views")
+    public Long getAllViews(@PathVariable Long organizerId) {
+        return statsService.getAllViews(organizerId);
+    }
+
+    @GetMapping("/organizers/{organizerId}/favorites")
+    public Long getOrganizerFavorites(@PathVariable Long organizerId) {
+        return statsService.getOrganizerFavorites(organizerId);
+    }
+    @GetMapping("/organizers/{organizerId}/members")
+    public Long getMembersCount(@PathVariable Long organizerId) {
+        return statsService.getOrganizerMembers(organizerId);
+    }
+
+    @GetMapping("/organizers/{organizerId}/events")
+    public Long getEventsCount(@PathVariable Long organizerId) {
+        return statsService.getOrganizerEvents(organizerId);
+    }
 }

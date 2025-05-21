@@ -52,10 +52,17 @@ const SideBar = ({sidebarOpen, sidebarRef, user}) => {
                     </>
                 )}
                 {user && user.role === 'ORGANIZER' && (
-                    <li onClick={() => navigate("/my-events")}
-                        className={window.location.pathname === "/my-events" ? "disabled" : ""}>
-                        <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
-                    </li>
+                    <>
+                        <li onClick={() => navigate("/my-events")}
+                            className={window.location.pathname === "/my-events" ? "disabled" : ""}>
+                            <i className="bi bi-calendar-check-fill"></i> Мои мероприятия
+                        </li>
+
+                        <li onClick={() => navigate(`/org-stats/${user.id}`)}
+                            className={window.location.pathname === `/org-stats/${user.id}` ? "disabled" : ""}>
+                            <i className="bi bi-bar-chart-fill"></i> Статистика
+                        </li>
+                    </>
                 )}
                 {user && user.role === 'MODERATOR' && (
                     <>
@@ -67,6 +74,11 @@ const SideBar = ({sidebarOpen, sidebarRef, user}) => {
                         <li onClick={() => navigate("/moderator-management")}
                             className={window.location.pathname === "/moderator-management" ? "disabled" : ""}>
                             <i className="bi bi-shield-lock-fill"></i> Управление модераторами
+                        </li>
+
+                        <li onClick={() => navigate("/stats")}
+                            className={window.location.pathname === "/stats" ? "disabled" : ""}>
+                            <i className="bi bi-bar-chart-fill"></i> Статистика
                         </li>
                     </>
                 )}

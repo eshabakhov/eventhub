@@ -175,8 +175,6 @@ class EventsPage extends Component {
                 longitude: 37.61,
             });
         }
-
-
     }
 
     componentWillUnmount() {
@@ -206,14 +204,14 @@ class EventsPage extends Component {
             .then((res) => res.json())
             .then((data) => {
                 this.setState({tags: data.list});
-                this.loadFavouriteTags();
+                this.loadFavoriteTags();
             })
             .catch((err) => console.error("Ошибка при загрузке тегов:", err));
     };
     // Загрузка избранных тегов
-    loadFavouriteTags = () => {
+    loadFavoriteTags = () => {
         const currentUser = this.context.user;
-        if (!currentUser) return;
+        if (!currentUser || !currentUser.id) return;
 
         fetch(`${API_BASE_URL}/v1/tags/${currentUser.id}`, {
             method: "GET",
@@ -272,6 +270,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -307,6 +307,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -391,7 +393,7 @@ class EventsPage extends Component {
         const displayEvents = activeTab === "allEvents" ? events : recommendations;
         const groupedEvents = this.groupEventsByLocation(displayEvents);
 
-        //console.log(this.context.user);
+
 
         return (
             <div className="events-container">
@@ -407,20 +409,23 @@ class EventsPage extends Component {
                     <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5 }}>
                         {/* Вкладки */}
-                        <div className="tabs-wrapper">
-                            <button
-                                className={`tab-button ${this.state.activeTab === "allEvents" ? "active" : ""}`}
-                                onClick={() => this.handleTabChange("allEvents")}
-                            >
-                                Все мероприятия
-                            </button>
-                            <button
-                                className={`tab-button ${this.state.activeTab === "recommendations" ? "active" : ""}`}
-                                onClick={() => this.handleTabChange("recommendations")}
-                            >
-                                Рекомендации
-                            </button>
-                        </div>
+                        {this.context.user && this.context.user.id && this.context.user.role === "MEMBER" && (
+                            <div className="tabs-wrapper">
+                                <button
+                                    className={`tab-button ${this.state.activeTab === "allEvents" ? "active" : ""}`}
+                                    onClick={() => this.handleTabChange("allEvents")}
+                                >
+                                    Все мероприятия
+                                </button>
+                                <button
+                                    className={`tab-button ${this.state.activeTab === "recommendations" ? "active" : ""}`}
+                                    onClick={() => this.handleTabChange("recommendations")}
+                                >
+                                    Рекомендации
+                                </button>
+                            </div>
+                        )}
+
 
                         {/* Поиск */}
                         <div className="search-wrapper">
@@ -461,14 +466,14 @@ class EventsPage extends Component {
                         {/* Фильтр по тегам */}
                         <div className="tags-filter-wrapper">
                             {tags.map((tag) => {
-                                const isSelected = this.state.selectedTags.includes(tag.name);
+                                const isSelected = this.state.selectedTags && this.state.selectedTags.includes(tag.name);
                                 return (
                                     <button
                                         key={tag.name}
                                         onClick={() => this.toggleTag(tag.name)}
                                         className={`tag-button ${isSelected ? "selected" : ""}`}
                                     >
-                                        {this.context.user.id && this.context.user.role === "MEMBER"  && (
+                                        {this.context.user && this.context.user.id && this.context.user.role === "MEMBER"  && (
                                             <FavoriteStar
                                                 tag={tag}
                                                 userId={this.context.user.id}
@@ -488,7 +493,7 @@ class EventsPage extends Component {
 
                         {/* Карточки событий */}
                         {displayEvents.map((event) => (
-                            <motion.div key={event.id} className={`event-card ${event.tags.find((tag) => this.state.tags.find((element) => element.name === tag).isFavorite) ? 'favorite' : ''}`}
+                            <motion.div key={event.id} className={`event-card ${event.tags.some((tag) => this.state.tags.some((element) => element.name === tag && element.isFavorite)) ? 'favorite' : ''}`}
                             >
                                 <img
                                     src={event.imageUrl ? `data:image/jpeg;base64,${event.imageUrl}` : defaultEventImage}
@@ -498,7 +503,19 @@ class EventsPage extends Component {
                                 <div className="event-info">
                                     <div className="event-title-container">
                                         <div className="event-title">{event.title}</div>
-                                        <div className="event-date">{event.date}</div>
+                                        <div className="event-date-stats">
+                                            <div className="event-date">{event.date}</div>
+                                            <div className="event-views-subscribers">
+                                                <div className="event-views">
+                                                    <i className="bi bi-eye-fill"></i>
+                                                    {` ${event.views}`}
+                                                </div>
+                                                <div className="event-views">
+                                                    <i className="bi bi-person-fill-check"></i>
+                                                    {` ${event.subscribers}`}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <p className="event-short-description">{event.shortDescription}</p>
                                     <p className="event-location">{event.location}</p>
@@ -526,7 +543,8 @@ class EventsPage extends Component {
                                             </button>
                                         </div>
                                         <div
-                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -593,7 +611,7 @@ class EventsPage extends Component {
                                             }}
                                         >
                                             <Popup>
-                                                <MultiEventPopup events={group} navigate={navigate} favouriteTags={this.state.tags.filter((tag)=> tag.isFavorite)}
+                                                <MultiEventPopup events={group} navigate={navigate} favoriteTags={this.state.tags.filter((tag)=> tag.isFavorite)}
                                                                  initialEventId={initialEventId}/>
                                             </Popup>
                                         </Marker>
@@ -610,7 +628,7 @@ class EventsPage extends Component {
 
 {/* PopUp для сгрупированных событий */}
 
-function MultiEventPopup({events, navigate, initialEventId, favouriteTags}) {
+function MultiEventPopup({events, navigate, initialEventId, favoriteTags}) {
     const initialIndex = initialEventId ? events.findIndex(e => e.id === initialEventId) : 0;
     const [page, setPage] = React.useState(Math.max(0, initialIndex));
     const total = events.length;
@@ -626,8 +644,8 @@ function MultiEventPopup({events, navigate, initialEventId, favouriteTags}) {
             <strong>{event.title}</strong>
             <p>{event.shortDescription}</p>
             <p>{event.date}</p>
-            {favouriteTags && event.tags.some((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)) && (
-                <p>Избранные теги: {event.tags.filter((tag) => favouriteTags.find((favouriteTag) => favouriteTag.name === tag)).join(", ")}</p>
+            {favoriteTags && event.tags.some((tag) => favoriteTags.find((favoriteTag) => favoriteTag.name === tag)) && (
+                <p>Избранные теги: {event.tags.filter((tag) => favoriteTags.find((favoriteTag) => favoriteTag.name === tag)).join(", ")}</p>
             )}
             <button onClick={() => navigate(`/events/${event.id}`)} className="event-button details">
                 Подробнее

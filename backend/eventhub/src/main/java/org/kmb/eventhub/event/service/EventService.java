@@ -89,6 +89,8 @@ public class EventService {
         List<EventDTO> eventDTOList = new ArrayList<>();
         eventList.forEach(event -> {
             EventDTO eventDTO = eventMapper.toDto(event);
+            eventDTO.setViews(eventRepository.fetchViews(event.getId()));
+            eventDTO.setSubscribers(eventRepository.fetchSubscriptionsCount(event.getId()));
             eventDTO.setTags(tagRepository.fetch(event.getId()).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
             eventDTOList.add(eventDTO);
         });
@@ -179,7 +181,8 @@ public class EventService {
         if (userId != null) {
             eventRepository.recordView(userId, id);
         }
-
+        eventDTO.setViews(eventRepository.fetchViews(id));
+        eventDTO.setSubscribers(eventRepository.fetchSubscriptionsCount(id));
         eventDTO.setFiles(eventFileDao.fetchByEventId(id).stream().map(eventFileMapper::toDto).collect(Collectors.toSet()));
         eventDTO.setTags(tagRepository.fetch(id).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
         return eventDTO;

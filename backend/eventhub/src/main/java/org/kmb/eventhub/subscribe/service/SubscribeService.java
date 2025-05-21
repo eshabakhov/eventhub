@@ -8,17 +8,15 @@ import org.kmb.eventhub.event.dto.EventMemberDTO;
 import org.kmb.eventhub.subscribe.exception.EventMemberNotFound;
 import org.kmb.eventhub.subscribe.exception.MemberNotFound;
 import org.kmb.eventhub.subscribe.exception.MemberSubscribeException;
+import org.kmb.eventhub.tables.daos.*;
 import org.kmb.eventhub.user.dto.MemberDTO;
 import org.kmb.eventhub.common.dto.ResponseList;
 import org.kmb.eventhub.event.service.EventService;
 import org.kmb.eventhub.event.mapper.EventMapper;
 import org.kmb.eventhub.event.mapper.EventMemberMapper;
+import org.kmb.eventhub.user.dto.MemberOrganizerDTO;
 import org.kmb.eventhub.user.mapper.UserMapper;
 import org.kmb.eventhub.subscribe.repository.SubscribeRepository;
-import org.kmb.eventhub.tables.daos.EventDao;
-import org.kmb.eventhub.tables.daos.EventMembersDao;
-import org.kmb.eventhub.tables.daos.MemberDao;
-import org.kmb.eventhub.tables.daos.UserDao;
 import org.kmb.eventhub.tables.pojos.*;
 import org.kmb.eventhub.user.service.UserSecurityService;
 import org.kmb.eventhub.user.service.UserService;
@@ -44,6 +42,8 @@ public class SubscribeService {
 
     private final EventMembersDao eventMembersDao;
 
+    private final MemberOrganizerDao memberOrganizerDao;
+
     private final EventDao eventDao;
 
     private final EventMapper eventMapper;
@@ -65,11 +65,35 @@ public class SubscribeService {
         eventMembersDao.insert(eventMembers);
 
     }
+
     public void unsubscribeFromEvent(Long eventId, Long memberId) {
         if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
             EventMembers eventMembers = subscribeRepository.fetchOptionalByMemberIdAndEventId(memberId, eventId, 1, 1);
             eventMembersDao.delete(eventMembers);
         }
+    }
+
+    public void subscribeToOrganizer(Long organizerId, Long memberId) {
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            MemberOrganizer memberOrganizer = new MemberOrganizer();
+            memberOrganizer.setMemberId(memberId);
+            memberOrganizer.setOrganizerId(organizerId);
+            memberOrganizerDao.insert(memberOrganizer);
+        }
+    }
+
+    public void unsubscribeFromOrganizer(Long organizerId, Long memberId) {
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            MemberOrganizer memberOrganizer = subscribeRepository.fetchOptionalByMemberIdAndOrganizerId(memberId, organizerId, 1, 1);
+            memberOrganizerDao.delete(memberOrganizer);
+        }
+    }
+
+    public MemberOrganizer checkSubscriptionToOrganizer(Long organizerId, Long memberId) {
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            return subscribeRepository.fetchOptionalByMemberIdAndOrganizerId(memberId, organizerId, 1, 1);
+        }
+        return null;
     }
 
     public ResponseList<Event> getEventsByMemberId(Long memberId, Integer page, Integer pageSize) {
@@ -105,6 +129,18 @@ public class SubscribeService {
         eventMembersDTO.setUserId(memberId);
 
         return eventMembersDTO;
+    }
 
+    public ResponseList<Organizer> getFavoriteOrganizersList(Long memberId, Integer page, Integer pageSize) {
+        ResponseList<Organizer> responseList = new ResponseList<>();
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            var orgList = subscribeRepository.fetchFavoriteOrganizersByMemberId(memberId, page, pageSize);
+            responseList.setList(orgList);
+            responseList.setTotal((long) orgList.size());
+        }
+
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
     }
 }

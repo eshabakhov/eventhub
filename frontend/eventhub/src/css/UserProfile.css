@@ -1,0 +1,39 @@
+﻿.button-wrapper.two-buttons {
+    column-gap: 20px;
+}
+.user-profile-button.add-to-favorites-button {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    justify-content: center;
+    background-color: black;
+    color: white;
+}
+.user-profile-button.add-to-favorites-button.favorite {
+    background-color: lightgray;
+    color: black;
+    fill: #ffd700;
+}
+
+.star-icon.favorite {
+    fill: #ffd700;
+}
+
+.user-profile-button.add-to-favorites-button.favorite:hover {
+    background-color: black;
+    color: white;
+}
+
+.user-profile-button.add-to-favorites-button.favorite:hover .star-icon {
+    fill: black;
+    stroke: white;
+}
+
+.user-profile-button.add-to-favorites-button:hover .star-icon  {
+    fill: #ffd700;
+}
+
+.user-profile-button.add-to-favorites-button:hover {
+    background-color: lightgray;
+    color: black;
+}

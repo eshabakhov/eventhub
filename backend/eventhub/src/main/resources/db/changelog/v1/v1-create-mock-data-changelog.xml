@@ -5,193 +5,36 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
-
-    <changeSet id="eventhub-data/v1/12-04-2025/1" author="Shabakhov_Eset">
-        <sql>
-            <![CDATA[
-            INSERT INTO public.user (role, email, username, display_name, password, is_active) VALUES
-            ('ORGANIZER', 'ogranizer@test.ru', 'organizer-test-1', 'Тестовый организатор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer1@eventhub.ru', 'organizer-test-2', 'АйТи Прорыв', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer2@eventhub.ru', 'organizer-test-3', 'Образование Будущего', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer3@eventhub.ru', 'organizer-test-4', 'Хакатон Продакшн', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer4@eventhub.ru', 'organizer-test-5', 'Фронтенд Юнити', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer5@eventhub.ru', 'organizer-test-6', 'Глобальные Технологии', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer6@eventhub.ru', 'organizer-test-7', 'РобоФест', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer7@eventhub.ru', 'organizer-test-8', 'Цифровой Восток', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer8@eventhub.ru', 'organizer-test-9', 'ЭкоИнновации', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer9@eventhub.ru', 'organizer-test-10', 'Нетворкинг Про', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer10@eventhub.ru', 'organizer-test-11', 'БиоАналитика', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer11@eventhub.ru', 'organizer-test-12', 'Центр Инноваций', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer12@eventhub.ru', 'organizer-test-13', 'ГеймДев Арена', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer13@eventhub.ru', 'organizer-test-14', 'Цифровая Академия', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer14@eventhub.ru', 'organizer-test-15', 'ТехноЮг', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer15@eventhub.ru', 'organizer-test-16', 'DevLegal', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer16@eventhub.ru', 'organizer-test-17', 'Стартап Коннект', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer17@eventhub.ru', 'organizer-test-18', 'Футуро Консалт', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer18@eventhub.ru', 'organizer-test-19', 'AI Платформа', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('ORGANIZER', 'organizer19@eventhub.ru', 'organizer-test-20', 'Мобайл Клуб', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MODERATOR', 'moderator1@test.ru', 'moderator-test-1', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MODERATOR', 'moderator2@test.ru', 'moderator-test-2', 'Тестовый модератор', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member1@test.ru', 'member-test-1', 'Тестовый участник 1', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member2@test.ru', 'member-test-2', 'Тестовый участник 2', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member3@test.ru', 'member-test-3', 'Тестовый участник 3', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member4@test.ru', 'member-test-4', 'Тестовый участник 4', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member5@test.ru', 'member-test-5', 'Тестовый участник 5', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member6@test.ru', 'member-test-6', 'Тестовый участник 6', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member7@test.ru', 'member-test-7', 'Тестовый участник 7', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member8@test.ru', 'member-test-8', 'Тестовый участник 8', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member9@test.ru', 'member-test-9', 'Тестовый участник 9', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member10@test.ru', 'member-test-10', 'Тестовый участник 10', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member11@test.ru', 'member-test-11', 'Тестовый участник 11', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true'),
-            ('MEMBER', 'member12@test.ru', 'member-test-12', 'Тестовый участник 12', '$2a$12$4GWXKCDpyMQ2F023MX0GEuKFduHTPhN0gJvrXF/yEnEBtXGLHdxN.', 'true')
-            ]]>
-        </sql>
-    </changeSet>
-    <changeSet id="eventhub-data/v1/12-04-2025/2" author="Timokhov_Evgeniy">
-        <sql>
-            <![CDATA[
-            INSERT INTO public.organizer VALUES
-            (1, 'ООО "Тестовый организатор"', 'Тестовый организатор, организует тестовые тесты', 'Организация тестовых тестов', 'Москва', 'true'),
-            (2, 'ООО "АйТи Прорыв"', 'Организатор форумов и конференций по технологиям', 'Проведение мероприятий в сфере IT', 'Санкт-Петербург', 'true'),
-            (3, 'АНО "Образование Будущего"', 'Образовательные программы и научные слеты', 'Просвещение, лекции, кружки', 'Новосибирск', 'true'),
-            (4, 'ООО "Хакатон Продакшн"', 'Организация хакатонов и соревнований по программированию', 'Технические конкурсы и челленджи', 'Казань', 'true'),
-            (5, 'ООО "Фронтенд Юнити"', 'Команда энтузиастов фронтенда', 'Воркшопы, интенсивы, метапы', 'Екатеринбург', 'true'),
-            (6, 'Фонд "Глобальные Технологии"', 'Международные конференции и саммиты', 'Конференции высокого уровня', 'Москва', 'true'),
-            (7, 'ООО "РобоФест"', 'Соревнования и выставки в сфере робототехники', 'Мероприятия для молодежи и школьников', 'Челябинск', 'true'),
-            (8, 'ООО "Цифровой Восток"', 'Поддержка IT-сообщества на Дальнем Востоке', 'Образовательные инициативы', 'Владивосток', 'true'),
-            (9, 'ООО "ЭкоИнновации"', 'Популяризация технологий устойчивого развития', 'Зеленые выставки и ярмарки', 'Калининград', 'true'),
-            (10, 'ООО "Нетворкинг Про"', 'Организация нетворкинг-вечеров и бизнес-завтраков', 'Продвижение IT-бизнеса', 'Ростов-на-Дону', 'true'),
-            (11, 'ООО "БиоАналитика"', 'Проведение биоинформатических школ и конференций', 'Наука и медицина', 'Пермь', 'true'),
-            (12, 'АНО "Центр Инноваций"', 'Межрегиональные инновационные форумы', 'Технологии и предпринимательство', 'Томск', 'true'),
-            (13, 'ООО "ГеймДев Арена"', 'Мероприятия для гейм-девелоперов', 'Игровые интенсивы и встречи', 'Иркутск', 'true'),
-            (14, 'ООО "Цифровая Академия"', 'Обучающие онлайн и офлайн мероприятия', 'Курсы, хабы, сессии', 'Красноярск', 'true'),
-            (15, 'ООО "ТехноЮг"', 'Развитие IT-сообщества на юге России', 'Местные метапы и хакатоны', 'Краснодар', 'true'),
-            (16, 'ООО "DevLegal"', 'Организация встреч на стыке технологий и права', 'Форумы по IT-закону и цифровым рискам', 'Тула', 'true'),
-            (17, 'ООО "Стартап Коннект"', 'Инкубатор и организатор стартап-питчей', 'Бизнес-мост между стартапами и инвесторами', 'Ульяновск', 'true'),
-            (18, 'ООО "Футуро Консалт"', 'Организация футуристических форумов и встреч', 'Будущее науки и технологий', 'Ярославль', 'true'),
-            (19, 'ООО "AI Платформа"', 'Фокус на искусственный интеллект и машинное обучение', 'AI-дни, митапы и буткемпы', 'Омск', 'true'),
-            (20, 'ООО "Мобайл Клуб"', 'Комьюнити мобильных разработчиков', 'Конференции, демо-дни, воркшопы', 'Воронеж', 'true');
-            ]]>
-        </sql>
-    </changeSet>
-    <changeSet id="eventhub-data/v1/12-04-2025/3" author="Timokhov_Evgeniy">
-        <sql>
-            <![CDATA[
-                INSERT INTO public.moderator VALUES (21, 'true'), (22, 'false');
-            ]]>
-        </sql>
-    </changeSet>
-    <changeSet id="eventhub-data/v1/12-04-2025/4" author="Timokhov_Evgeniy">
-        <sql>
-            <![CDATA[
-            INSERT INTO public.member VALUES
-            (23, 'Иванов', 'Иван', 'Иванович', '1999-01-01', 'Москва', 'PRIVATE'),
-            (24, 'Петров', 'Петр', 'Петрович', '1999-01-01', 'Санкт-Петербург', 'PUBLIC'),
-            (25, 'Сидоров', 'Сидор', 'Сидорович', '1999-01-01', 'Казань', 'ONLY_FRIENDS'),
-            (26, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (27, 'Сергеев', 'Сергей', 'Сергеевич', '1999-01-01', 'Воронеж', 'ONLY_FRIENDS'),
-            (28, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (29, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (30, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (31, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (32, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (33, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC'),
-            (34, 'Алексеев', 'Алексей', 'Алексеевич', '1999-01-01', 'Пермь', 'PUBLIC');
-            ]]>
-        </sql>
-    </changeSet>
-    <changeSet id="eventhub-data/v1/15-04-2025/1" author="Timokhov_Evgeniy">
-        <sql>
-            <![CDATA[
-            INSERT INTO public.event (title, short_description, description, format, start_date_time, end_date_time, location, latitude, longitude, organizer_id) VALUES
-            ('AI Future Forum', 'Форум по будущему искусственного интеллекта', 'Уникальное мероприятие, собирающее ведущих экспертов в области AI, машинного обучения и этики технологий.', 'ONLINE', '2025-03-10 10:00', '2025-03-12 17:00', 'Новосибирск', 54.96781445, 82.95159894278376, 1),
-            ('Data Science Camp', 'Летний лагерь по Data Science', 'Погружение в мир анализа данных, статистики и Python на свежем воздухе с лекциями и практикой.', 'OFFLINE', '2025-06-15 14:00', '2025-06-22 10:00', 'Сочи, Пионерская улица, 18', 43.57530, 39.73325, 2),
-            ('DevOps Days Russia', 'Практическая конференция по DevOps', 'Доклады и воркшопы по Kubernetes, CI/CD, Docker, GitOps и прочим инструментам.', 'ONLINE', '2025-04-20 09:00', '2025-04-21 17:00', 'Екатеринбург', 56.839104, 60.60825, 3),
-            ('Cybersecurity Week', 'Неделя кибербезопасности', 'Обучение защите данных, хакерским атакам и защите от них. Практика на живых системах.', 'OFFLINE', '2025-05-13 10:00', '2025-05-17 14:00', 'Калининград, Ленинский проспект, 30', 54.71098, 20.50822, 4),
-            ('Startup Pitch Night', 'Ночь стартап-питчей', 'Начинающие команды представляют свои технологические идеи инвесторам и экспертам.', 'OFFLINE', '2025-07-05 19:00', '2025-07-05 23:00', 'Санкт-Петербург, Большой проспект П.С., 29', 60.01266, 30.02307, 5),
-            ('Frontend Weekend', 'Интенсив для frontend-разработчиков', 'React, Vue, TypeScript, GraphQL и лучшие практики UI/UX.', 'ONLINE', '2025-08-02 10:00', '2025-08-04 17:00', 'Красноярск', 56.0091173, 92.872586, 6),
-            ('Hackathon 48h', '48-часовой хакатон', 'Собери команду и разработай прототип за двое суток. Лучшие получат призы!', 'OFFLINE', '2025-09-12 10:00', '2025-09-14 17:00', 'Иркутск, ул. Байкальская, 253Б', 52.25529, 104.35333, 7),
-            ('DevOps Meetup Владивосток', 'Встреча по DevOps в Владивостоке', 'Обсуждение инструментов и практик DevOps.', 'OFFLINE', '2025-03-08 10:00', '2025-03-08 17:00', 'Приморский край, Университетский проспект', 43.024557, 131.893821, 8),
-            ('Digital Education Forum', 'Форум цифрового образования', 'Технологии в обучении, EdTech, новые форматы обучения для школ и вузов.', 'ONLINE', '2025-10-01 09:00', '2025-10-02 17:00', 'Пермь', 58.014965, 56.246723, 9),
-            ('Open Source Day', 'День Open Source-разработки', 'Презентации и мастер-классы по открытому ПО и вклад в сообщества.', 'OFFLINE', '2025-04-27 10:00', '2025-04-27 17:00', 'Томск, проспект Ленина, 34', 56.46749, 84.95013, 10),
-            ('Mobile Conf', 'Конференция по мобильной разработке', 'iOS, Android, Flutter, новые тренды и UX-исследования.', 'ONLINE', '2025-06-05 10:00', '2025-06-06 17:00', 'Ульяновск', 54.3150278, 48.403373, 11),
-            ('Quantum Tech Days', 'Дни квантовых технологий', 'Будущее квантовых вычислений, практические кейсы и лаборатории.', 'OFFLINE', '2025-11-10 10:00', '2025-11-12 17:00', 'Дубна, улица Университетская, 19', 56.74038, 37.22429, 12),
-            ('Backend Battle', 'Битва backend-разработчиков', 'Соревнования по проектированию API, оптимизации БД и архитектуре сервисов.', 'ONLINE', '2025-07-15 10:00', '2025-07-16 17:00', 'Омск', 54.991375, 73.371529, 13),
-            ('UX/UI Live', 'Дизайн-интенсив', 'Живой интенсив по созданию пользовательских интерфейсов с участием студий и агентств.', 'OFFLINE', '2025-05-20 10:00', '2025-05-22 17:00', 'Ростов-на-Дону, проспект Ворошиловский, 35', 47.222084, 39.71880, 14),
-            ('Bioinformatics Hack', 'Биоинформатический хакатон', 'Объединяем науку и код: анализ ДНК, Big Data и Python.', 'ONLINE', '2025-10-12 10:00', '2025-10-14 17:00', 'Курск', 51.72703565, 36.192247956921115, 15),
-            ('Digital Nomads Meetup', 'Слет цифровых кочевников', 'Обмен опытом удаленной работы, путешествий и фриланса.', 'OFFLINE', '2025-09-01 10:00', '2025-09-03 17:00', 'Ярославль, ул. Свободы, 46', 57.62696, 39.86852, 16),
-            ('ML Bootcamp', 'Буткемп по машинному обучению', 'Месячная программа с обучением, проектами и наставниками.', 'ONLINE', '2025-08-10 10:00', '2025-09-10 17:00', 'Челябинск', 55.1598408, 61.4025547, 17),
-            ('GameDev Weekend', 'Выходные с геймдевом', 'Unity, Unreal, игровые механики и командная работа.', 'OFFLINE', '2025-04-06 14:00', '2025-04-07 19:00', 'Казань, Кремлевская улица, 35', 55.79245, 49.12271, 18),
-            ('TechLaw Forum', 'Технологии и право', 'Юридические аспекты цифровых решений, ИИ и защиты данных.', 'ONLINE', '2025-11-20 10:00', '2025-11-21 17:00', 'Тула', 54.1930321, 37.61754, 19),
-            ('Green Tech Expo', 'Выставка зеленых технологий', 'Инновации в устойчивом развитии, экологичные IT-решения и стартапы.', 'OFFLINE', '2025-06-25 15:00', '2025-06-27 19:00', 'Воронеж, улица Кольцовская, 30', 51.67421, 39.20044, 20);
-            ]]>
-        </sql>
-    </changeSet>
-    <changeSet id="eventhub-data/v1/19-04-2025/1" author="Timokhov_Evgeniy">
-        <sql>
-            <![CDATA[
-                INSERT INTO public.tag(name) VALUES
-                ('IT'),
-                ('UX/UI'),
-                ('Наука'),
-                ('Технологии'),
-                ('Хакатон'),
-                ('Meetup'),
-                ('Конференция'),
-                ('Форум'),
-                ('Образование'),
-                ('ИИ');
-            ]]>
-        </sql>
-    </changeSet>
     <changeSet id="eventhub-data/v1/19-04-2025/2" author="Timokhov_Evgeniy">
         <sql>
             <![CDATA[
             INSERT INTO public.event_tags(event_id, tag_id) VALUES
-                (1, 1),
-                (1, 8),
-                (1, 4),
-                (1, 10),
-                (2, 1),
-                (2, 4),
-                (3, 1),
-                (3, 4),
-                (3, 7),
-                (4, 1),
-                (4, 4),
-                (5, 1),
-                (5, 2),
-                (6, 1),
-                (7, 1),
-                (7, 5),
-                (8, 1),
-                (8, 4),
-                (8, 6),
-                (9, 4),
-                (9, 8),
-                (9 ,9),
-                (10, 1),
-                (10, 4),
-                (11, 1),
-                (11, 7),
-                (12, 4),
-                (13, 1),
-                (13, 4),
-                (14, 1),
-                (14, 2),
-                (14, 4),
-                (15, 3),
-                (15, 4),
-                (15, 5),
-                (16, 1),
-                (17, 1),
-                (17, 9),
-                (18, 1),
-                (19, 1),
-                (19, 10),
-                (20, 1),
-                (20, 3),
-                (20, 4);
+            (1, 1),
+            (1, 8),
+            (1, 4),
+            (1, 10),
+            (2, 1),
+            (2, 4),
+            (3, 1),
+            (3, 4),
+            (3, 7),
+            (4, 1),
+            (4, 4),
+            (5, 1),
+            (5, 2),
+            (6, 1),
+            (7, 1),
+            (7, 5),
+            (8, 1),
+            (8, 4),
+            (8, 6),
+            (9, 4),
+            (9, 8),
+            (9 ,9),
+            (10, 1),
+            (10, 4),
+            (11, 1),
+            (11, 7);
             ]]>
         </sql>
     </changeSet>
@@ -199,6 +42,76 @@
         <sql>
             <![CDATA[
             CREATE EXTENSION IF NOT EXISTS postgis;
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/21-05-2025/1" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.friend_request (sender_id, recipient_id, status, created_at) VALUES
+            (6, 16, 'ACCEPTED', '2025-04-18 12:19:35'),
+            (6, 17, 'ACCEPTED', '2025-05-05 23:20:59'),
+            (6, 18, 'PENDING', '2025-04-02 12:50:29'),
+            (7, 19, 'REJECTED', '2025-05-20 08:00:53'),
+            (7, 20, 'REJECTED', '2025-04-18 19:14:06'),
+            (7, 21, 'ACCEPTED', '2025-03-26 03:41:37'),
+            (8, 22, 'ACCEPTED', '2025-03-30 02:12:08'),
+            (9, 23, 'REJECTED', '2025-04-02 06:53:38'),
+            (10, 24, 'REJECTED', '2025-03-22 15:59:04'),
+            (11, 25, 'PENDING', '2025-03-28 09:21:53'),
+            (12, 25, 'REJECTED', '2025-03-26 14:37:00'),
+            (13, 25, 'REJECTED', '2025-03-28 13:21:43'),
+            (14, 15, 'PENDING', '2025-04-30 22:16:19'),
+            (15, 25, 'PENDING', '2025-03-25 18:06:10');
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/21-05-2025/2" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.event_members (event_id, member_id) VALUES
+            (1, 6),
+            (1, 7),
+            (1, 8),
+            (2, 9),
+            (2, 10),
+            (2, 11),
+            (3, 12),
+            (3, 13),
+            (3, 14),
+            (4, 15),
+            (4, 16),
+            (4, 17),
+            (5, 18),
+            (5, 19),
+            (6, 20),
+            (6, 21),
+            (7, 22),
+            (8, 23),
+            (9, 24),
+            (10, 25),
+            (11, 25);
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="eventhub-data/v1/21-05-2025/3" author="Shabakhov_Eset">
+        <sql>
+            <![CDATA[
+            INSERT INTO public.member_organizer (member_id, organizer_id) VALUES
+            (6, 26),
+            (6, 27),
+            (6, 28),
+            (7, 29),
+            (7, 30),
+            (7, 31),
+            (8, 32),
+            (8, 33),
+            (9, 34),
+            (10, 35),
+            (11, 36),
+            (12, 37),
+            (13, 38),
+            (14, 39);
             ]]>
         </sql>
     </changeSet>

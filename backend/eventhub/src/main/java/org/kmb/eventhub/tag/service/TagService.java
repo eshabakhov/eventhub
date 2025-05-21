@@ -52,9 +52,9 @@ public class TagService {
         responseList.setPageSize(pageSize);
         return responseList;
     }
-    public ResponseList<Tag> getFavouriteList(Long userId, Integer page, Integer pageSize) {
+    public ResponseList<Tag> getFavoriteList(Long userId, Integer page, Integer pageSize) {
         ResponseList<Tag> responseList = new ResponseList<>();
-        List<Tag> list =  tagRepository.fetchFavourites(userId);
+        List<Tag> list =  tagRepository.fetchFavorites(userId);
         responseList.setList(list);
         return responseList;
     }

@@ -1,7 +1,17 @@
 import React, { Component } from "react";
 import api from "../common/AxiosInstance";
+import Header from "../common/Header";
+import {useNavigate} from "react-router-dom";
+import SideBar from "../common/SideBar";
+import "../../css/EventStatsPage.css";
+import UserContext from "../../UserContext"; // Импорт стилей
+
+export const withNavigation = (WrappedComponent) => {
+    return (props) => <WrappedComponent {...props} navigate={useNavigate()}/>;
+};
 
 class EventStatsPage extends Component {
+    static contextType = UserContext;
     state = {
         events: [],
         users: [],
@@ -15,13 +25,34 @@ class EventStatsPage extends Component {
         totalEventViews: null,
         totalUserViews: null,
         userEventViews: null,
+        sidebarOpen: false,
         errorMessage: ""
     };
+    sidebarRef = React.createRef();
 
     componentDidMount() {
+        document.addEventListener("mousedown", this.handleClickOutside);
         this.fetchEvents();
         this.fetchUsers();
     }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+
+    toggleSidebar = () => {
+        this.setState(prev => ({sidebarOpen: !prev.sidebarOpen}));
+    };
+
+    handleClickOutside = (event) => {
+        if (this.state.sidebarOpen &&
+            this.sidebarRef.current &&
+            !this.sidebarRef.current.contains(event.target) &&
+            !event.target.classList.contains('burger-button') &&
+            !event.target.closest('.burger-button')) {
+            this.setState({sidebarOpen: false});
+        }
+    };
 
     fetchEvents = async () => {
         const { eventPage, pageSize } = this.state;
@@ -119,6 +150,7 @@ class EventStatsPage extends Component {
     };
 
     render() {
+        const {navigate} = this.props;
         const {
             events,
             users,
@@ -132,100 +164,121 @@ class EventStatsPage extends Component {
             totalEventViews,
             totalUserViews,
             userEventViews,
+            sidebarOpen,
             errorMessage
         } = this.state;
 
         return (
-            <div className="view-stats-page">
-                <h2>Статистика просмотров</h2>
+            <div className="stats-page-container">
+                <Header
+                    onBurgerButtonClick={this.toggleSidebar}
+                    title="Статистика просмотров"
+                    navigate={navigate}/>
+                <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}></div>
+                <SideBar sidebarOpen={sidebarOpen} sidebarRef={this.sidebarRef} user={this.context.user}/>
 
-                <div style={{ marginBottom: 10 }}>
-                    <label>Размер страницы:</label>
-                    <select value={pageSize} onChange={this.handlePageSizeChange}>
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                    </select>
-                </div>
+                <div className="stats-controls">
+                    <div className="page-size-selector">
+                        <label>Размер:</label>
+                        <select value={pageSize} onChange={this.handlePageSizeChange}>
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
 
-                <div style={{ marginBottom: 20 }}>
-                    <label>Мероприятие:</label>
-                    <select name="selectedEventId" value={selectedEventId} onChange={this.handleChange}>
-                        <option value="">-- Выберите мероприятие --</option>
-                        {events.map((event) => (
-                            <option key={event.id} value={event.id}>
-                                {event.title}
-                            </option>
-                        ))}
-                    </select>
-                    <div>
-                        <button
-                            type="button"
-                            onClick={() => this.handleEventPageChange(-1)}
-                            disabled={eventPage <= 0}
-                        >
-                            Назад
-                        </button>
-                        <span style={{ margin: "0 10px" }}>
-                            Страница {eventPage + 1} из {totalEventPages}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => this.handleEventPageChange(1)}
-                            disabled={eventPage + 1 >= totalEventPages}
-                        >
-                            Далее
-                        </button>
+                    <div className="stats-selector">
+                        <label>Мероприятие:</label>
+                        <select name="selectedEventId" value={selectedEventId} onChange={this.handleChange}>
+                            <option value="">-- Выберите мероприятие --</option>
+                            {events.map((event) => (
+                                <option key={event.id} value={event.id}>
+                                    {event.title}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pagination-controls">
+                            <button
+                                type="button"
+                                className="back-forward"
+                                onClick={() => this.handleEventPageChange(-1)}
+                                disabled={eventPage <= 0}
+                            >
+                                Назад
+                            </button>
+                            <span>
+                                {eventPage}
+                            </span>
+                            <button
+                                type="button"
+                                className="back-forward"
+                                onClick={() => this.handleEventPageChange(1)}
+                                disabled={eventPage + 1 >= totalEventPages}
+                            >
+                                Далее
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="stats-selector">
+                        <label>Пользователь:</label>
+                        <select name="selectedUserId" value={selectedUserId} onChange={this.handleChange}>
+                            <option value="">-- Выберите пользователя --</option>
+                            {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.displayName} ({user.username})
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pagination-controls">
+                            <button
+                                type="button"
+                                className="back-forward"
+                                onClick={() => this.handleUserPageChange(-1)}
+                                disabled={userPage <= 0}
+                            >
+                                Назад
+                            </button>
+                            <span>
+                                {userPage}
+                            </span>
+                            <button
+                                type="button"
+                                className="back-forward"
+                                onClick={() => this.handleUserPageChange(1)}
+                                disabled={userPage + 1 >= totalUserPages}
+                            >
+                                Далее
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ marginBottom: 20 }}>
-                    <label>Пользователь:</label>
-                    <select name="selectedUserId" value={selectedUserId} onChange={this.handleChange}>
-                        <option value="">-- Выберите пользователя --</option>
-                        {users.map((user) => (
-                            <option key={user.id} value={user.id}>
-                                {user.displayName} ({user.username})
-                            </option>
-                        ))}
-                    </select>
-                    <div>
-                        <button
-                            type="button"
-                            onClick={() => this.handleUserPageChange(-1)}
-                            disabled={userPage <= 0}
-                        >
-                            Назад
-                        </button>
-                        <span style={{ margin: "0 10px" }}>
-                            Страница {userPage + 1} из {totalUserPages}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => this.handleUserPageChange(1)}
-                            disabled={userPage + 1 >= totalUserPages}
-                        >
-                            Далее
-                        </button>
-                    </div>
-                </div>
-
-                <div className="stats-result">
+                <div className="stats-results">
                     {selectedEventId && totalEventViews !== null && (
-                        <p>Общее количество просмотров мероприятия: <strong>{totalEventViews}</strong></p>
+                        <div className="stat-card">
+                            <div className="stat-label">Общее количество просмотров мероприятия</div>
+                            <div className="stat-value">{totalEventViews}</div>
+                        </div>
                     )}
                     {selectedUserId && totalUserViews !== null && (
-                        <p>Общее количество просмотров от пользователя: <strong>{totalUserViews}</strong></p>
+                        <div className="stat-card">
+                            <div className="stat-label">Общее количество просмотров от пользователя</div>
+                            <div className="stat-value">{totalUserViews}</div>
+                        </div>
                     )}
                     {selectedEventId && selectedUserId && userEventViews !== null && (
-                        <p>Просмотры выбранного мероприятия этим пользователем: <strong>{userEventViews}</strong></p>
+                        <div className="stat-card">
+                            <div className="stat-label">Просмотры выбранного мероприятия этим пользователем</div>
+                            <div className="stat-value">{userEventViews}</div>
+                        </div>
                     )}
-                    {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
                 </div>
             </div>
         );
     }
 }
 
-export default EventStatsPage;
+export default withNavigation(EventStatsPage);
