@@ -129,6 +129,18 @@ public class SubscribeService {
         eventMembersDTO.setUserId(memberId);
 
         return eventMembersDTO;
+    }
 
+    public ResponseList<Organizer> getFavoriteOrganizersList(Long memberId, Integer page, Integer pageSize) {
+        ResponseList<Organizer> responseList = new ResponseList<>();
+        if (userSecurityService.isUserOwnData(memberId, userDetailsService.getAuthenticatedUser())) {
+            var orgList = subscribeRepository.fetchFavoriteOrganizersByMemberId(memberId, page, pageSize);
+            responseList.setList(orgList);
+            responseList.setTotal((long) orgList.size());
+        }
+
+        responseList.setCurrentPage(page);
+        responseList.setPageSize(pageSize);
+        return responseList;
     }
 }
