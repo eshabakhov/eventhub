@@ -179,7 +179,7 @@ class EventStatsPage extends Component {
 
                 <div className="stats-controls">
                     <div className="page-size-selector">
-                        <label>Размер страницы:</label>
+                        <label>Размер:</label>
                         <select value={pageSize} onChange={this.handlePageSizeChange}>
                             <option value={5}>5</option>
                             <option value={10}>10</option>
@@ -208,7 +208,7 @@ class EventStatsPage extends Component {
                                 Назад
                             </button>
                             <span>
-                                Страница {eventPage + 1} из {totalEventPages}
+                                {eventPage}
                             </span>
                             <button
                                 type="button"
@@ -241,7 +241,7 @@ class EventStatsPage extends Component {
                                 Назад
                             </button>
                             <span>
-                                Страница {userPage + 1} из {totalUserPages}
+                                {userPage}
                             </span>
                             <button
                                 type="button"
