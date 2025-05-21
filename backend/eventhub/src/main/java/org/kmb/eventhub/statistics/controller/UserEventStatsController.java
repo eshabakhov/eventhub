@@ -29,4 +29,14 @@ public class UserEventStatsController {
     public int getViewsByUserForEvent(@PathVariable Long eventId, @PathVariable Long userId) {
         return statsService.getViewsByUserForEvent(userId, eventId);
     }
+
+    @GetMapping("/event/views")
+    public Long getAllViews() {
+        return statsService.getAllViews();
+    }
+
+    @GetMapping("/organizers/{organizerId}/favorites")
+    public Long getOrganizerFavorites(@PathVariable Long organizerId) {
+        return statsService.getOrganizerFavorites(organizerId);
+    }
 }

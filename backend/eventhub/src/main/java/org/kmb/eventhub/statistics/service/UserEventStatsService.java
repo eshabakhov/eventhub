@@ -21,5 +21,13 @@ public class UserEventStatsService {
     public int getViewsByUserForEvent(Long userId, Long eventId) {
         return repository.countViewsByUserAndEvent(userId, eventId);
     }
+
+    public Long getAllViews() {
+        return repository.getAllViews();
+    }
+
+    public Long getOrganizerFavorites(Long organizerId) {
+        return repository.getOrganizerFavorites(organizerId);
+    }
 }
 

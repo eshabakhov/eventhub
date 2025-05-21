@@ -411,20 +411,23 @@ class EventsPage extends Component {
                     <motion.div className="left-panel" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5 }}>
                         {/* Вкладки */}
-                        <div className="tabs-wrapper">
-                            <button
-                                className={`tab-button ${this.state.activeTab === "allEvents" ? "active" : ""}`}
-                                onClick={() => this.handleTabChange("allEvents")}
-                            >
-                                Все мероприятия
-                            </button>
-                            <button
-                                className={`tab-button ${this.state.activeTab === "recommendations" ? "active" : ""}`}
-                                onClick={() => this.handleTabChange("recommendations")}
-                            >
-                                Рекомендации
-                            </button>
-                        </div>
+                        {this.context.user && this.context.user.id && this.context.user.role === "MEMBER" && (
+                            <div className="tabs-wrapper">
+                                <button
+                                    className={`tab-button ${this.state.activeTab === "allEvents" ? "active" : ""}`}
+                                    onClick={() => this.handleTabChange("allEvents")}
+                                >
+                                    Все мероприятия
+                                </button>
+                                <button
+                                    className={`tab-button ${this.state.activeTab === "recommendations" ? "active" : ""}`}
+                                    onClick={() => this.handleTabChange("recommendations")}
+                                >
+                                    Рекомендации
+                                </button>
+                            </div>
+                        )}
+
 
                         {/* Поиск */}
                         <div className="search-wrapper">

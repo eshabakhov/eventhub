@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import static org.kmb.eventhub.Tables.MEMBER_ORGANIZER;
 import static org.kmb.eventhub.Tables.USER_EVENT_INTERACTIONS;
 
 @Repository
@@ -38,6 +39,21 @@ public class UserEventInteractionRepository {
                         .and(USER_EVENT_INTERACTIONS.EVENT_ID.eq(eventId))
                         .and(USER_EVENT_INTERACTIONS.INTERACTION_TYPE.eq("VIEW")))
                 .fetchOne(0, int.class);
+    }
+
+    public Long getAllViews() {
+        return dsl.selectCount()
+                .from(USER_EVENT_INTERACTIONS)
+                .where(USER_EVENT_INTERACTIONS.INTERACTION_TYPE.eq("VIEW"))
+                .fetchOneInto(Long.class);
+    }
+
+    public Long getOrganizerFavorites(Long organizerId) {
+        return dsl.select()
+                .from(MEMBER_ORGANIZER)
+                .where(MEMBER_ORGANIZER.ORGANIZER_ID.eq(organizerId))
+                .groupBy(MEMBER_ORGANIZER.ORGANIZER_ID)
+                .fetchOneInto(Long.class);
     }
 }
 
