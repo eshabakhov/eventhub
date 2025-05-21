@@ -505,13 +505,15 @@ class EventsPage extends Component {
                                 <div className="event-info">
                                     <div className="event-title-container">
                                         <div className="event-title">{event.title}</div>
-                                        <div className="event-date">{event.date}</div>
-                                        <div className="event-views-subscribers">
-                                            <div className="event-views">
-                                                {`Просмотры ${event.views}`}
-                                            </div>
-                                            <div className="event-views">
-                                                {`Участники ${event.subscribers}`}
+                                        <div className="event-date-stats">
+                                            <div className="event-date">{event.date}</div>
+                                            <div className="event-views-subscribers">
+                                                <div className="event-views">
+                                                    {`👁 ${event.views}`}
+                                                </div>
+                                                <div className="event-views">
+                                                    {`☺︎ ${event.subscribers}`}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
