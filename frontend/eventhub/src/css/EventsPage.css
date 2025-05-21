@@ -161,6 +161,8 @@
     width: 25%; /* Фиксированная ширина картинки */
     height: auto;
     object-fit: cover;
+    max-height: 255px;
+    max-width: 250px;
   }
 
   .event-card:hover {
