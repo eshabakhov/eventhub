@@ -83,6 +83,8 @@ public class RecommendationService {
         recommendations.forEach(event -> {
             EventDTO eventDTO = eventMapper.toDto(event);
             eventDTO.setTags(tagRepository.fetch(event.getId()).stream().map(tagMapper::toDto).collect(Collectors.toSet()));
+            eventDTO.setViews(eventRepository.fetchViews(event.getId()));
+            eventDTO.setSubscribers(eventRepository.fetchSubscriptionsCount(event.getId()));
             eventDTOList.add(eventDTO);
         });
 
