@@ -17,6 +17,7 @@ import ModeratorCreate from "./components/ModeratorManagement/ModeratorCreate";
 import UserProfile from "./components/profile/UserProfile";
 import UserEventsList from "./components/events/UserEventsList";
 import EventStatsPage from "./components/stats/EventStatsPage";
+import FavoritesPage from "./components/favorites/FavoritesPage";
 
 class App extends React.Component {
   
@@ -45,6 +46,7 @@ class App extends React.Component {
               <Route path="/organizers/:id" element={<UserProfile/>}/>
               <Route path="/organizers/:id/events" element={<UserEventsList/>}/>
               <Route path="/stats" element={<EventStatsPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
             </Routes>
           </UserProvider>
         </Router>
