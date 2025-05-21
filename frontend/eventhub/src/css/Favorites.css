@@ -64,6 +64,32 @@
     transition: all 0.2s ease;
 
 }
-.favorites-remove-button:hover {
+
+.tag-favorites-star {
+    width: 16px;
+    height: 16px;
+    fill: #ffd700;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: all 0.2s ease;
+}
+
+.favorites-remove-button:hover,
+.tag-favorites-star:hover {
     fill: white;
+}
+
+.tag-favorites-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 8px;
+    font-size: 14px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
 }

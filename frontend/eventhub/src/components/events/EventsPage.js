@@ -461,7 +461,7 @@ class EventsPage extends Component {
                         {/* Фильтр по тегам */}
                         <div className="tags-filter-wrapper">
                             {tags.map((tag) => {
-                                const isSelected = this.state.selectedTags.includes(tag.name);
+                                const isSelected = this.state.selectedTags && this.state.selectedTags.includes(tag.name);
                                 return (
                                     <button
                                         key={tag.name}
