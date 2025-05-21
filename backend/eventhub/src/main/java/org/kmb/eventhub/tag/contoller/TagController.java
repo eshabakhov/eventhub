@@ -44,11 +44,11 @@ public class TagController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Tag.class)))
     @GetMapping("/{userId}")
-    public ResponseList<Tag> getFavouriteList(
+    public ResponseList<Tag> getFavoriteList(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @PathVariable Long userId) {
-                return tagService.getFavouriteList(userId, page, pageSize);
+                return tagService.getFavoriteList(userId, page, pageSize);
     }
 
     @Operation(summary = "Добавление тега в избранное пользователя.",
