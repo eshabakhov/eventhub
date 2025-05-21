@@ -47,8 +47,8 @@
     margin: 0;
   }
   
-  .friends-item,
-  .search-result-item,
+  .friends-items,
+  .search-result-items,
   .incoming-request-item,
   .sent-request-item {
     padding: 10px 15px;
@@ -59,6 +59,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+
+  .friends-item,
+  .search-result-item {
+    width: 30%;
   }
   
   .no-friends,
@@ -148,7 +154,7 @@
   .remove-button:hover {
     background-color: #c82333;
   }
-  
+
   .request-sent {
     color: #888;
     font-style: italic;
