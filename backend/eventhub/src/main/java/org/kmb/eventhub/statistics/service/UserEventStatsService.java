@@ -22,12 +22,20 @@ public class UserEventStatsService {
         return repository.countViewsByUserAndEvent(userId, eventId);
     }
 
-    public Long getAllViews() {
-        return repository.getAllViews();
+    public Long getAllViews(Long organizerId) {
+        return repository.getAllViews(organizerId);
     }
 
     public Long getOrganizerFavorites(Long organizerId) {
         return repository.getOrganizerFavorites(organizerId);
+    }
+
+    public Long getOrganizerMembers(Long organizerId) {
+        return repository.getAllMembers(organizerId);
+    }
+
+    public Long getOrganizerEvents(Long organizerId) {
+        return repository.getAllEvents(organizerId);
     }
 }
 
