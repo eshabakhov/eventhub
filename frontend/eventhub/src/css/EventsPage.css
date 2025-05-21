@@ -247,6 +247,14 @@
     color: white;
   }
 
+  .event-views-subscribers {
+
+  }
+
+  .event-views {
+    align-content: flex-end;
+  }
+
   .online {
     background-color: #2e7d32;
   }

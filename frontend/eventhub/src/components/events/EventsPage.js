@@ -272,6 +272,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -307,6 +309,8 @@ class EventsPage extends Component {
                     tags: e.tags?.map((tag) => tag.name) || [],
                     position: [e.latitude, e.longitude],
                     location: e.location,
+                    views: e.views,
+                    subscribers: e.subscribers,
                     imageUrl: e.pictures || null  // <-- добавлено
                 }));
                 this.setState({
@@ -499,6 +503,14 @@ class EventsPage extends Component {
                                     <div className="event-title-container">
                                         <div className="event-title">{event.title}</div>
                                         <div className="event-date">{event.date}</div>
+                                        <div className="event-views-subscribers">
+                                            <div className="event-views">
+                                                {`Просмотры ${event.views}`}
+                                            </div>
+                                            <div className="event-views">
+                                                {`Участники ${event.subscribers}`}
+                                            </div>
+                                        </div>
                                     </div>
                                     <p className="event-short-description">{event.shortDescription}</p>
                                     <p className="event-location">{event.location}</p>
@@ -526,7 +538,8 @@ class EventsPage extends Component {
                                             </button>
                                         </div>
                                         <div
-                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}</div>
+                                            className={`event-format ${event.format.toLowerCase()}`}>{event.format === "ONLINE" ? "Онлайн" : "Офлайн"}
+                                        </div>
                                     </div>
                                 </div>
 
