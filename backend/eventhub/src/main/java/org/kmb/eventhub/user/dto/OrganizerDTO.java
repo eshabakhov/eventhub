@@ -10,4 +10,8 @@ public class OrganizerDTO {
     private String industry;
     private String address;
     private Boolean isAccredited;
+    private Long eventsCount;
+    private Long membersCount;
+    private Long viewsCount;
+    private Long subscribersCount;
 }

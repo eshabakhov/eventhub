@@ -79,4 +79,19 @@ public class EventRepository {
         }
 
     }
+    public Long fetchViews(Long eventId) {
+        return dslContext
+                .selectCount()
+                .from(USER_EVENT_INTERACTIONS)
+                .where(USER_EVENT_INTERACTIONS.EVENT_ID.eq(eventId))
+                .and(USER_EVENT_INTERACTIONS.INTERACTION_TYPE.eq("VIEW"))
+                .fetchOneInto(Long.class);
+    }
+    public Long fetchSubscriptionsCount(Long eventId) {
+        return dslContext
+                .selectCount()
+                .from(EVENT_MEMBERS)
+                .where(EVENT_MEMBERS.EVENT_ID.eq(eventId))
+                .fetchOneInto(Long.class);
+    }
 }

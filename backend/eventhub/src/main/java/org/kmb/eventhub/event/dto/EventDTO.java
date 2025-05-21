@@ -27,4 +27,6 @@ public class EventDTO {
     private Set<EventFileDTO> files;
     private Set<TagDTO> tags;
     private byte[] pictures;
+    private Long views;
+    private Long subscribers;
 }
