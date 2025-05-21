@@ -163,7 +163,7 @@ class Login extends React.Component {
             };
 
             // 1. Создание пользователя
-            fetch(`${API_BASE_URL}/v1/users`, {
+            fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",
