@@ -56,7 +56,7 @@ class ProfilePage extends Component {
                 patronymic: data.customUser.patronymic || '',
                 birthDate: data.customUser.birthDate || '',
                 birthCity: data.customUser.birthCity || '',
-                privacy: data.customUser.privacy || 'public',
+                privacy: data.customUser.privacy || 'ONLY_FRIENDS',
                 isAdmin: !!data.customUser.isAdmin
             })
         };
