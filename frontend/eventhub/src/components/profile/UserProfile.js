@@ -99,7 +99,6 @@ class UserProfile extends Component {
                     } else {
                         this.setState({eventsOpen: false});
                     }
-                    console.log(data);
                 })
                 .catch((error) => {
                     console.error('Ошибка при загрузке профиля:', error);
@@ -114,7 +113,6 @@ class UserProfile extends Component {
                 }
             }).then((response) => {
                 const data = response.data;
-                console.log(data);
                 const formData = {
                     name: data.name || '',
                     industry: data.industry || '',
@@ -158,7 +156,6 @@ class UserProfile extends Component {
     };
 
     handleUserEvents = () => {
-        console.log('кнопка')
         if (this.state.isOrganizersPath) {
             this.props.navigate(`/organizers/${this.props.params.id}/events`);
         } else {
@@ -213,7 +210,6 @@ class UserProfile extends Component {
             isMembersPath, isOrganizersPath, isFavorite} = this.state;
 
         if (loading) return <div className="profile-loading">Загрузка...</div>;
-        console.log(eventsOpen)
         return (
             <div className="profile-page">
                 <Header

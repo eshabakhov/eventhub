@@ -174,9 +174,7 @@ class EventEdit extends React.Component {
     };
 
     componentDidMount() {
-        console.log('ok')
         const {eventId} = this.props.params;
-        console.log(eventId)
         document.addEventListener("mousedown", this.handleClickOutside);
 
         if (eventId) {
@@ -204,7 +202,6 @@ class EventEdit extends React.Component {
                 .catch(err => console.error('Ошибка получения данных мероприятия:', err));
         } else {
             const {user} = this.context;
-            console.log(user);
             this.setState({
                 isCreating: true,
                 isEditing: false,
@@ -349,7 +346,6 @@ class EventEdit extends React.Component {
             tags: [...prevState.tags, addedTag],
             newTag: ''
         }));
-        console.log('Тег успешно добавлен: ', addedTag);
     }
 
     handleAddTag = async (e) => {

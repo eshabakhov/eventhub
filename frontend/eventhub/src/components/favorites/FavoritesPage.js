@@ -58,7 +58,6 @@ class FavoritesPage extends Component {
                     favoriteOrganizers: data.list || [],
                     totalOrgs: data.total,
                     currentOrgPage: page});
-                console.log(data.list);
             })
             .catch(console.error);
     };

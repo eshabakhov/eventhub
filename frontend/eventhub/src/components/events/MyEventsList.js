@@ -333,7 +333,7 @@ class MyEventsList extends Component {
                 setUser(userData); // сохраняем в context + localStorage
             })
             .catch((err) => {
-                console.log("Ошибка авторизации:", err.message);
+                console.error("Ошибка авторизации:", err.message);
             });
     };
 
