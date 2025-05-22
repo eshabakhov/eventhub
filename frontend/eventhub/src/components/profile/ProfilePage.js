@@ -335,7 +335,7 @@ class ProfilePage extends Component {
                                         </label>
                                         <label className="profile-label">
                                             Приватность:
-                                            <select className="profile-input" name="privacy" onChange={this.handleChange}>
+                                            <select className="profile-input" name="privacy" value={formData.privacy} onChange={this.handleChange}>
                                                 <option value="PRIVATE">Приватный</option>
                                                 <option value="PUBLIC">Публичный</option>
                                                 <option value="ONLY_FRIENDS">Только для друзей</option>
