@@ -70,11 +70,12 @@ const SideBar = ({sidebarOpen, sidebarRef, user}) => {
                             className={window.location.pathname === "/accreditation" ? "disabled" : ""}>
                             <i className="bi bi-clipboard-check-fill"></i> Аккредитация организаций
                         </li>
-
-                        <li onClick={() => navigate("/moderator-management")}
-                            className={window.location.pathname === "/moderator-management" ? "disabled" : ""}>
-                            <i className="bi bi-shield-lock-fill"></i> Управление модераторами
-                        </li>
+                        {user.moderatorIsAdmin && (
+                            <li onClick={() => navigate("/moderator-management")}
+                                className={window.location.pathname === "/moderator-management" ? "disabled" : ""}>
+                                <i className="bi bi-shield-lock-fill"></i> Управление модераторами
+                            </li>
+                        )}
 
                         <li onClick={() => navigate("/stats")}
                             className={window.location.pathname === "/stats" ? "disabled" : ""}>
