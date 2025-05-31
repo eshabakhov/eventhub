@@ -41,8 +41,6 @@ class ModeratorCreate extends Component {
                 }
             }).then((response) => {
                 const data = response.data;
-                console.log(data);
-
                 const formData = {
                     role: data.role || '',
                     email: data.email || '',

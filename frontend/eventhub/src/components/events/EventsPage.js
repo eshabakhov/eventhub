@@ -593,7 +593,6 @@ class EventsPage extends Component {
                                     let icon = group[0].format === "ONLINE" ? onlineIcon : offlineIcon;
                                     if (hasFavoriteTag)
                                         icon = group[0].format === "ONLINE" ? onlineIconStar : offlineIconStar;
-                                        //console.log(group[0].title)
                                     const initialEventId = this.state.focusedEvent?.id;
                                     return (
                                         <Marker

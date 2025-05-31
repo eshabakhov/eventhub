@@ -158,7 +158,9 @@ public class  UserService {
             organizerDao.insert(userMapper.toOrganizer(user));
         }
         if (RoleEnum.MEMBER.equals(userDTO.getRole())) {
-            memberDao.insert(userMapper.toMember(user));
+            Member member = userMapper.toMember(user);
+            member.setPrivacy(PrivacyType.ONLY_FRIENDS);
+            memberDao.insert(member);
         }
         if (RoleEnum.MODERATOR.equals(userDTO.getRole())) {
             moderatorDao.insert(userMapper.toModerator(user));

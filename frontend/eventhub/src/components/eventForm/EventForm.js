@@ -72,7 +72,6 @@ class EventForm extends React.Component {
     };
 
     handleSubmit = (e) => {
-        console.log('handleSubmit');
         e.preventDefault();
         const {user} = this.context;
 
@@ -88,9 +87,7 @@ class EventForm extends React.Component {
                 organizerId: user.id
 
             };
-            console.log(user)
 
-            console.log('Отправка данных мероприятия:', eventData);
             // Здесь можно добавить вызов API для сохранения мероприятия
             // this.props.onSubmit(eventData);
 

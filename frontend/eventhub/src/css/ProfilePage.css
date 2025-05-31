@@ -3,7 +3,6 @@
 }
 
 .profile-page {
-  height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -74,6 +73,7 @@
   margin-bottom: 1rem;
   font-size: 1rem;
   box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
 }
 
 textarea.profile-input {

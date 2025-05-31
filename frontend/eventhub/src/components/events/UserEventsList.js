@@ -142,7 +142,6 @@ class UserEventsList extends Component {
                     } else {
                         this.setState({eventsOpen: false});
                     }
-                    console.log(data);
                 })
                 .catch((error) => {
                     console.error('Ошибка при загрузке профиля:', error);

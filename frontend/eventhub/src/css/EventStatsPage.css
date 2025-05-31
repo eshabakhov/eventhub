@@ -58,6 +58,10 @@
     width: 100%;
 }
 
+.pagination-controls.hidden {
+    display: none;
+}
+
 .pagination-controls {
     display: flex;
     align-items: center;

@@ -358,7 +358,6 @@ class Login extends React.Component {
     handleNext = (e) => {
         e.preventDefault();
         const {username, email, password, confirmPassword, role, displayName, showConfirmModal} = this.state;
-        console.log(username, email, password, confirmPassword, role, displayName);
         if (!username || !email || !password || password !== confirmPassword || !role || !displayName) {
             this.setState({
                 showConfirmModal: true,

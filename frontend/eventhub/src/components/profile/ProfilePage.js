@@ -56,7 +56,7 @@ class ProfilePage extends Component {
                 patronymic: data.customUser.patronymic || '',
                 birthDate: data.customUser.birthDate || '',
                 birthCity: data.customUser.birthCity || '',
-                privacy: data.customUser.privacy || 'public',
+                privacy: data.customUser.privacy || 'ONLY_FRIENDS',
                 isAdmin: !!data.customUser.isAdmin
             })
         };
@@ -333,6 +333,15 @@ class ProfilePage extends Component {
                                             <input className="profile-input" type="text" name="birthCity"
                                                    value={formData.birthCity} onChange={this.handleChange}/>
                                         </label>
+                                        <label className="profile-label">
+                                            Приватность:
+                                            <select className="profile-input" name="privacy" value={formData.privacy} onChange={this.handleChange}>
+                                                <option value="PRIVATE">Приватный</option>
+                                                <option value="PUBLIC">Публичный</option>
+                                                <option value="ONLY_FRIENDS">Только для друзей</option>
+                                            </select>
+                                        </label>
+
                                     </>
                                 )}
 
